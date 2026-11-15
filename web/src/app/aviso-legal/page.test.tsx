@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { cargarNegocio, type Negocio } from '../../lib/content';
@@ -51,5 +53,19 @@ describe('aviso legal', () => {
   it('exporta metadata con canonical propio', () => {
     expect(metadata.alternates.canonical).toMatch(/\/aviso-legal\/$/);
     expect(metadata.openGraph.url).toBe(metadata.alternates.canonical);
+  });
+});
+
+describe('.texto-largo (globals.css)', () => {
+  it('columna centrada con relleno lateral y vertical, solo con tokens', () => {
+    const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+    const regla = /\.texto-largo\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(regla).toMatch(/max-inline-size:\s*var\(--measure\)/);
+    expect(regla).toMatch(/margin-inline:\s*auto/);
+    expect(regla).toMatch(/padding-inline:\s*var\(--spacing-\d+\)/);
+    expect(regla).toMatch(/padding-block:\s*var\(--spacing-\d+\)/);
+    for (const decl of regla.split(';').map((d) => d.trim()).filter(Boolean)) {
+      expect(decl).toMatch(/^[a-z-]+:\s*(var\(--[a-z0-9-]+\)|auto|100%|border-box)$/);
+    }
   });
 });
