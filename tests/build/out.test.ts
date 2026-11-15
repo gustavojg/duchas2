@@ -65,6 +65,41 @@ describe('web/out servido por Hono', () => {
     expect(await (await app.request('/robots.txt')).text()).toContain('Sitemap:');
   });
 
+  const contenido = (f: string) => JSON.parse(fs.readFileSync(path.resolve('web/content', f), 'utf8'));
+  /** HTML visible: sin <script> (el payload RSC repite textos y lleva plantillas ICU con «{{»). */
+  const visible = (html: string) => html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+  const sinEntidades = (html: string) => html.replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+
+  it('/zonas/ sirve HTML con un H1 y todos los distritos y municipios de zonas.json', async () => {
+    const res = await app.request('/zonas/');
+    expect(res.status).toBe(200);
+    const html = sinEntidades(visible(await res.text()));
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    const zonas = contenido('zonas.json') as { madrid_capital: string[]; municipios: string[] };
+    for (const z of [...zonas.madrid_capital, ...zonas.municipios]) expect(html).toContain(z);
+    expect(html).not.toContain('PENDIENTE');
+    expect(html).not.toContain('{{');
+  });
+
+  it('la portada lleva los servicios de servicios.json y las secciones nuevas, sin pendientes', () => {
+    const html = sinEntidades(visible(fs.readFileSync(path.join(webDir, 'index.html'), 'utf8')));
+    const servicios = contenido('servicios.json') as { nombre: string }[];
+    expect(servicios).toHaveLength(10);
+    for (const s of servicios) expect(html).toContain(s.nombre);
+    for (const h of ['¿Reparar o cambiar?', 'Cómo trabajamos', 'Precios orientativos']) expect(html).toContain(h);
+    // La cifra sin confirmar de comparativa.json no se publica.
+    const comparativa = contenido('comparativa.json') as { filas: { id: string; cambiar: { valor: string | null; confirmado: boolean } }[] };
+    const coste = comparativa.filas.find((f) => f.id === 'coste')!;
+    if (!coste.cambiar.confirmado && coste.cambiar.valor) expect(html).not.toContain(coste.cambiar.valor);
+    expect(html).not.toContain('PENDIENTE');
+    expect(html).not.toContain('{{');
+    expect(html).not.toMatch(/\b0 años/);
+  });
+
+  it('el sitemap incluye /zonas/', async () => {
+    expect(await (await app.request('/sitemap.xml')).text()).toMatch(/<loc>[^<]*\/zonas\/<\/loc>/);
+  });
+
   it('/health sigue respondiendo JSON', async () => {
     expect(await (await app.request('/health')).json()).toMatchObject({ ok: true });
   });

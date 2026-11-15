@@ -59,6 +59,36 @@ test.describe('portada en un móvil de 360 × 740', () => {
   });
 });
 
+/** Sin scroll horizontal entre 320 y 1440 px (brain/design.md § Reglas, 4) y sin errores de consola. */
+for (const ruta of ['/', '/zonas/']) {
+  for (const ancho of [320, 360, 1440]) {
+    test.describe(`${ruta} en ${ancho} px`, () => {
+      test.use({ viewport: { width: ancho, height: 900 } });
+
+      test('sin scroll horizontal ni errores de consola', async ({ page }) => {
+        const errors: string[] = [];
+        page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+        await page.goto(ruta);
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        const scroll = await page.evaluate(() => document.documentElement.scrollWidth);
+        expect(scroll).toBeLessThanOrEqual(ancho);
+        if (ruta === '/') {
+          // La tabla «¿Reparar o cambiar?» cabe entera, sin scroll propio.
+          const tabla = page.getByRole('table');
+          await expect(tabla).toBeVisible();
+          const medida = await tabla.evaluate((t) => {
+            const caja = t.parentElement!.closest('[role="group"]') ?? t.parentElement!;
+            return { tabla: t.scrollWidth, caja: caja.clientWidth, derecha: t.getBoundingClientRect().right };
+          });
+          expect(medida.tabla).toBeLessThanOrEqual(medida.caja);
+          expect(medida.derecha).toBeLessThanOrEqual(ancho);
+        }
+        expect(errors).toEqual([]);
+      });
+    });
+  }
+}
+
 test('la portada carga con su navegación', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
