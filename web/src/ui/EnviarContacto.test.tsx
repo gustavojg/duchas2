@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fotoDemasiadoGrande, MENSAJES } from '../lib/contacto';
-import { enviarContacto, interpretarRespuesta, validarCliente } from './EnviarContacto';
+import { enviarContacto, interpretarRespuesta, validarCliente, validarFoto } from './EnviarContacto';
 import { VALORES_INICIALES, type ValoresContacto } from './FormularioContacto';
 
 const MB = 1024 * 1024;
@@ -50,6 +50,21 @@ describe('validarCliente', () => {
 
   it('datos correctos sin foto: sin errores', () => {
     expect(validarCliente(correctos, null, 10)).toEqual({});
+  });
+});
+
+describe('validarFoto', () => {
+  it('11 MB con límite de 10 → aviso de tamaño', () => {
+    expect(validarFoto(foto(11 * MB, 'grande.jpg', 'image/jpeg'), 10)).toBe(fotoDemasiadoGrande(10));
+  });
+  it('gif → aviso de tipo', () => {
+    expect(validarFoto(foto(100, 'gato.gif', 'image/gif'), 10)).toBe(MENSAJES.foto_tipo);
+  });
+  it('.heic con type vacío es válida', () => {
+    expect(validarFoto(foto(100, 'IMG_0001.HEIC', ''), 10)).toBeUndefined();
+  });
+  it('jpeg pequeño es válido', () => {
+    expect(validarFoto(foto(100, 'dano.jpg', 'image/jpeg'), 10)).toBeUndefined();
   });
 });
 

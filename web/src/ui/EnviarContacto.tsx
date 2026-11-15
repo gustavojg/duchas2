@@ -18,6 +18,13 @@ export interface ResultadoEnvio {
   errores: Record<string, string>;
 }
 
+/** Tamaño y tipo de la foto: el aviso que corresponde o undefined si se puede enviar. */
+export function validarFoto(foto: File, fotoMaxMb: number): string | undefined {
+  if (foto.size > fotoMaxMb * MB) return fotoDemasiadoGrande(fotoMaxMb);
+  if (!TIPOS_FOTO.includes(foto.type.toLowerCase()) && !foto.name.toLowerCase().endsWith('.heic')) return MENSAJES.foto_tipo;
+  return undefined;
+}
+
 /**
  * Validación en el navegador con el mismo esquema zod que el servidor (lib/contacto.ts) más el tamaño y el tipo
  * de la foto. Devuelve un mensaje por campo; vacío si se puede enviar.
@@ -33,12 +40,8 @@ export function validarCliente(valores: ValoresContacto, foto: File | null, foto
     privacidad: valores.privacidad ? 'on' : undefined,
   });
   const errores = r.success ? {} : erroresPorCampo(r.error);
-  if (foto) {
-    if (foto.size > fotoMaxMb * MB) errores.foto = fotoDemasiadoGrande(fotoMaxMb);
-    else if (!TIPOS_FOTO.includes(foto.type.toLowerCase()) && !foto.name.toLowerCase().endsWith('.heic')) {
-      errores.foto = MENSAJES.foto_tipo;
-    }
-  }
+  const errorFoto = foto ? validarFoto(foto, fotoMaxMb) : undefined;
+  if (errorFoto) errores.foto = errorFoto;
   return errores;
 }
 
@@ -123,9 +126,8 @@ export function EnviarContacto({ config, whatsapp, telefono, plazoRespuesta, men
   const onFoto = (archivo: File | null) => {
     setFoto(archivo);
     setValores((v) => ({ ...v, fotoNombre: archivo?.name ?? '' }));
-    const { foto: _quitado, ...resto } = errores;
-    const error = archivo ? validarCliente({ ...valores, fotoNombre: archivo.name }, archivo, config.foto_max_mb).foto : undefined;
-    setErrores(error ? { ...resto, foto: error } : resto);
+    const error = archivo ? validarFoto(archivo, config.foto_max_mb) : undefined;
+    setErrores(({ foto: _quitado, ...resto }) => (error ? { ...resto, foto: error } : resto));
   };
 
   const onEnviar = async () => {
