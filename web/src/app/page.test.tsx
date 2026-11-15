@@ -14,6 +14,7 @@ import {
   type Negocio,
   type Servicio,
 } from '../lib/content';
+import { rutaGenerada } from '../lib/paginas';
 import { DESCRIPTION, PAGES } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
@@ -178,13 +179,28 @@ describe('portada: módulos tras la franja de confianza', () => {
     expect(html.indexOf('>¿Reparar o cambiar?<')).toBeGreaterThan(franja);
   });
 
-  it('una tarjeta por servicio, el plato primero y Hoteles al final, cada una a su ruta', () => {
-    const t = tarjetas(html);
-    expect(t).toHaveLength(servicios.length);
-    expect(t[0].nombre).toBe('Reparación y esmaltado de platos de ducha');
-    expect(t.at(-1)!.nombre).toBe('Hoteles y comunidades');
-    const rutas = new Map(servicios.map((s) => [s.nombre, s.ruta]));
-    for (const { nombre, href } of t) expect(href).toBe(rutas.get(nombre));
+  const seccionServicios = (h: string) => seccion(h, 'Servicios', 'Precios orientativos');
+  const nombresTarjetas = (h: string) =>
+    [...seccionServicios(h).matchAll(/<h3[^>]*>((?:(?!<\/h3>).)*)<\/h3>/gs)].map((m) => m[1].replace(/<[^>]+>/g, ''));
+  const hrefsInternos = (h: string) =>
+    [...seccionServicios(h).matchAll(/href="(\/[^"]*)"/g)].map((m) => m[1]).filter((href) => !href.startsWith('//'));
+
+  it('una tarjeta por servicio, el plato primero y Hoteles al final', () => {
+    const nombres = nombresTarjetas(html);
+    expect(nombres).toHaveLength(servicios.length);
+    expect(nombres).toHaveLength(10);
+    expect(nombres[0]).toBe(servicios.find((s) => s.tipo === 'principal')!.nombre);
+    expect(nombres[0]).toBe('Reparación y esmaltado de platos de ducha');
+    expect(nombres.at(-1)).toBe('Hoteles y comunidades');
+    expect([...nombres].sort()).toEqual(servicios.map((s) => s.nombre).sort());
+  });
+
+  it('ninguna tarjeta de Servicios enlaza a una ruta sin página generada', () => {
+    const hrefs = hrefsInternos(html);
+    for (const href of hrefs) expect(rutaGenerada(href), `enlace roto: ${href}`).toBe(true);
+    // Cada tarjeta enlaza a su ruta exactamente cuando esa página existe.
+    const conPagina = servicios.filter((s) => rutaGenerada(s.ruta)).map((s) => s.ruta);
+    expect(tarjetas(html).map((t) => t.href).sort()).toEqual(conPagina.sort());
   });
 
   it('un servicio nuevo en el contenido aparece sin tocar componentes', () => {
@@ -195,9 +211,10 @@ describe('portada: módulos tras la franja de confianza', () => {
       ruta: '/servicios/lavabos/',
       orden: 11,
     };
-    const t = tarjetas(pinta(negocio, config, { servicios: [...servicios, nuevo] }));
-    expect(t).toHaveLength(11);
-    expect(t).toContainEqual({ nombre: 'Reparación de lavabos', href: '/servicios/lavabos/' });
+    const otro = pinta(negocio, config, { servicios: [...servicios, nuevo] });
+    expect(nombresTarjetas(otro)).toHaveLength(11);
+    expect(nombresTarjetas(otro)).toContain('Reparación de lavabos');
+    expect(hrefsInternos(otro)).not.toContain('/servicios/lavabos/');
   });
 
   it('los pasos sin plazos confirmados usan los textos sin plazo; con plazos, los plazos', () => {
