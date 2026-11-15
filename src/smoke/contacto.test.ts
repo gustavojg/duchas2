@@ -89,6 +89,24 @@ describe('leerEntornoSmoke', () => {
     expect(() => leerEntornoSmoke({ BASE_URL: 'no es una url' })).toThrow(/BASE_URL/);
     expect(() => leerEntornoSmoke({ BASE_URL: 'ftp://x.test' })).toThrow(/BASE_URL/);
   });
+
+  it('con usuario o contraseña en BASE_URL lanza sin repetir las credenciales', () => {
+    for (const BASE_URL of [
+      'https://usuario:token@staging.ejemplo.test',
+      'https://usuario@staging.ejemplo.test',
+      'ftp://usuario:token@staging.ejemplo.test',
+    ]) {
+      let mensaje = '';
+      try {
+        leerEntornoSmoke({ BASE_URL });
+      } catch (e) {
+        mensaje = (e as Error).message;
+      }
+      expect(mensaje).toMatch(/BASE_URL/);
+      expect(mensaje).not.toContain('token');
+      expect(mensaje).not.toContain('usuario');
+    }
+  });
 });
 
 describe('ejecutarSmoke', () => {

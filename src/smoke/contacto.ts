@@ -73,6 +73,12 @@ export function leerEntornoSmoke(env: Record<string, string | undefined>): Entor
   } catch {
     throw new Error(`BASE_URL no es una URL válida: «${bruta}» (ejemplo: http://127.0.0.1:3000)`);
   }
+  // Antes que cualquier otro error que repita «bruta»: nunca imprimir credenciales.
+  if (url.username || url.password) {
+    throw new Error(
+      'BASE_URL no debe llevar credenciales (nombre ni contraseña antes de «@»): se imprimirían en los logs y fetch no admite credenciales en la URL',
+    );
+  }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
     throw new Error(`BASE_URL debe empezar por http:// o https://: «${bruta}»`);
   }
