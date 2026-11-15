@@ -52,7 +52,7 @@ export interface PortadaProps {
 function Seccion({ id, titulo, children }: { id: string; titulo: string; children: ReactNode }) {
   return (
     <VStack gap={4} as="section" aria-labelledby={id}>
-      <Heading level={2} id={id}>
+      <Heading level={2} type="display-2" weight="bold" id={id}>
         {titulo}
       </Heading>
       {children}
