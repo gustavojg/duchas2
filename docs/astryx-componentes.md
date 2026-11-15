@@ -46,10 +46,21 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | Composición | Fichero | Primitivas | Estado |
 |---|---|---|---|
 | CintaEtiqueta | `web/src/ui/CintaEtiqueta.tsx` | Text (`type="code"`, `as="p"`) + clase `cinta-etiqueta` de globals.css (var(--color-tape), var(--color-on-tape), var(--spacing-*)) | creada |
-| BotonWhatsApp | `web/src/ui/BotonWhatsApp.tsx` | Button (primary, lg) + Icon con glifo propio; href con `waLink()` | creada |
+| BotonWhatsApp | `web/src/ui/BotonWhatsApp.tsx` | Button (`variante` primary por defecto o secondary, lg) + Icon con glifo propio; href con `waLink()` | creada |
 | BotonLlamar | `web/src/ui/BotonLlamar.tsx` | Button (secondary, lg) + Icon con glifo propio; href con `telLink()`. Lo usan la cabecera (`Frame`) y el hero | creada |
 | Contenedor `portada` | `web/src/app/page.tsx` (+ `.portada` en globals.css) | VStack (`className="portada"`) que envuelve hero y franja: padding-inline var(--spacing-4), max-inline-size var(--measure), margin-inline auto. Solo clase, sin `<div>`/`<span>` propios; no usa `Section maxWidth` ni `Layout contentWidth` porque pintan estilo en línea | creada |
 | FranjaConfianza | `web/src/ui/FranjaConfianza.tsx` | Section (muted) + VStack/HStack (`ul`/`li`) + Text + IconoCompromiso de art.tsx; hueco del icono con la clase `franja-confianza-icono` (var(--spacing-10)) | creada |
+| FormularioContacto | `web/src/ui/FormularioContacto.tsx` | Componente puro (sin fetch): VStack `as="form"` + Field + SegmentedControl (icono de art.tsx en `campo-pieza-icono`) + TextInput + Selector + TextArea + CheckboxInput + Link + Banner (`collapsible={false}`, sin `endContent`, que pinta estilo en línea) + Button primario «Enviar petición» (`#enviar-peticion`) + BotonLlamar/BotonWhatsApp secundarios. Honeypot `web` como `<input>` nativo con la clase `campo-trampa`, y `pagina_origen` oculto | creada |
+| EnviarContacto | `web/src/ui/EnviarContacto.tsx` | Contenedor cliente sin UI propia: estado, validación con `contactoSchema` y `fetch` multipart a `/api/contacto`; pinta FormularioContacto. Lo usan `/contacto/` y la portada | creada |
+| BotonFlotanteWhatsApp | `web/src/ui/BotonFlotanteWhatsApp.tsx` | Button (primary, lg) + Icon con el glifo de BotonWhatsApp; href con `waLink(numero, mensajePorRuta(usePathname()))`. Clase `boton-flotante` (fijo abajo a la derecha, `--radius-full`, `--shadow-1`, `--z-flotante`) y `boton-flotante-oculto` (aria-hidden, sin desmontarse) mientras IntersectionObserver ve `#cta-hero` o `#enviar-peticion`. Montado una vez en `layout.tsx` | creada |
+| CampoFoto | `web/src/ui/CampoFoto.tsx` | Field (ayuda y error `detached`) + Button «Añadir foto del daño» / «Quitar foto» + Text sobre `<input type="file">` nativo con la clase `campo-foto-input`. No usa FileInput: descarta en silencio los tipos fuera de `accept` y el aviso tiene que ser el de lib/contacto.ts | creada |
+| TarjetaServicio | `web/src/ui/TarjetaServicio.tsx` | ClickableCard (`href` = `servicio.ruta`, padding 6 grande / 4 compacta) + VStack/HStack + Heading 3 (`type="display-3"` en la grande) + Text + IconoServicio de art.tsx (`imagen_tarjeta`); ancho del icono con la clase `tarjeta-servicio-icono` (var(--spacing-12), doble con `data-tamano="grande"`). Sin precio | creada |
+| PrecioDesde | `web/src/ui/PrecioDesde.tsx` | Text: `type="code"` (mono, `size="xl"`) con la cifra confirmada de `precioDesde()`; Text normal con «Pide presupuesto gratuito». Nunca «0» | creada |
+| PasosTrabajo | `web/src/ui/PasosTrabajo.tsx` | VStack (`as="ol"`/`"li"`) + Text (`type="code"`, «PASO N», clase `paso-numero`: var(--color-tape), var(--color-on-tape), var(--spacing-*)) + Heading 3 + Text + BotonWhatsApp secondary en el paso con `accion: 'whatsapp'` (sin número, sin botón). Textos ya resueltos por `resolverPasos()` | creada |
+| TablaRepararCambiar | `web/src/ui/TablaRepararCambiar.tsx` | Table en modo children (TableHeader/TableBody/TableRow/TableHeaderCell/TableCell), 3 columnas (concepto, Reparar, Cambiar), texto que envuelve; cabecera «Reparar» con la clase `tabla-cabecera-reparar` (cinta); cifras del coste en Text `type="code"`; fuente en Text supporting solo con la fila de coste. Filas de `filasComparativa()`. Ojo: Table pinta en su contenedor de scroll un `style` propio de overflow (`--x-overflowX:clip…`), que los tests toleran solo en ese elemento | creada |
+| ListaZonas | `web/src/ui/ListaZonas.tsx` | VStack + AnillosZonas de art.tsx (ancho con la clase `lista-zonas-anillos`) + dos grupos con Heading 3 y HStack (`as="ul"`, `wrap`) de VStack `as="li"` con Text. Sin Badge ni CTA (lo pone el padre) | creada |
+| AcordeonFaq | `web/src/ui/AcordeonFaq.tsx` | Collapsible + CollapsibleGroup (`type="single"`, `hasDividers`) + Text (`as="p"`); todos cerrados al principio, disparador `<button>` nativo con `aria-expanded`. `'use client'` (Collapsible guarda el estado) | creada |
+| BloqueResenas | `web/src/ui/BloqueResenas.tsx` | VStack (`section`/`ul`/`li`) + Heading (level 2) + Text (`type="code"` para la nota); nota y número de `resumenResenas()`/`notaVisible()` de seo.ts. Sin reseñas devuelve null | creada |
 
 Notas de implementación:
 
@@ -63,6 +74,4 @@ Notas de implementación:
 - `Grid` con `columns` pinta `style="--x-gridTemplateColumns…"`: para listas se usa VStack/HStack.
 
 Previstas por `brain/design.md` (las construye la funcionalidad que las usa): DeslizadorAntesDespues,
-PasosTrabajo, TablaRepararCambiar, TarjetaServicio, BotonFlotanteWhatsApp, CabeceraContacto, PrecioDesde,
-BloqueResenas, ListaZonas, FormularioContacto (+ CampoFoto), GaleriaFiltrable, MigasDePan, AcordeonFaq,
-IlustracionSvg, HuecoFoto.
+CabeceraContacto, GaleriaFiltrable, MigasDePan, IlustracionSvg, HuecoFoto.

@@ -70,6 +70,8 @@
   --measure: 65ch;
   /* Botones de acción ≥ 44 px (brain/design.md: ≥ 48): Button size="lg" toma su alto de este token. */
   --size-element-lg: var(--spacing-12);
+  /* Capa del botón flotante de WhatsApp: por encima del contenido de la página. */
+  --z-flotante: 10;
 }
 
 /*
@@ -102,4 +104,91 @@
   display: block;
   flex: none;
   inline-size: var(--spacing-10);
+}
+
+/*
+ * BotonFlotanteWhatsApp (src/ui/BotonFlotanteWhatsApp.tsx): píldora de marca fija abajo a la derecha con la única
+ * sombra del producto. Alto ≥ 48 px por Button size="lg" (--size-element-lg). Se oculta sin desmontarse mientras
+ * se ve el CTA del hero o el «Enviar petición» (IDS_SIN_FLOTANTE en src/lib/whatsapp.ts).
+ */
+.boton-flotante {
+  position: fixed;
+  inset-block-end: var(--spacing-4);
+  inset-inline-end: var(--spacing-4);
+  z-index: var(--z-flotante);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-1);
+}
+
+.boton-flotante-oculto {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/*
+ * FormularioContacto y CampoFoto (src/ui/): inputs nativos que no se ven. `campo-foto-input` es el <input
+ * type="file"> que abre el botón «Añadir foto del daño»; `campo-trampa` es el honeypot `web` (aria-hidden y
+ * tabindex -1). Ocultos sin display:none, fuera del flujo y recortados.
+ */
+.campo-foto-input,
+.campo-trampa {
+  position: absolute;
+  inline-size: var(--spacing-0-5);
+  block-size: var(--spacing-0-5);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * SegmentedControl de pieza: Astryx (hug) recorta las etiquetas cuando no caben («Ba…» a 360 px) y no tiene prop
+ * para envolver. Aquí las opciones saltan de línea y cada fila se reparte el ancho. El lens del seleccionado se
+ * coloca con las cajas medidas (left/top), así que funciona en varias filas.
+ */
+.campo-pieza-opciones .astryx-segmented-control {
+  flex-wrap: wrap;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.campo-pieza-opciones .astryx-segmented-control-item {
+  flex: 1 1 auto;
+}
+
+/* Icono de cada pieza en el SegmentedControl del formulario. */
+.campo-pieza-icono {
+  display: block;
+  flex: none;
+  inline-size: var(--spacing-5);
+}
+
+/* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) encima, al doble. */
+.tarjeta-servicio-icono {
+  flex: none;
+  inline-size: var(--spacing-12);
+}
+
+.tarjeta-servicio-icono[data-tamano="grande"] {
+  inline-size: calc(var(--spacing-12) * 2);
+}
+
+/* «PASO N» de PasosTrabajo: la cinta (firma), como cinta-etiqueta. */
+.paso-numero {
+  align-self: flex-start;
+  background-color: var(--color-tape);
+  color: var(--color-on-tape);
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-2);
+}
+
+/* Cabecera «Reparar» de TablaRepararCambiar: la cinta. */
+.tabla-cabecera-reparar {
+  background-color: var(--color-tape);
+  color: var(--color-on-tape);
+}
+
+/* Esquema de anillos de ListaZonas: no ocupa todo el ancho en escritorio. */
+.lista-zonas-anillos {
+  inline-size: 100%;
+  max-inline-size: calc(var(--spacing-12) * 6);
 }

@@ -10,7 +10,7 @@ hay dos procesos (next dev :3000 con rewrites de `/api` y `/health` a Hono :3001
 
 ```
 Navegador ──► Hono (PORT)
-               ├── GET  /health          → { ok, app }
+               ├── GET  /health          → { ok, app, commit }
                ├── POST /api/contacto    → valida, limita, guarda (SQLite + fotos), envía SMTP
                └── GET  /*               → web/out (HTML estático); 404 → web/out/404.html
 ```
@@ -48,7 +48,9 @@ Navegador ──► Hono (PORT)
   4) zod compartido → **400** `{ error: 'validacion', campos: { campo: mensaje } }`; 5) tipo de foto por bytes
   mágicos (JPEG, PNG, WebP, HEIC) → **415**; 6) guardar foto + fila; 7) email con adjunto; si falla, se borran
   fila y foto y **503** `{ error: 'envio' }`; éxito **201** `{ ok: true }`.
-- `GET /health` → `{ ok: true, app }`. `/api/*` desconocido → `{ error: 'not_found' }` 404.
+- `GET /health` → `{ ok: true, app, commit }`. `commit` es el commit servido: lo inyecta el staging de la fábrica
+  en la variable de entorno `GIT_SHA`, la lee `src/config.ts` (`Config.commit`, recortado; `'desconocido'` si falta
+  o está vacía) y llega a `createApp` por `Deps.commit`. `/api/*` desconocido → `{ error: 'not_found' }` 404.
 - Teléfono normalizado `+34XXXXXXXXX` (9 dígitos que empiezan por 6-9; admite `+34`/`0034`).
 - Enlaces solo con `telLink`/`waLink` (`https://wa.me/<digitos>?text=<encodeURIComponent>`).
 

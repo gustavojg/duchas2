@@ -8,8 +8,7 @@ import { openDb } from '../src/db.js';
 import { borrarCaducadas } from '../src/domain/limpieza.js';
 import { configFormulario } from '../web/src/lib/config.js';
 
-// La limpieza no usa la sal (borra por fecha): se rellena para no emitir el aviso de IP_SALT ausente.
-const { dataDir } = loadConfig({ ...process.env, IP_SALT: process.env.IP_SALT || 'no-se-usa-en-la-limpieza' });
+const { dataDir } = loadConfig();
 const formulario = configFormulario();
 const db = openDb(path.join(dataDir, 'app.db'));
 const r = borrarCaducadas(db, dataDir, formulario.retencion_dias, new Date(), formulario.ventana_min);
