@@ -152,6 +152,13 @@ describe('portada: antes/después, reseñas, FAQ resumida y JSON-LD', () => {
     expect(fila).not.toContain('Pronto, fotos reales de este trabajo');
   });
 
+  it('el CTA secundario a ancho completo va antes y separado del enlace a todos los trabajos', () => {
+    const seccion = /<section[^>]*aria-labelledby="portada-antes-despues-titulo"[\s\S]*?<\/section>/.exec(html)?.[0] ?? '';
+    expect(seccion).toMatch(/<a[^>]*class="[^"]*portada-cta[^"]*"[^>]*data-variant="secondary"/);
+    expect(seccion.indexOf('Manda la foto del tuyo')).toBeLessThan(seccion.indexOf('Ver todos los trabajos'));
+    expect(seccion).not.toMatch(/data-direction="horizontal"[^>]*>(?:(?!<\/ul>)[\s\S])*Ver todos los trabajos/);
+  });
+
   it('sin reseñas: ni bloque ni AggregateRating, pero sí LocalBusiness', () => {
     expect(texto).not.toContain('Lo que dicen de nosotros');
     expect(html).not.toMatch(/aggregateRating|AggregateRating/);

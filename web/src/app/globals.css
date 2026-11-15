@@ -107,6 +107,11 @@
   min-inline-size: 0;
 }
 
+/* CTA secundario del antes/después: ancho completo (Button width="100%" pintaría estilo en línea). */
+.portada-cta {
+  inline-size: 100%;
+}
+
 .franja-confianza-icono {
   display: block;
   flex: none;

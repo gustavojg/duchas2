@@ -64,8 +64,7 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
           ))}
         </HStack>
       ) : null}
-      <HStack gap={3} wrap="wrap" vAlign="center">
-        <Link href="/antes-y-despues/">Ver todos los trabajos</Link>
+      <VStack gap={3}>
         {whatsapp ? (
           <Button
             variant="secondary"
@@ -74,9 +73,11 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
             href={waLink(whatsapp, MENSAJE_WHATSAPP)}
             target="_blank"
             rel="noopener noreferrer"
+            className="portada-cta"
           />
         ) : null}
-      </HStack>
+        <Link href="/antes-y-despues/">Ver todos los trabajos</Link>
+      </VStack>
     </VStack>
   );
 }
