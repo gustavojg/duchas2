@@ -4,8 +4,8 @@ import { NAV } from '../../config';
 import { configFormulario } from '../../lib/config';
 import { cargarFaq, cargarNegocio } from '../../lib/content';
 import { preguntasResueltas } from '../../lib/faq';
-import { PAGES } from '../../lib/site';
-import { metadata, PaginaFaq } from './page';
+import { canonicalUrl, PAGES } from '../../lib/site';
+import { generateMetadata, PaginaFaq } from './page';
 
 const faq = cargarFaq();
 const negocio = cargarNegocio();
@@ -65,7 +65,9 @@ describe('/preguntas-frecuentes/', () => {
   });
 
   it('metadata, PAGES y NAV incluyen la página', () => {
+    const metadata = generateMetadata();
     expect(String(metadata.title)).toMatch(/^Preguntas frecuentes · /);
+    expect(metadata.alternates?.canonical).toBe(canonicalUrl(cargarNegocio().url_base, '/preguntas-frecuentes/'));
     expect(metadata.description).toBeTruthy();
     expect(PAGES).toContain('/preguntas-frecuentes/');
     expect(NAV.map((n) => n.href)).toContain('/preguntas-frecuentes/');
