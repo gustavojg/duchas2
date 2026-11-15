@@ -90,7 +90,12 @@ export const IMAGENES_TARJETA = [
 ] as const;
 
 const cadena = z.string().min(1);
-const rutaSchema = cadena.refine((r) => r.startsWith('/') && r.endsWith('/'), 'la ruta empieza y acaba en /');
+/** Ruta interna del sitio: nunca «//» (relativa al protocolo), esquema («:») ni «\» (algunos navegadores la leen como «/»). */
+const rutaSchema = cadena
+  .refine((r) => r.startsWith('/') && r.endsWith('/'), 'la ruta empieza y acaba en /')
+  .refine((r) => !r.startsWith('//'), 'la ruta no puede empezar por //')
+  .refine((r) => !r.includes(':'), 'la ruta no puede llevar esquema (ningún «:»)')
+  .refine((r) => !r.includes('\\'), 'la ruta no puede llevar barras invertidas (\\)');
 
 export const servicioSchema = z
   .object({
