@@ -104,7 +104,7 @@
   inline-size: var(--spacing-10);
 }
 
-/* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) encima, al doble. */
+/* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) al doble. */
 .tarjeta-servicio-icono {
   flex: none;
   inline-size: var(--spacing-12);
@@ -112,6 +112,15 @@
 
 .tarjeta-servicio-icono[data-tamano="grande"] {
   inline-size: calc(var(--spacing-12) * 2);
+}
+
+/*
+ * Texto de la tarjeta grande: ocupa lo que deja el icono y no baja de 5 × spacing-12. En escritorio cabe al lado
+ * del icono (sin hueco junto a él); en móvil no cabe y el HStack con wrap lo pasa debajo (columna).
+ */
+.tarjeta-servicio-textos[data-tamano="grande"] {
+  flex: 1 1 calc(var(--spacing-12) * 5);
+  min-inline-size: 0;
 }
 
 /* «PASO N» de PasosTrabajo: la cinta (firma), como cinta-etiqueta. */
