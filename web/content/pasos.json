@@ -1,0 +1,35 @@
+[
+  {
+    "numero": 1,
+    "titulo": "Manda la foto por WhatsApp",
+    "texto": "Haz una foto del daño y mándanosla. Te decimos si tiene arreglo.",
+    "texto_sin_plazo": "Haz una foto del daño y mándanosla. Te decimos si tiene arreglo.",
+    "plazo": null,
+    "accion": "whatsapp",
+    "mensaje": "Hola, os mando una foto del daño para que me digáis si tiene arreglo."
+  },
+  {
+    "numero": 2,
+    "titulo": "Te damos presupuesto",
+    "texto": "Presupuesto gratuito {plazos.presupuesto}",
+    "texto_sin_plazo": "Presupuesto gratuito y sin compromiso",
+    "plazo": "plazos.presupuesto",
+    "accion": null
+  },
+  {
+    "numero": 3,
+    "titulo": "Lo reparamos en tu baño",
+    "texto": "Reparación {plazos.reparacion}",
+    "texto_sin_plazo": "Reparación sin obras ni polvo",
+    "plazo": "plazos.reparacion",
+    "accion": null
+  },
+  {
+    "numero": 4,
+    "titulo": "Te dejamos la garantía",
+    "texto": "{garantia.anios}",
+    "texto_sin_plazo": "Garantía por escrito",
+    "plazo": "garantia.anios",
+    "accion": null
+  }
+]

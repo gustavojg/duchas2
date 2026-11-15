@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { anios, garantia, precioDesde, presupuesto, reparacion, respuesta, titularPortada } from './textos.ts';
+import { anios, compromisosFranja, garantia, HOTELES, precioDesde, presupuesto, reparacion, respuesta, SIN_OBRAS, titularPortada } from './textos.ts';
 
 const si = <T>(valor: T) => ({ valor, confirmado: true });
 const no = <T>(valor: T | null = null) => ({ valor, confirmado: false });
@@ -60,5 +60,37 @@ describe('titularPortada()', () => {
     expect(con).toMatch(/[Ss]in obras/);
     expect(con).not.toBe(sin);
     expect(titularPortada(no(), 'pendientes')).toContain('{{PENDIENTE}}');
+  });
+});
+
+describe('compromisosFranja()', () => {
+  const tipos = (cs: { tipo: string }[]) => cs.map((c) => c.tipo);
+
+  it('sin confirmar (público): garantía sin plazo, sin obras y hoteles; sin años', () => {
+    const cs = compromisosFranja({ garantia: { anios: no() }, anios: no() }, 'publico');
+    expect(tipos(cs)).toEqual(['garantia', 'sin-obras', 'hoteles']);
+    expect(cs[0].texto).toBe('Garantía por escrito');
+    expect(cs[1].texto).toBe(SIN_OBRAS);
+    expect(cs[2].texto).toBe(HOTELES);
+    expect(SIN_OBRAS).toBe('Sin obras ni polvo');
+    expect(HOTELES).toBe('Trabajamos para hoteles y comunidades');
+  });
+
+  it('con garantía y años confirmados: los cuatro, por orden', () => {
+    const cs = compromisosFranja({ garantia: { anios: si(2) }, anios: si(15) }, 'publico');
+    expect(tipos(cs)).toEqual(['garantia', 'sin-obras', 'hoteles', 'anios']);
+    expect(cs[0].texto).toBe('Garantía por escrito de 2 años');
+    expect(cs[3].texto).toBe('15 años reparando baños');
+  });
+
+  it('años a 0 o sin confirmar: no hay compromiso «anios»', () => {
+    expect(tipos(compromisosFranja({ garantia: { anios: si(2) }, anios: si(0) }, 'publico'))).not.toContain('anios');
+    expect(tipos(compromisosFranja({ garantia: { anios: si(2) }, anios: no(15) }, 'publico'))).not.toContain('anios');
+  });
+
+  it('ninguno habla de «Un solo teléfono»', () => {
+    const cs = compromisosFranja({ garantia: { anios: si(2) }, anios: si(15) }, 'publico');
+    expect(tipos(cs)).not.toContain('un-telefono');
+    for (const c of cs) expect(c.texto).not.toMatch(/teléfono/i);
   });
 });

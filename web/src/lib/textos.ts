@@ -57,3 +57,28 @@ export function titularPortada(plazoReparacion: Dato<string>, modo: Modo): strin
   const plazo = texto(plazoReparacion, modo);
   return `Tu plato de ducha se repara${plazo ? ` ${plazo}` : ''}. Sin obras y con garantía.`;
 }
+
+/** Compromiso fijo de la franja de confianza. */
+export const SIN_OBRAS = 'Sin obras ni polvo';
+
+/** Compromiso fijo de la franja de confianza. */
+export const HOTELES = 'Trabajamos para hoteles y comunidades';
+
+export type TipoCompromiso = 'garantia' | 'sin-obras' | 'hoteles' | 'anios';
+
+/**
+ * Franja de confianza de la portada (brain/design.md § Portada, 2): garantía, sin obras, hoteles y años, por
+ * este orden. Se omite el compromiso cuyo texto sale vacío: los años sin confirmar (o a 0) no aparecen.
+ */
+export function compromisosFranja(
+  negocio: { garantia: { anios: Dato<number> }; anios: Dato<number> },
+  modo: Modo,
+): { tipo: TipoCompromiso; texto: string }[] {
+  const todos: { tipo: TipoCompromiso; texto: string }[] = [
+    { tipo: 'garantia', texto: garantia(negocio.garantia.anios, modo) },
+    { tipo: 'sin-obras', texto: SIN_OBRAS },
+    { tipo: 'hoteles', texto: HOTELES },
+    { tipo: 'anios', texto: anios(negocio.anios, modo) },
+  ];
+  return todos.filter((c) => c.texto.trim() !== '');
+}

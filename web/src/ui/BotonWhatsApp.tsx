@@ -22,19 +22,22 @@ export interface BotonWhatsAppProps {
   mensaje: string;
   /** Texto del botón (p. ej. «Manda la foto por WhatsApp»). */
   etiqueta: string;
+  /** primary solo en la acción principal de la pantalla (hero); el resto de botones de WhatsApp, secondary. */
+  variante?: 'primary' | 'secondary';
 }
 
 /**
  * La acción principal del producto: Button primario de Astryx con glifo, enlazado a wa.me con waLink().
  * Tamaño lg: su alto sale del token --size-element-lg, que globals.css fija en var(--spacing-12) (≥ 44 px).
- * Es el único Button primario de cada pantalla. Cliente porque Icon de Astryx lo es y recibe el glifo como
- * componente. No se pinta si el número no es válido (esNumeroValido): devuelve null antes de llamar a waLink().
+ * La variante primary es el único Button primario de cada pantalla; los demás WhatsApp van en secondary. Cliente
+ * porque Icon de Astryx lo es y recibe el glifo como componente. No se pinta si el número no es válido
+ * (esNumeroValido): devuelve null antes de llamar a waLink().
  */
-export function BotonWhatsApp({ numero, mensaje, etiqueta }: BotonWhatsAppProps) {
+export function BotonWhatsApp({ numero, mensaje, etiqueta, variante = 'primary' }: BotonWhatsAppProps) {
   if (!esNumeroValido(numero)) return null;
   return (
     <Button
-      variant="primary"
+      variant={variante}
       size="lg"
       label={etiqueta}
       href={waLink(numero, mensaje)}
