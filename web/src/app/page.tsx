@@ -8,14 +8,12 @@ import { cargarNegocio, type Negocio } from '../lib/content';
 import { type Modo, modoActual } from '../lib/dato';
 import { DESCRIPTION } from '../lib/site';
 import { anios, garantia, titularPortada } from '../lib/textos';
-import { telLink } from '../lib/whatsapp';
+import { MENSAJE_PORTADA, telLink } from '../lib/whatsapp';
 import { PlatoPartido } from '../ui/art';
 import { BotonLlamar } from '../ui/BotonLlamar';
 import { BotonWhatsApp } from '../ui/BotonWhatsApp';
 import { CintaEtiqueta } from '../ui/CintaEtiqueta';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
-
-const MENSAJE_WHATSAPP = 'Hola, os mando una foto del daño para que me digáis si tiene arreglo.';
 
 export interface PortadaProps {
   negocio: Negocio;
@@ -43,7 +41,7 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
           {DESCRIPTION}
         </Text>
         <HStack gap={2} wrap="wrap" vAlign="center">
-          {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_WHATSAPP} etiqueta="Manda la foto por WhatsApp" /> : null}
+          {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_PORTADA} etiqueta="Manda la foto por WhatsApp" /> : null}
           {telefono ? <BotonLlamar href={telLink(telefono)} etiqueta="Llamar" /> : null}
         </HStack>
         <Text type="supporting" as="p">
