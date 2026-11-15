@@ -1,16 +1,71 @@
 /*
  * Estilos globales del producto: Astryx precompilado (ruta «Plain CSS» de `npx astryx docs styling-overview`).
- * Orden: fuente local (Figtree, empaquetada en el build: sin red en ejecución), reset, componentes de
- * @astryxdesign/core y tema. Para cambiar el tema se cambia el último import (y el tema que aplica
+ * Orden: fuentes locales (Archivo y Figtree, empaquetadas en el build: sin red en ejecución), reset, componentes
+ * de @astryxdesign/core y tema. Para cambiar el tema se cambia el último import (y el tema que aplica
  * src/ui/Frame.tsx); los overrides de variables van debajo, nunca CSS por página.
  */
+@import "@fontsource-variable/archivo";
 @import "@fontsource-variable/figtree";
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
 @import "@astryxdesign/theme-neutral/theme.css";
 
-/* El tema pide «Figtree» (de Google Fonts); @fontsource-variable la declara como «Figtree Variable». */
-[data-astryx-theme="neutral"] {
-  --font-family-body: "Figtree Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-family-heading: "Figtree Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+/*
+ * Dirección visual de Duchas 2 (docs/DESIGN.md § Tokens, copiado tal cual): porcelana cálida, verde azulado
+ * profundo y la cinta de enmascarar. Claro y oscuro con light-dark(). Único sitio del producto con hex.
+ * El selector incluye [data-astryx-media] porque el tema redefine ahí texto, icono y acento.
+ */
+[data-astryx-theme="neutral"],
+[data-astryx-theme="neutral"] [data-astryx-media] {
+  --color-background-body: light-dark(#FBFAF6, #0F1716);
+  --color-background-surface: light-dark(#FBFAF6, #162120);
+  --color-background-muted: light-dark(#F3F0E7, #162120);
+  --color-background-card: light-dark(#FFFFFF, #1E2B29);
+  --color-background-popover: light-dark(#FFFFFF, #1E2B29);
+  --color-skeleton: light-dark(#E7E2D4, #1E2B29);
+  --color-background-gray: light-dark(#E7E2D4, #1E2B29);
+  --color-text-primary: light-dark(#13201E, #F3F1EA);
+  --color-text-secondary: light-dark(#36443F, #CDD3CF);
+  --color-text-disabled: light-dark(#77827E, #808A86);
+  --color-text-accent: light-dark(#08574F, #7FD6C9);
+  --color-icon-primary: light-dark(#13201E, #F3F1EA);
+  --color-icon-secondary: light-dark(#56635F, #A5AEAA);
+  --color-icon-disabled: light-dark(#77827E, #808A86);
+  --color-border: light-dark(#DDD8CA, #26332F);
+  --color-border-emphasized: light-dark(#7F8A86, #7A8783);
+  --color-border-gray: light-dark(#C4BEAE, #34433F);
+  --color-accent: light-dark(#0A6E64, #4CC2B1);
+  --color-accent-muted: light-dark(#D5ECE7, #173A35);
+  --color-on-accent: light-dark(#FFFFFF, #062421);
+  --color-icon-accent: light-dark(#0A6E64, #4CC2B1);
+  --color-info: light-dark(#0A6E64, #4CC2B1);
+  --color-info-muted: light-dark(#D5ECE7, #173A35);
+  --color-on-info: light-dark(#FFFFFF, #062421);
+  --color-on-info-muted: light-dark(#08574F, #7FD6C9);
+  --color-text-info: light-dark(#08574F, #7FD6C9);
+  --color-success: light-dark(#3B7A12, #8BC86A);
+  --color-text-success: light-dark(#3B7A12, #8BC86A);
+  --color-success-muted: light-dark(#DCEBCF, #8BC86A3D);
+  --color-warning: light-dark(#F2B33D, #E7B54A);
+  --color-text-warning: light-dark(#8C5A00, #E7B54A);
+  --color-on-warning-muted: light-dark(#8C5A00, #E7B54A);
+  --color-warning-muted: light-dark(#F7E3B5, #E7B54A3D);
+  --color-error: light-dark(#B3261E, #FF8A7A);
+  --color-text-error: light-dark(#B3261E, #FF8A7A);
+  --color-error-muted: light-dark(#F6D3CF, #FF8A7A3D);
+  --shadow-inset-hover: inset 0 0 0 2px light-dark(#0A6E644D, #4CC2B14D);
+  --shadow-inset-selected: inset 0 0 0 2px light-dark(#0A6E64, #4CC2B1);
+  --font-family-heading: "Archivo Variable", Figtree, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-family-body: "Figtree Variable", Figtree, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.1875rem;
+  --radius-inner: 0.25rem;
+  --radius-element: 0.5rem;
+  --radius-container: 0.75rem;
+  --radius-page: 1rem;
+  /* propias del producto */
+  --color-tape: light-dark(#F1DA94, #E3C877);
+  --color-on-tape: #13201E;
+  --shadow-1: 0 6px 16px light-dark(#0A6E6433, #00000066);
+  --measure: 65ch;
 }

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME } from '../../web/src/lib/site.js';
+import { APP_NAME, TAGLINE } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -17,8 +17,9 @@ describe('web/out servido por Hono', () => {
     const res = await app.request('/');
     expect(res.status).toBe(200);
     const html = await res.text();
-    const name = APP_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    expect(html).toMatch(new RegExp(`<h1[^>]*>(?:(?!</h1>).)*${name}`, 's'));
+    const tagline = TAGLINE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    expect(html).toMatch(new RegExp(`<h1[^>]*>(?:(?!</h1>).)*${tagline}`, 's'));
+    expect(html).toContain(APP_NAME);
     expect(html).toMatch(/<main[\s>]|role="main"/);
     expect(html).toMatch(/<nav[^>]*aria-label="[^"]+"/);
     expect(html).toContain('data-astryx-theme="neutral"');
@@ -31,7 +32,12 @@ describe('web/out servido por Hono', () => {
     const res = await app.request(css!);
     expect(res.status).toBe(200);
     expect(res.headers.get('cache-control')).toContain('immutable');
-    expect(await res.text()).toContain('Figtree Variable');
+    // Next puede partir globals.css en varios chunks: se comprueban todos juntos.
+    const links = [...html.matchAll(/href="(\/_next\/static\/[^"]+\.css)"/g)].map((m) => m[1]);
+    const body = (await Promise.all(links.map(async (l) => (await app.request(l)).text()))).join('\n');
+    expect(body).toContain('Figtree Variable');
+    expect(body).toContain('Archivo Variable');
+    expect(body).toContain('--color-tape');
   });
 
   it('las rutas desconocidas dan 404 con la página de Next', async () => {

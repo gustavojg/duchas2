@@ -15,3 +15,43 @@ package.json
 pnpm-lock.yaml
 package-lock.json
 .env
+# --- Duchas 2 (docs/ARCHITECTURE.md) ---
+# Modelo de datos y migraciones (datos personales de peticiones)
+src/db.ts
+# Formulario: datos personales, fotos, límite por IP, borrado RGPD
+src/routes/contacto
+src/contacto.ts
+src/domain/contacto
+src/domain/foto
+src/domain/rate-limit
+src/domain/limpieza
+src/foto.ts
+src/rate-limit.ts
+src/limpieza.ts
+scripts/limpieza
+# Secretos, correo y qué se sirve por HTTP
+src/config.ts
+src/mailer.ts
+src/server.ts
+src/web.ts
+# Validación compartida, retención, modo borrador y promesas comerciales
+web/src/lib/contacto
+web/src/lib/config
+web/src/lib/borrador
+web/src/lib/dato
+web/src/lib/textos
+# Datos del negocio: teléfono único, datos legales, retención
+web/content/negocio.json
+web/content/config.json
+# Páginas legales y cookies (LSSI / RGPD)
+web/src/app/aviso-legal/
+web/src/app/privacidad/
+web/src/app/cookies/
+web/src/ui/BannerCookies
+# SEO: robots, noindex y sitemap
+scripts/postbuild.ts
+scripts/seo-build
+# Build y dependencias
+pnpm-workspace.yaml
+web/package.json
+web/next.config.ts
