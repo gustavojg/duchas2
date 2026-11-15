@@ -8,7 +8,10 @@ import { CintaEtiqueta } from './CintaEtiqueta';
 export interface HuecoFotoProps {
   par: ParGaleria;
   lado: 'antes' | 'despues';
-  /** Solo la cinta y la ilustración, sin el aviso ni el texto del hueco (miniaturas, deslizador). */
+  /**
+   * Solo la ilustración, sin cintas (ni «ILUSTRACIÓN» ni la vertical «ANTES · DESPUÉS»), sin el aviso ni el texto
+   * del hueco: miniaturas, donde quien la usa pone una única cinta «ILUSTRACIONES» para todas.
+   */
   compacta?: boolean;
 }
 
@@ -29,7 +32,7 @@ export function HuecoFoto({ par, lado, compacta = false }: HuecoFotoProps) {
   }
   return (
     <VStack gap={2}>
-      <CintaEtiqueta>Ilustración</CintaEtiqueta>
+      {compacta ? null : <CintaEtiqueta>Ilustración</CintaEtiqueta>}
       {compacta ? null : <Text as="p">Pronto, fotos reales de este trabajo</Text>}
       {!compacta && par.hueco ? (
         <Text as="p" type="supporting">
@@ -37,7 +40,7 @@ export function HuecoFoto({ par, lado, compacta = false }: HuecoFotoProps) {
         </Text>
       ) : null}
       <AspectRatio ratio={4 / 3} fit="contain">
-        <PlatoPartido title={alt} />
+        <PlatoPartido title={alt} sinCinta={compacta} />
       </AspectRatio>
     </VStack>
   );

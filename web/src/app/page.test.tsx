@@ -151,8 +151,20 @@ describe('portada: antes/después, reseñas, FAQ resumida y JSON-LD', () => {
     expect(seccion).not.toBe('');
     const fila = /<ul[^>]*data-direction="horizontal"[^>]*>([\s\S]*?)<\/ul>/.exec(seccion)?.[1] ?? '';
     expect(fila.match(/<li[^>]*class="[^"]*portada-miniatura[^"]*"/g)).toHaveLength(3);
-    expect(fila.match(/ILUSTRACIÓN/g)).toHaveLength(3);
+    expect(fila).not.toContain('ILUSTRACIÓN');
+    expect(fila).not.toContain('ANTES · DESPUÉS');
     expect(fila).not.toContain('Pronto, fotos reales de este trabajo');
+  });
+
+  it('una sola cinta «ILUSTRACIONES» encima de las miniaturas sin foto', () => {
+    const seccion = /<section[^>]*aria-labelledby="portada-antes-despues-titulo"[\s\S]*?<\/section>/.exec(html)?.[0] ?? '';
+    const ul = seccion.search(/<ul[^>]*data-direction="horizontal"/);
+    expect(ul).toBeGreaterThan(-1);
+    const cinta = seccion.indexOf('ILUSTRACIONES');
+    expect(cinta).toBeGreaterThan(-1);
+    expect(cinta).toBeLessThan(ul);
+    expect(seccion.match(/ILUSTRACIONES/g)).toHaveLength(1);
+    expect(readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8')).not.toMatch(/\.portada-miniatura\s+\.cinta-etiqueta/);
   });
 
   it('el CTA secundario a ancho completo va antes y separado del enlace a todos los trabajos', () => {

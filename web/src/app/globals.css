@@ -107,13 +107,6 @@
   min-inline-size: 0;
 }
 
-/* En un tercio de 360 la cinta «ILUSTRACIÓN» no cabe entera: parte la palabra antes que desbordar la fila. */
-.portada-miniatura .cinta-etiqueta {
-  max-inline-size: 100%;
-  box-sizing: border-box;
-  overflow-wrap: anywhere;
-}
-
 /*
  * Cintas «ANTES»/«DESPUÉS» del deslizador (DeslizadorAntesDespues en src/ui/): el contenido de Overlay es una
  * columna flex con align-items: flex-start, así que la fila se encogería al contenido y justify="between" no

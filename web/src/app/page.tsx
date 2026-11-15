@@ -49,20 +49,26 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
   const platos = galeria.filter((p) => p.servicio === 'platos-de-ducha');
   if (platos.length === 0) return null;
   const [principal, ...resto] = platos;
+  const miniaturas = resto.slice(0, 3);
+  // Las miniaturas compactas no llevan cinta propia: una sola encima avisa de que no son fotos reales.
+  const hayIlustraciones = miniaturas.some((par) => !par.despues);
   return (
     <VStack gap={4} as="section" aria-labelledby="portada-antes-despues-titulo">
       <Heading level={2} id="portada-antes-despues-titulo">
         Antes y después
       </Heading>
       <DeslizadorAntesDespues par={principal} />
-      {resto.length > 0 ? (
-        <HStack gap={2} as="ul" aria-label="Más trabajos">
-          {resto.slice(0, 3).map((par) => (
-            <VStack as="li" key={par.alt_despues} className="portada-miniatura">
-              <HuecoFoto par={par} lado="despues" compacta />
-            </VStack>
-          ))}
-        </HStack>
+      {miniaturas.length > 0 ? (
+        <VStack gap={2}>
+          {hayIlustraciones ? <CintaEtiqueta>Ilustraciones</CintaEtiqueta> : null}
+          <HStack gap={2} as="ul" aria-label="Más trabajos">
+            {miniaturas.map((par) => (
+              <VStack as="li" key={par.alt_despues} className="portada-miniatura">
+                <HuecoFoto par={par} lado="despues" compacta />
+              </VStack>
+            ))}
+          </HStack>
+        </VStack>
       ) : null}
       <VStack gap={3}>
         {whatsapp ? (
