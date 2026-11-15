@@ -7,7 +7,7 @@ import { type ConfigFormulario, configFormulario } from '../lib/config';
 import { cargarNegocio, type Negocio } from '../lib/content';
 import { type Modo, modoActual } from '../lib/dato';
 import { DESCRIPTION } from '../lib/site';
-import { anios, garantia, titularPortada } from '../lib/textos';
+import { compromisosFranja, titularPortada } from '../lib/textos';
 import { telLink } from '../lib/whatsapp';
 import { PlatoPartido } from '../ui/art';
 import { BotonLlamar } from '../ui/BotonLlamar';
@@ -26,8 +26,8 @@ export interface PortadaProps {
 /**
  * Portada `/` (brain/design.md § Portada): hero con cinta, H1 de beneficio, subtítulo, la acción principal
  * (WhatsApp) + «Llamar» con la retención de la foto junto al botón, y el plato partido; debajo, la franja de
- * confianza. Los botones van antes de la ilustración para que en 360 × 740 se vean sin scroll. Todos los
- * plazos y cifras salen de textos.ts con el contenido que recibe por props (los tests inyectan el suyo).
+ * confianza (compromisos de textos.compromisosFranja()). Los botones van antes de la ilustración para que
+ * en 360 × 740 se vean sin scroll. Todos los plazos y cifras salen de textos.ts con el contenido que recibe por props (los tests inyectan el suyo).
  */
 export function Portada({ negocio, config, modo }: PortadaProps) {
   const whatsapp = negocio.whatsapp.valor;
@@ -53,14 +53,7 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
           <PlatoPartido />
         </Card>
       </VStack>
-      <FranjaConfianza
-        compromisos={[
-          { tipo: 'garantia', texto: garantia(negocio.garantia.anios, modo) },
-          { tipo: 'sin-obras', texto: 'Sin obras ni polvo' },
-          { tipo: 'hoteles', texto: 'Trabajamos para hoteles y comunidades' },
-          { tipo: 'anios', texto: anios(negocio.anios, modo) },
-        ]}
-      />
+      <FranjaConfianza compromisos={compromisosFranja(negocio, modo)} />
     </VStack>
   );
 }
