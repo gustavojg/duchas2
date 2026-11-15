@@ -21,10 +21,16 @@ export interface BotonFlotanteWhatsAppProps {
  * sumar otro primario en pantalla ni tapar el envío. Sin IntersectionObserver queda siempre visible.
  */
 export function BotonFlotanteWhatsApp({ numero, servicios }: BotonFlotanteWhatsAppProps) {
-  const ruta = usePathname() ?? '/';
+  const pathname = usePathname() ?? '/';
+  // En el HTML exportado (p. ej. 404.html) la ruta del prerender no es la que se visita, y React no corrige un
+  // href distinto al hidratar: tras montar se toma la de la barra de direcciones y el botón se vuelve a crear
+  // (key) para que el enlace del DOM sea el de esa ruta.
+  const [rutaCliente, setRutaCliente] = useState<string | null>(null);
   const [oculto, setOculto] = useState(false);
+  const ruta = rutaCliente ?? pathname;
 
   useEffect(() => {
+    setRutaCliente(window.location.pathname);
     setOculto(false);
     if (typeof IntersectionObserver === 'undefined') return;
     const visibles = new Set<Element>();
@@ -40,10 +46,11 @@ export function BotonFlotanteWhatsApp({ numero, servicios }: BotonFlotanteWhatsA
       if (el) observer.observe(el);
     }
     return () => observer.disconnect();
-  }, [ruta]);
+  }, [pathname]);
 
   return (
     <Button
+      key={rutaCliente === null ? 'prerender' : 'cliente'}
       variant="primary"
       size="lg"
       label="WhatsApp"
