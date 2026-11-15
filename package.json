@@ -1,0 +1,32 @@
+{
+  "name": "factory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.8.0",
+  "scripts": {
+    "dev": "concurrently -k -n web,api -c blue,green \"pnpm --filter web dev\" \"PORT=3001 tsx watch src/server.ts\"",
+    "build": "pnpm --filter web build && tsx scripts/postbuild.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc -p tsconfig.json && pnpm --filter web typecheck",
+    "test": "vitest run && pnpm --filter web test",
+    "test:build": "vitest run --config vitest.build.config.ts",
+    "e2e": "playwright test"
+  },
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "@hono/node-server": "^2.1.8",
+    "hono": "^4.13.18",
+    "nodemailer": "^10.5.0",
+    "tsx": "^4.23.15",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.2",
+    "concurrently": "^10.0.7",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

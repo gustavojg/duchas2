@@ -1,0 +1,16 @@
+/*
+ * Estilos globales del producto: Astryx precompilado (ruta «Plain CSS» de `npx astryx docs styling-overview`).
+ * Orden: fuente local (Figtree, empaquetada en el build: sin red en ejecución), reset, componentes de
+ * @astryxdesign/core y tema. Para cambiar el tema se cambia el último import (y el tema que aplica
+ * src/ui/Frame.tsx); los overrides de variables van debajo, nunca CSS por página.
+ */
+@import "@fontsource-variable/figtree";
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+
+/* El tema pide «Figtree» (de Google Fonts); @fontsource-variable la declara como «Figtree Variable». */
+[data-astryx-theme="neutral"] {
+  --font-family-body: "Figtree Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-family-heading: "Figtree Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}

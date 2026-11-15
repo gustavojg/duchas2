@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+# Build del frontend
+web/.next/
+web/out/
+web/next-env.d.ts
+*.tsbuildinfo
+# Playwright
+test-results/
+playwright-report/
+# Datos y entorno
+data/
+*.db
+*.db-*
+.env
+.sf/

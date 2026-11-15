@@ -1,0 +1,14 @@
+packages:
+  - .
+  - web
+# Scripts de instalación permitidos. Los postinstall de Astryx solo imprimen un aviso de `astryx init`
+# (ya hecho: web/AGENTS.md); no hacen falta.
+allowBuilds:
+  '@astryxdesign/cli': false
+  '@astryxdesign/core': false
+  esbuild: true
+# Astryx (beta) publica a menudo: sus versiones fijadas se instalan aunque sean más nuevas que el mínimo de pnpm.
+minimumReleaseAgeExclude:
+  - '@astryxdesign/cli@0.7.16'
+  - '@astryxdesign/core@0.7.16'
+  - '@astryxdesign/theme-neutral@0.7.16'

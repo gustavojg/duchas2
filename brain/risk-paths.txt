@@ -1,0 +1,17 @@
+# Prefijos de ruta cuyo cambio SIEMPRE requiere aprobación humana (gate determinista, no rebajable).
+# Uno por línea. Se comparan como prefijo de la ruta del fichero (o de cualquier subdirectorio).
+migrations/
+prisma/
+auth/
+payments/
+billing/
+infra/
+terraform/
+.github/
+brain/
+Dockerfile
+docker-compose
+package.json
+pnpm-lock.yaml
+package-lock.json
+.env
