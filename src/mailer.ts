@@ -3,7 +3,8 @@ import path from 'node:path';
 import nodemailer from 'nodemailer';
 import type { Config } from './config.js';
 
-export interface Mail { to: string; subject: string; text: string; html?: string; replyTo?: string }
+export interface Adjunto { filename: string; content: Buffer; contentType?: string }
+export interface Mail { to: string; subject: string; text: string; html?: string; replyTo?: string; attachments?: Adjunto[] }
 export interface Mailer { send(mail: Mail): Promise<void> }
 
 /**
