@@ -36,6 +36,8 @@ describe('DeslizadorAntesDespues', () => {
     // El asa sigue al Slider también sobre la ilustración.
     expect(html).toMatch(/<line[^>]*x1="50"[^>]*stroke="var\(--/);
     expect(html).toMatch(/<circle[^>]*cx="50"[^>]*fill="var\(--/);
+    // El único divisor visible es el asa: la cinta vertical de PlatoPartido no se pinta.
+    expect(html).not.toContain('ANTES · DESPUÉS');
     expect(sinVariablesAstryx(html)).not.toContain('style=');
   });
 

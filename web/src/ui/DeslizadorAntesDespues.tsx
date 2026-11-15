@@ -54,7 +54,7 @@ export function DeslizadorAntesDespues({ par }: DeslizadorAntesDespuesProps) {
     // El <svg> de art.tsx anidado ocupa el lienzo entero (4:3 sobre 4:3).
     return (
       <g clipPath={clip}>
-        <PlatoPartido title={alt} />
+        <PlatoPartido title={alt} sinCinta />
       </g>
     );
   };

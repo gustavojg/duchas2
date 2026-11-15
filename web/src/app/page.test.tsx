@@ -57,6 +57,9 @@ describe('portada con contenido sin confirmar (modo público)', () => {
   it('lleva la cinta del hero y la ilustración del plato partido', () => {
     expect(texto).toContain('MADRID · PLATOS DE DUCHA, BAÑERAS Y AZULEJOS');
     expect(html).toMatch(/<svg[^>]*role="img"[^>]*aria-label="Ilustración: plato de ducha/);
+    // El hero conserva la cinta vertical del plato partido, antes del deslizador.
+    expect(html).toContain('ANTES · DESPUÉS');
+    expect(html.indexOf('ANTES · DESPUÉS')).toBeLessThan(html.indexOf('role="slider"'));
   });
 
   it('enlaza a WhatsApp y al teléfono del fichero de contacto', () => {
