@@ -89,6 +89,52 @@ for (const ruta of ['/', '/zonas/']) {
   }
 }
 
+/** Jerarquía de la portada: cada H2 de sección es mayor que los H3 de su sección (brain/design.md § Tipografía). */
+for (const ancho of [360, 1280]) {
+  test.describe(`jerarquía de la portada en ${ancho} px`, () => {
+    test.use({ viewport: { width: ancho, height: 900 } });
+
+    test('los H2 de sección son mayores que los H3 de su sección', async ({ page }) => {
+      await page.goto('/');
+      const medidas = await page.locator('section[aria-labelledby]').evaluateAll((secciones) =>
+        secciones.flatMap((s) => {
+          const h2 = s.querySelector(':scope > h2');
+          if (!h2) return [];
+          const px = (e: Element) => parseFloat(getComputedStyle(e).fontSize);
+          return [{ titulo: h2.textContent ?? '', h2: px(h2), h3: [...s.querySelectorAll('h3')].map(px) }];
+        }),
+      );
+      expect(medidas.map((m) => m.titulo)).toEqual([
+        '¿Reparar o cambiar?',
+        'Cómo trabajamos',
+        'Servicios',
+        'Precios orientativos',
+        'Zonas',
+      ]);
+      for (const { titulo, h2, h3 } of medidas) {
+        for (const t of h3) expect(h2, `${titulo}: H2 ${h2}px frente a H3 ${t}px`).toBeGreaterThan(t);
+      }
+      const plato = page.locator('h3[data-type="display-3"]');
+      await expect(plato).toHaveCount(1);
+      const tamPlato = await plato.evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
+      expect(medidas.find((m) => m.titulo === 'Servicios')!.h2).toBeGreaterThan(tamPlato);
+    });
+
+    if (ancho === 1280) {
+      test('el icono del plato no deja hueco', async ({ page }) => {
+        await page.goto('/');
+        const caja = page.locator('.tarjeta-servicio-icono[data-tamano="grande"]');
+        await expect(caja).toHaveCount(1);
+        const { icono, svg } = await caja.evaluate((e) => ({
+          icono: e.getBoundingClientRect().width,
+          svg: e.querySelector('svg')!.getBoundingClientRect().width,
+        }));
+        expect(icono - svg, `caja ${icono}px frente a SVG ${svg}px`).toBeLessThanOrEqual(1);
+      });
+    }
+  });
+}
+
 test('la portada carga con su navegación', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
