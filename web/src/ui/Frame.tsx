@@ -38,7 +38,7 @@ export function Frame({ brand, brandHref = '/', nav, who, footer, children }: Fr
     <InternationalizationProvider locale="es-ES" messages={{ 'es-ES': esES }}>
       <Theme theme={neutralTheme}>
         <AppShell height="auto" topNav={topNav}>
-          {/* Sin contentWidth: Layout lo pasaría como style="--…" en línea. */}
+          {/* Sin contentWidth: Layout lo pasaría como estilo en línea con una variable CSS. */}
           <Layout height="auto" footer={footer ? <LayoutFooter hasDivider>{footer}</LayoutFooter> : undefined}>
             {children}
           </Layout>
