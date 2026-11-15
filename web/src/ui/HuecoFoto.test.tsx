@@ -41,6 +41,14 @@ describe('HuecoFoto', () => {
     expect(antes).toMatch(/<img[^>]*src="\/fotos\/a\.webp"[^>]*alt="Plato desconchado"/);
   });
 
+  it('compacta: solo la cinta y la ilustración, sin el aviso ni el hueco', () => {
+    const html = renderToStaticMarkup(<HuecoFoto par={conHueco} lado="despues" compacta />);
+    expect(html).toContain('ILUSTRACIÓN');
+    expect(html).toMatch(/<svg[^>]*role="img"/);
+    expect(html).not.toContain('Pronto, fotos reales de este trabajo');
+    expect(html).not.toContain(conHueco.hueco);
+  });
+
   it('sin style= propio ni hex', () => {
     for (const par of [conHueco, conFotos]) {
       const html = sinVariablesAstryx(renderToStaticMarkup(<HuecoFoto par={par} lado="antes" />));
