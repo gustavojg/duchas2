@@ -68,4 +68,25 @@
   --color-on-tape: #13201E;
   --shadow-1: 0 6px 16px light-dark(#0A6E6433, #00000066);
   --measure: 65ch;
+  /* Botones de acción ≥ 44 px (brain/design.md: ≥ 48): Button size="lg" toma su alto de este token. */
+  --size-element-lg: var(--spacing-12);
+}
+
+/*
+ * Composiciones registradas en docs/astryx-componentes.md. Sin capa: ganan a astryx-base. Solo var(--…), nada
+ * de valores sueltos; las vistas no escriben CSS, solo usan estas clases a través de su composición.
+ */
+.cinta-etiqueta {
+  align-self: flex-start;
+  background-color: var(--color-tape);
+  color: var(--color-on-tape);
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-2);
+  letter-spacing: 0.08em;
+}
+
+.franja-confianza-icono {
+  display: block;
+  flex: none;
+  inline-size: var(--spacing-10);
 }
