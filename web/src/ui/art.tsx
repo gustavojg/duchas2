@@ -161,16 +161,16 @@ export function IlustracionDano({ dano, title, decorative }: ArtProps & { dano: 
   );
 }
 
-export type Compromiso = 'garantia' | 'sin-obras' | 'un-telefono' | 'hoteles';
+export type Compromiso = 'garantia' | 'sin-obras' | 'hoteles' | 'anios';
 
 const COMPROMISO_TITULO: Record<Compromiso, string> = {
   garantia: 'Garantía por escrito',
   'sin-obras': 'Sin obras ni polvo',
-  'un-telefono': 'Un solo teléfono, siempre el mismo',
   hoteles: 'Trabajamos para hoteles y comunidades',
+  anios: 'Años reparando baños',
 };
 
-/** Iconos de la franja de confianza (4 compromisos). */
+/** Iconos de la franja de confianza (4 compromisos; años con calendario propio, distinto de la garantía). */
 export function IconoCompromiso({ tipo, title, decorative }: ArtProps & { tipo: Compromiso }) {
   const body: Record<Compromiso, ReactNode> = {
     garantia: (
@@ -187,19 +187,19 @@ export function IconoCompromiso({ tipo, title, decorative }: ArtProps & { tipo: 
         <path d="M34 20 q4 -1 6 2" stroke={BRAND} strokeWidth={2.5} />
       </g>
     ),
-    'un-telefono': (
-      <g>
-        <path d="M12 10 q-4 2 -2 8 q6 16 22 22 q6 2 8 -2 l2 -5 l-8 -5 l-4 4 q-8 -4 -12 -12 l4 -4 l-5 -8z" fill={CARD} />
-        <text x={38} y={16} fill={BRAND} stroke="none" fontFamily={MONO} fontSize={14} fontWeight={700} textAnchor="middle" dominantBaseline="central">
-          1
-        </text>
-      </g>
-    ),
     hoteles: (
       <g>
         <rect x={10} y={8} width={32} height={36} fill={CARD} />
         <path d="M16 16 h6 M30 16 h6 M16 24 h6 M30 24 h6 M16 32 h6 M30 32 h6" strokeWidth={2.5} stroke={BRAND} />
         <path d="M23 44 v-6 h6 v6" />
+      </g>
+    ),
+    anios: (
+      <g>
+        <rect x={8} y={12} width={36} height={32} rx={4} fill={CARD} />
+        <path d="M8 20 h36" />
+        <path d="M16 8 v8 M36 8 v8" />
+        <path d="M16 28 h4 M24 28 h4 M32 28 h4 M16 36 h4 M24 36 h4" strokeWidth={2.5} stroke={BRAND} />
       </g>
     ),
   };

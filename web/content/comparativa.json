@@ -1,0 +1,23 @@
+{
+  "filas": [
+    {
+      "id": "coste",
+      "etiqueta": "Coste",
+      "reparar": { "valor": null, "confirmado": false },
+      "cambiar": { "valor": "865-1.200 €", "confirmado": false }
+    },
+    {
+      "id": "tiempo",
+      "etiqueta": "Tiempo",
+      "reparar": { "valor": "Sin días de obra", "confirmado": true },
+      "cambiar": { "valor": "Días de obra y espera", "confirmado": true }
+    },
+    {
+      "id": "obra",
+      "etiqueta": "Obra",
+      "reparar": { "valor": "En tu baño, sin picar", "confirmado": true },
+      "cambiar": { "valor": "Con obra y escombro", "confirmado": true }
+    }
+  ],
+  "fuente": "Precio de cambiar el plato según Cronoshare (docs/research.md)."
+}
