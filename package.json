@@ -12,7 +12,8 @@
     "test": "vitest run && pnpm --filter web test",
     "test:build": "vitest run --config vitest.build.config.ts",
     "e2e": "playwright test",
-    "e2e:staging": "E2E_BASE_URL=${E2E_BASE_URL:-http://127.0.0.1:8804} playwright test"
+    "e2e:staging": "E2E_BASE_URL=${E2E_BASE_URL:-http://127.0.0.1:8804} playwright test",
+    "limpieza": "tsx scripts/limpieza.ts"
   },
   "engines": { "node": ">=22" },
   "dependencies": {
