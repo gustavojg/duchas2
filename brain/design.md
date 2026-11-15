@@ -112,7 +112,7 @@ microcopy, semántica, modo oscuro. Descartadas: glass/neumorfismo, 3D/vídeo, g
 - **Firma — «la línea de cinta»:** tira de cinta crema (`--color-tape`, texto `--color-on-tape`, mono mayúscula),
   plana, siempre con texto, nunca botón. Aparece SOLO en: hero (imagen partida con «ANTES · DESPUÉS»), asa y
   etiquetas de `DeslizadorAntesDespues`, número de `PasosTrabajo` («PASO 1»), cabecera «Reparar» de
-  `TablaRepararCambiar`, eyebrow `CintaEtiqueta` del hero.
+  `TablaRepararCambiar`, eyebrow `CintaEtiqueta` del hero, eyebrow de la cabecera de /contacto/.
 - **Defaults rechazados:** foto de banco de baño de lujo → el daño de Marta partido por la cinta · azul agua sobre
   blanco frío → teal profundo sobre porcelana cálida · contadores sin cifra y «Pide presupuesto» → franja de
   compromisos verificables y «Manda la foto por WhatsApp» · botón #25D366 con texto blanco (2:1) → botón de marca
@@ -176,6 +176,12 @@ Logotipo: `{{MARCA}}` en Archivo 800 precedido del símbolo (plato `brand` con d
 - **Botón flotante WhatsApp** (`BotonFlotanteWhatsApp`): píldora abajo a la derecha, `brand`, ≥ 48 px, `--shadow-1`,
   mensaje por ruta; se oculta mientras el CTA del hero está visible y no tapa el enviar del formulario.
 - **Un solo `Button` primario por pantalla, y es WhatsApp.** «Llamar» siempre secundario.
+  Excepción deliberada: la portada `/` tiene dos botones primarios a la vez, el CTA del hero (`#cta-hero`, WhatsApp)
+  y el botón flotante de WhatsApp (`BotonFlotanteWhatsApp`, primary). Son la misma acción (mandar la foto por
+  WhatsApp) y el flotante se oculta (`boton-flotante-oculto`, aria-hidden) mientras `#cta-hero` o `#enviar-peticion`
+  están a la vista, así que no se ven los dos a la vez (si el navegador no tiene IntersectionObserver, el flotante
+  queda siempre visible). En el resto de páginas rige la regla de uno solo; en /contacto/ el único primary de la
+  página es «Enviar petición».
 - Visual: imagen a ancho completo en móvil, 55-60 % en escritorio; CTA justo debajo.
 - Texto largo: `--measure`, H2 = la pregunta buscada, párrafos de 2-4 líneas, CTA cada 2 apartados.
 - Cifras: número grande mono, unidad en `ink-3`; nunca inventada ni «0».
@@ -206,7 +212,7 @@ Logotipo: `{{MARCA}}` en Archivo 800 precedido del símbolo (plato `brand` con d
 2. Un solo botón primario por pantalla, `brand` #0A6E64 con texto blanco, y es de WhatsApp.
 3. Botón flotante de WhatsApp en todas las páginas en móvil, con sombra, sin tapar el enviar del formulario.
 4. Ningún texto público dice «PENDIENTE», «{{», «0 años» ni muestra contadores sin cifra.
-5. La cinta crema solo en hero, deslizador, números de pasos y cabecera «Reparar».
+5. La cinta crema solo en hero, deslizador, números de pasos, cabecera «Reparar» y eyebrow de la cabecera de /contacto/.
 6. Franja de confianza con 4 compromisos e iconos propios justo debajo del hero.
 7. «¿Reparar o cambiar?» antes de «Cómo trabajamos», sin scroll horizontal en 320 px.
 8. Fondo porcelana cálida alternando #FBFAF6 / #F3F0E7; tarjetas blancas sobre `surface-1`.

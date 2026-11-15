@@ -45,7 +45,7 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 
 | Composición | Fichero | Primitivas | Estado |
 |---|---|---|---|
-| CintaEtiqueta | `web/src/ui/CintaEtiqueta.tsx` | Text (`type="code"`, `as="p"`) + clase `cinta-etiqueta` de globals.css (var(--color-tape), var(--color-on-tape), var(--spacing-*)) | creada |
+| CintaEtiqueta | `web/src/ui/CintaEtiqueta.tsx` | Text (`type="code"`, `as="p"`) + clase `cinta-etiqueta` de globals.css (var(--color-tape), var(--color-on-tape), var(--spacing-*)). Eyebrow del hero de `/` y de la cabecera de `/contacto/` | creada |
 | BotonWhatsApp | `web/src/ui/BotonWhatsApp.tsx` | Button (`variante` primary por defecto o secondary, lg) + Icon con glifo propio; href con `waLink()` | creada |
 | BotonLlamar | `web/src/ui/BotonLlamar.tsx` | Button (secondary, lg) + Icon con glifo propio; href con `telLink()`. Lo usan la cabecera (`Frame`) y el hero | creada |
 | Contenedor `portada` | `web/src/app/page.tsx` (+ `.portada` en globals.css) | VStack (`className="portada"`) que envuelve hero y franja: padding-inline var(--spacing-4), max-inline-size var(--measure), margin-inline auto. Solo clase, sin `<div>`/`<span>` propios; no usa `Section maxWidth` ni `Layout contentWidth` porque pintan estilo en línea | creada |
