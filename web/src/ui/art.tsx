@@ -86,8 +86,15 @@ function Plato({ x = 20, y = 20, w = 360, h = 260 }: { x?: number; y?: number; w
   );
 }
 
-/** Hero: plato partido por la cinta; mitad izquierda con desconchón y óxido, derecha con brillo. */
-export function PlatoPartido({ title = 'Ilustración: plato de ducha con un desconchón a la izquierda y recién esmaltado a la derecha', decorative }: ArtProps) {
+/**
+ * Hero: plato partido por la cinta; mitad izquierda con desconchón y óxido, derecha con brillo.
+ * `sinCinta` quita la cinta vertical «ANTES · DESPUÉS» (el deslizador ya tiene su asa como divisor).
+ */
+export function PlatoPartido({
+  title = 'Ilustración: plato de ducha con un desconchón a la izquierda y recién esmaltado a la derecha',
+  decorative,
+  sinCinta = false,
+}: ArtProps & { sinCinta?: boolean }) {
   return (
     <Svg viewBox="0 0 400 300" title={title} decorative={decorative}>
       <rect x={0} y={0} width={400} height={300} fill={SURFACE} stroke="none" />
@@ -99,7 +106,7 @@ export function PlatoPartido({ title = 'Ilustración: plato de ducha con un desc
       {/* Después: reflejos de brillo */}
       <path d="M262 70 q30 -6 52 8" stroke={BRAND} strokeWidth={3} />
       <path d="M276 92 q18 -3 30 4" stroke={BRAND} strokeWidth={3} />
-      <Cinta x={186} y={0} w={28} h={300} text="ANTES · DESPUÉS" vertical />
+      {sinCinta ? null : <Cinta x={186} y={0} w={28} h={300} text="ANTES · DESPUÉS" vertical />}
     </Svg>
   );
 }

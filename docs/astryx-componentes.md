@@ -61,6 +61,8 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | ListaZonas | `web/src/ui/ListaZonas.tsx` | VStack + AnillosZonas de art.tsx (ancho con la clase `lista-zonas-anillos`) + dos grupos con Heading 3 y HStack (`as="ul"`, `wrap`) de VStack `as="li"` con Text. Sin Badge ni CTA (lo pone el padre) | creada |
 | AcordeonFaq | `web/src/ui/AcordeonFaq.tsx` | Collapsible + CollapsibleGroup (`type="single"`, `hasDividers`) + Text (`as="p"`); todos cerrados al principio, disparador `<button>` nativo con `aria-expanded`. `'use client'` (Collapsible guarda el estado) | creada |
 | BloqueResenas | `web/src/ui/BloqueResenas.tsx` | VStack (`section`/`ul`/`li`) + Heading (level 2) + Text (`type="code"` para la nota); nota y número de `resumenResenas()`/`notaVisible()` de seo.ts. Sin reseñas devuelve null | creada |
+| HuecoFoto | `web/src/ui/HuecoFoto.tsx` | AspectRatio + `<img>` nativo + art.tsx + CintaEtiqueta; `compacta` (miniaturas): solo la ilustración, sin cintas, aviso ni `hueco`; quien la usa pone una única cinta «ILUSTRACIONES» encima | creada |
+| DeslizadorAntesDespues | `web/src/ui/DeslizadorAntesDespues.tsx` | Slider (`isLabelHidden`, «Comparar antes y después», 0-100, inicial 50) + AspectRatio 4:3 + Overlay (`scrim={false}`, cintas) + CintaEtiqueta «ANTES»/«DESPUÉS»; recorte de la «después» con `<clipPath><rect width={posición}>` y asa (`<line>`/`<circle>` con var(--…)). Sin fotos, la ilustración de art.tsx (PlatoPartido) en el mismo lienzo SVG (capa de abajo velada, la de arriba recortada) y el asa siguiendo al Slider; cinta «ILUSTRACIÓN» encima y el aviso + `hueco` una vez debajo. `'use client'` (estado de la posición) | creada |
 
 Notas de implementación:
 
@@ -71,7 +73,9 @@ Notas de implementación:
   `var(--spacing-12)` (48 px) para que «Manda la foto por WhatsApp» y «Llamar» midan ≥ 44 px.
 - `Icon` de Astryx es componente cliente: un glifo pasado como función solo funciona desde un fichero
   `'use client'` (por eso BotonWhatsApp y BotonLlamar lo son, y Frame sigue siendo de servidor).
+- AspectRatio y Slider pintan `style="--x-aspectRatio…"` / `style="--_slider-…"` (variables internas de
+  Astryx, solo números): los tests de HTML las ignoran y siguen prohibiendo cualquier otro `style=`.
 - `Grid` con `columns` pinta `style="--x-gridTemplateColumns…"`: para listas se usa VStack/HStack.
 
-Previstas por `brain/design.md` (las construye la funcionalidad que las usa): DeslizadorAntesDespues,
-CabeceraContacto, GaleriaFiltrable, MigasDePan, IlustracionSvg, HuecoFoto.
+Previstas por `brain/design.md` (las construye la funcionalidad que las usa): CabeceraContacto,
+GaleriaFiltrable, MigasDePan, IlustracionSvg.
