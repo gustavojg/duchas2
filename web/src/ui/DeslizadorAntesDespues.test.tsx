@@ -31,6 +31,12 @@ describe('DeslizadorAntesDespues', () => {
     expect(html).toMatch(/role="slider"[^>]*aria-valuenow="50"/);
     expect(html).toContain('Comparar antes y después');
     expect(html).toContain('Pronto, fotos reales de este trabajo');
+    expect(html.split('Pronto, fotos reales de este trabajo')).toHaveLength(2);
+    expect(html.split(conHueco.hueco!)).toHaveLength(2);
+    // El asa sigue al Slider también sobre la ilustración.
+    expect(html).toMatch(/<line[^>]*x1="50"[^>]*stroke="var\(--/);
+    expect(html).toMatch(/<circle[^>]*cx="50"[^>]*fill="var\(--/);
+    expect(sinVariablesAstryx(html)).not.toContain('style=');
   });
 
   it('con fotos: recorte SVG con clipPath, las dos rutas, asa y sin style= propio', () => {

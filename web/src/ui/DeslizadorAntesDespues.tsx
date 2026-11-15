@@ -4,17 +4,20 @@ import { AspectRatio } from '@astryxdesign/core/AspectRatio';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Overlay } from '@astryxdesign/core/Overlay';
 import { Slider } from '@astryxdesign/core/Slider';
+import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
-import { useId, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 import type { ParGaleria } from '../lib/content';
+import { PlatoPartido } from './art';
 import { CintaEtiqueta } from './CintaEtiqueta';
-import { HuecoFoto } from './HuecoFoto';
 
 /** Lienzo del SVG en unidades de usuario: 100 de ancho = la posición del Slider (0-100); 4:3. */
 const ANCHO = 100;
 const ALTO = 75;
 const ASA = 'var(--color-background-card)';
 const ASA_BORDE = 'var(--color-text-primary)';
+/** Opacidad de la capa de abajo cuando es la misma ilustración: se distingue de la recortada. */
+const VELO = 0.35;
 
 export interface DeslizadorAntesDespuesProps {
   par: ParGaleria;
@@ -22,23 +25,43 @@ export interface DeslizadorAntesDespuesProps {
 
 /**
  * Comparador antes/después (docs/astryx-componentes.md, fila «deslizador antes/después»). Un Slider de Astryx
- * (arrastre táctil y flechas, con aria-valuenow) mueve la posición 0-100. Con fotos, la «antes» va debajo y
- * la «después» encima, recortada con un <clipPath> SVG cuyo <rect> mide la posición (atributos SVG, sin estilo en línea), con el asa
- * en el borde. Sin fotos (hueco), la ilustración rotulada de HuecoFoto y el mismo Slider.
+ * (arrastre táctil y flechas, con aria-valuenow) mueve la posición 0-100. Overlay (cintas «ANTES»/«DESPUÉS»)
+ * + AspectRatio 4:3 + un <svg viewBox="0 0 100 75">: la capa de abajo, la de arriba recortada con un
+ * <clipPath> cuyo <rect> mide la posición (atributos SVG, sin estilo en línea), y el asa en el borde.
+ * Con fotos, «antes» debajo y «después» encima. Sin fotos (hueco), la ilustración de art.tsx en las dos capas
+ * (la de abajo velada), rotulada «ILUSTRACIÓN», con el aviso y el texto del hueco una sola vez, debajo.
  */
 export function DeslizadorAntesDespues({ par }: DeslizadorAntesDespuesProps) {
   const [posicion, setPosicion] = useState(50);
   const recorte = `recorte${useId()}`;
+  const conFotos = Boolean(!par.hueco && par.antes && par.despues);
   const cintas = (
     <HStack gap={2} justify="between" vAlign="center">
       <CintaEtiqueta>Antes</CintaEtiqueta>
       <CintaEtiqueta>Después</CintaEtiqueta>
     </HStack>
   );
-  const conFotos = !par.hueco && par.antes && par.despues;
+  const capa = (lado: 'antes' | 'despues', clip?: string): ReactNode => {
+    const alt = lado === 'antes' ? par.alt_antes : par.alt_despues;
+    if (conFotos) {
+      return (
+        <>
+          <title>{alt}</title>
+          <image clipPath={clip} href={par[lado]!} x={0} y={0} width={ANCHO} height={ALTO} preserveAspectRatio="xMidYMid slice" />
+        </>
+      );
+    }
+    // El <svg> de art.tsx anidado ocupa el lienzo entero (4:3 sobre 4:3).
+    return (
+      <g clipPath={clip}>
+        <PlatoPartido title={alt} />
+      </g>
+    );
+  };
   return (
     <VStack gap={3}>
-      {conFotos ? (
+      {conFotos ? null : <CintaEtiqueta>Ilustración</CintaEtiqueta>}
+      <VStack gap={2}>
         <Overlay scrim={false} position="top" align="start" content={cintas}>
           <AspectRatio ratio={4 / 3} fit="cover">
             <svg
@@ -53,21 +76,12 @@ export function DeslizadorAntesDespues({ par }: DeslizadorAntesDespuesProps) {
                   <rect x={0} y={0} width={posicion} height={ALTO} />
                 </clipPath>
               </defs>
-              <g role="img" aria-label={par.alt_antes}>
-                <title>{par.alt_antes}</title>
-                <image href={par.antes!} x={0} y={0} width={ANCHO} height={ALTO} preserveAspectRatio="xMidYMid slice" />
+              {/* Con ilustración, el <svg> de art.tsx ya lleva role="img" y su título. */}
+              <g role={conFotos ? 'img' : undefined} aria-label={conFotos ? par.alt_antes : undefined} opacity={conFotos ? undefined : VELO}>
+                {capa('antes')}
               </g>
-              <g role="img" aria-label={par.alt_despues}>
-                <title>{par.alt_despues}</title>
-                <image
-                  clipPath={`url(#${recorte})`}
-                  href={par.despues!}
-                  x={0}
-                  y={0}
-                  width={ANCHO}
-                  height={ALTO}
-                  preserveAspectRatio="xMidYMid slice"
-                />
+              <g role={conFotos ? 'img' : undefined} aria-label={conFotos ? par.alt_despues : undefined}>
+                {capa('despues', `url(#${recorte})`)}
               </g>
               <g aria-hidden="true">
                 <line x1={posicion} y1={0} x2={posicion} y2={ALTO} stroke={ASA} strokeWidth={1} />
@@ -76,22 +90,27 @@ export function DeslizadorAntesDespues({ par }: DeslizadorAntesDespuesProps) {
             </svg>
           </AspectRatio>
         </Overlay>
-      ) : (
-        <>
-          {cintas}
-          <HuecoFoto par={par} lado="despues" />
-        </>
+        <Slider
+          label="Comparar antes y después"
+          isLabelHidden
+          valueDisplay="none"
+          min={0}
+          max={100}
+          value={posicion}
+          onChange={(v: number) => setPosicion(v)}
+          formatValue={(v) => `${v} %`}
+        />
+      </VStack>
+      {conFotos ? null : (
+        <VStack gap={1}>
+          <Text as="p">Pronto, fotos reales de este trabajo</Text>
+          {par.hueco ? (
+            <Text as="p" type="supporting">
+              {par.hueco}
+            </Text>
+          ) : null}
+        </VStack>
       )}
-      <Slider
-        label="Comparar antes y después"
-        isLabelHidden
-        valueDisplay="none"
-        min={0}
-        max={100}
-        value={posicion}
-        onChange={(v: number) => setPosicion(v)}
-        formatValue={(v) => `${v} %`}
-      />
     </VStack>
   );
 }
