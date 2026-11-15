@@ -95,6 +95,7 @@ describe('leerEntornoSmoke', () => {
       'https://usuario:token@staging.ejemplo.test',
       'https://usuario@staging.ejemplo.test',
       'ftp://usuario:token@staging.ejemplo.test',
+      'https://usuario:token@',
     ]) {
       let mensaje = '';
       try {

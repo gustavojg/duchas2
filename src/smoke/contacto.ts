@@ -71,7 +71,7 @@ export function leerEntornoSmoke(env: Record<string, string | undefined>): Entor
   try {
     url = new URL(bruta);
   } catch {
-    throw new Error(`BASE_URL no es una URL válida: «${bruta}» (ejemplo: http://127.0.0.1:3000)`);
+    throw new Error('BASE_URL no es una URL válida (ejemplo: http://127.0.0.1:3000)');
   }
   // Antes que cualquier otro error que repita «bruta»: nunca imprimir credenciales.
   if (url.username || url.password) {
