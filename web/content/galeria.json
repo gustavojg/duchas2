@@ -1,0 +1,34 @@
+[
+  {
+    "servicio": "platos-de-ducha",
+    "antes": null,
+    "despues": null,
+    "alt_antes": "Plato de ducha blanco con el esmalte desconchado junto al desagüe",
+    "alt_despues": "El mismo plato de ducha esmaltado, liso y sin desconchones",
+    "hueco": "Plato desconchado antes y después del esmaltado"
+  },
+  {
+    "servicio": "platos-de-ducha",
+    "antes": null,
+    "despues": null,
+    "alt_antes": "Plato de ducha con una grieta que cruza la superficie",
+    "alt_despues": "El mismo plato de ducha reparado, sin rastro de la grieta",
+    "hueco": "Grieta en el plato antes y después de repararla"
+  },
+  {
+    "servicio": "platos-de-ducha",
+    "antes": null,
+    "despues": null,
+    "alt_antes": "Plato de ducha mate y amarillento por el uso",
+    "alt_despues": "El mismo plato de ducha con el brillo recuperado",
+    "hueco": "Plato sin brillo antes y después del esmaltado"
+  },
+  {
+    "servicio": "platos-de-ducha",
+    "antes": null,
+    "despues": null,
+    "alt_antes": "Plato de ducha liso y resbaladizo",
+    "alt_despues": "El mismo plato de ducha con acabado antideslizante",
+    "hueco": "Plato antes y después del tratamiento antideslizante"
+  }
+]

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { telLink, waLink } from './whatsapp.ts';
+import { esNumeroValido, telLink, waLink } from './whatsapp.ts';
 
 describe('waLink()', () => {
   it('solo dígitos y el mensaje con encodeURIComponent', () => {
@@ -9,6 +9,50 @@ describe('waLink()', () => {
   it('normaliza 0034 y números sin prefijo', () => {
     expect(waLink('0034 600 000 000', 'a')).toBe('https://wa.me/34600000000?text=a');
     expect(waLink('600000000', 'a')).toBe('https://wa.me/34600000000?text=a');
+  });
+
+  it('número válido', () => {
+    expect(waLink('600000000', 'Hola')).toBe('https://wa.me/34600000000?text=Hola');
+  });
+
+  it('número con espacios y prefijo', () => {
+    expect(waLink('+34 600 00 00 00', 'a')).toBe('https://wa.me/34600000000?text=a');
+    expect(waLink('600 000 000', 'a')).toBe('https://wa.me/34600000000?text=a');
+  });
+
+  it('lanza ante un número inválido', () => {
+    expect(() => waLink('12345', 'a')).toThrow(/Teléfono no válido/);
+    expect(() => waLink('500 000 000', 'a')).toThrow(/Teléfono no válido/);
+    expect(() => waLink('', 'a')).toThrow(/Teléfono no válido/);
+  });
+});
+
+describe('esNumeroValido()', () => {
+  it('acepta números españoles de 9 cifras con o sin prefijo', () => {
+    expect(esNumeroValido('600 000 000')).toBe(true);
+    expect(esNumeroValido('+34 912 34 56 78')).toBe(true);
+    expect(esNumeroValido('0034600000000')).toBe(true);
+  });
+
+  it('rechaza lo demás', () => {
+    expect(esNumeroValido('12345')).toBe(false);
+    expect(esNumeroValido('500000000')).toBe(false);
+    expect(esNumeroValido('')).toBe(false);
+  });
+});
+
+describe('telLink() y waLink() comparten la validación', () => {
+  const validos = ['600 000 000', '+34 912 34 56 78', '0034600000000', '7 0 0 0 0 0 0 0 0'];
+  const invalidos = ['12345', '500000000', '', '+44 7700 900000', '34600000000123'];
+
+  it.each(validos)('ambas aceptan %j', (n) => {
+    expect(() => telLink(n)).not.toThrow();
+    expect(() => waLink(n, 'a')).not.toThrow();
+  });
+
+  it.each(invalidos)('ambas rechazan %j', (n) => {
+    expect(() => telLink(n)).toThrow(/Teléfono no válido/);
+    expect(() => waLink(n, 'a')).toThrow(/Teléfono no válido/);
   });
 });
 

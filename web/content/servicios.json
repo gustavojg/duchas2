@@ -1,0 +1,262 @@
+[
+  {
+    "slug": "platos-de-ducha",
+    "nombre": "Reparación y esmaltado de platos de ducha",
+    "ruta": "/platos-de-ducha/",
+    "tipo": "principal",
+    "orden": 1,
+    "resumen": "Arreglamos grietas, golpes y desconchones del plato de ducha en tu baño, sin cambiarlo.",
+    "problema": "Tu plato de ducha tiene un desconchón o una grieta. Parece que hay que cambiarlo, pero casi siempre se repara.",
+    "como": [
+      "Limpiamos y lijamos la zona dañada.",
+      "Rellenamos el daño con masilla y lo igualamos.",
+      "Esmaltamos el plato y lo dejamos brillante."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Se puede reparar un plato de resina?", "r": "Sí. Reparamos platos de resina, carga mineral, acrílico y porcelana." },
+      { "p": "¿Hay que quitar el plato?", "r": "No. Trabajamos con el plato en su sitio, sin obras ni polvo." }
+    ],
+    "relacionados": ["juntas-y-sellado", "mamparas", "azulejos"],
+    "whatsapp_mensaje": "Hola, os mando una foto de mi plato de ducha para ver si tiene arreglo.",
+    "seo": {
+      "title": "Reparar plato de ducha en Madrid, sin obras",
+      "description": "Reparamos y esmaltamos platos de ducha desconchados o agrietados en tu baño. Manda una foto por WhatsApp."
+    },
+    "imagen_tarjeta": "plato"
+  },
+  {
+    "slug": "baneras-completas",
+    "nombre": "Esmaltado de bañeras completas",
+    "ruta": "/servicios/baneras-completas/",
+    "tipo": "servicio",
+    "orden": 2,
+    "resumen": "Renovamos tu bañera entera con un esmaltado nuevo, sin sacarla del baño.",
+    "problema": "Tu bañera ha perdido el brillo o tiene manchas que no salen. No hace falta cambiarla.",
+    "como": [
+      "Protegemos el baño con cinta y plástico.",
+      "Lijamos y preparamos toda la superficie.",
+      "Aplicamos el esmalte nuevo con pistola."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Puedo cambiar el color de la bañera?", "r": "Sí. Podemos esmaltarla en blanco o en otro color." },
+      { "p": "¿Se queda el baño sucio?", "r": "No. Lo tapamos todo y no picamos nada." }
+    ],
+    "relacionados": ["esmaltado-parcial", "baneras-de-patas", "juntas-y-sellado"],
+    "whatsapp_mensaje": "Hola, quiero esmaltar mi bañera. Os mando una foto.",
+    "seo": {
+      "title": "Esmaltar bañera en Madrid, sin obras",
+      "description": "Esmaltamos tu bañera completa en tu baño, sin cambiarla. Mándanos una foto y te decimos qué podemos hacer."
+    },
+    "imagen_tarjeta": "banera"
+  },
+  {
+    "slug": "esmaltado-parcial",
+    "nombre": "Esmaltado parcial de bañeras",
+    "ruta": "/servicios/esmaltado-parcial/",
+    "tipo": "servicio",
+    "orden": 3,
+    "resumen": "Reparamos solo la zona dañada de tu bañera y la igualamos con el resto.",
+    "problema": "Tu bañera tiene un golpe o una zona gastada. El resto está bien y no quieres esmaltarla entera.",
+    "como": [
+      "Marcamos la zona dañada con cinta.",
+      "Reparamos y lijamos solo esa parte.",
+      "Esmaltamos e igualamos el tono con el resto."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Se nota dónde se ha reparado?", "r": "Igualamos el tono para que la reparación se vea lo menos posible." },
+      { "p": "¿Me sale mejor que esmaltarla entera?", "r": "Depende del daño. Con una foto te decimos qué conviene." }
+    ],
+    "relacionados": ["baneras-completas", "perforadas-y-oxido"],
+    "whatsapp_mensaje": "Hola, mi bañera tiene un golpe. Os mando una foto de la zona.",
+    "seo": {
+      "title": "Esmaltado parcial de bañeras en Madrid",
+      "description": "Reparamos solo la zona dañada de tu bañera y la igualamos. Manda una foto por WhatsApp."
+    },
+    "imagen_tarjeta": "parcial"
+  },
+  {
+    "slug": "perforadas-y-oxido",
+    "nombre": "Bañeras perforadas y con óxido",
+    "ruta": "/servicios/perforadas-y-oxido/",
+    "tipo": "servicio",
+    "orden": 4,
+    "resumen": "Cerramos agujeros y frenamos el óxido de bañeras de chapa o hierro.",
+    "problema": "Tu bañera tiene óxido o un agujero por donde se escapa el agua. Conviene actuar antes de que crezca.",
+    "como": [
+      "Quitamos el óxido hasta llegar al metal sano.",
+      "Sellamos el agujero y rellenamos la zona.",
+      "Imprimamos y esmaltamos la superficie."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Se puede arreglar una bañera agujereada?", "r": "Muchas veces sí. Con una foto te decimos si tiene arreglo." },
+      { "p": "¿Vuelve a salir el óxido?", "r": "Quitamos todo el óxido antes de esmaltar para frenarlo." }
+    ],
+    "relacionados": ["baneras-completas", "esmaltado-parcial"],
+    "whatsapp_mensaje": "Hola, mi bañera tiene óxido o un agujero. Os mando una foto.",
+    "seo": {
+      "title": "Reparar bañera con óxido o agujero en Madrid",
+      "description": "Cerramos agujeros y frenamos el óxido de tu bañera sin cambiarla. Manda una foto por WhatsApp."
+    },
+    "imagen_tarjeta": "perforada"
+  },
+  {
+    "slug": "azulejos",
+    "nombre": "Esmaltado de azulejos",
+    "ruta": "/servicios/azulejos/",
+    "tipo": "servicio",
+    "orden": 5,
+    "resumen": "Cambiamos el color de tus azulejos sin quitarlos ni hacer obra.",
+    "problema": "Tus azulejos están viejos o no te gusta su color. Quitarlos supone obra y escombro.",
+    "como": [
+      "Limpiamos y desengrasamos los azulejos.",
+      "Aplicamos una imprimación para que agarre el esmalte.",
+      "Esmaltamos los azulejos en el color que elijas."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Se pueden esmaltar las juntas también?", "r": "Sí. Podemos dejarlas del mismo color o marcarlas." },
+      { "p": "¿Sirve para la zona de la ducha?", "r": "Sí. El esmalte aguanta el agua y la limpieza de cada día." }
+    ],
+    "relacionados": ["juntas-y-sellado", "platos-de-ducha", "baneras-completas"],
+    "whatsapp_mensaje": "Hola, quiero esmaltar los azulejos del baño. Os mando una foto.",
+    "seo": {
+      "title": "Esmaltar azulejos del baño en Madrid",
+      "description": "Cambiamos el color de tus azulejos sin quitarlos ni hacer obra. Manda una foto por WhatsApp."
+    },
+    "imagen_tarjeta": "azulejos"
+  },
+  {
+    "slug": "baneras-de-patas",
+    "nombre": "Restauración de bañeras de patas",
+    "ruta": "/servicios/baneras-de-patas/",
+    "tipo": "servicio",
+    "orden": 6,
+    "resumen": "Devolvemos el brillo a tu bañera antigua de patas, por dentro y por fuera.",
+    "problema": "Tienes una bañera de patas con desgaste o golpes. Es una pieza que merece la pena conservar.",
+    "como": [
+      "Revisamos el esmalte, las patas y el metal.",
+      "Reparamos golpes y zonas con óxido.",
+      "Esmaltamos el interior y pintamos el exterior."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Restauráis también las patas?", "r": "Sí. Las limpiamos y pintamos a juego con la bañera." },
+      { "p": "¿Hay que llevarse la bañera?", "r": "No. La restauramos en tu casa siempre que se pueda." }
+    ],
+    "relacionados": ["baneras-completas", "perforadas-y-oxido"],
+    "whatsapp_mensaje": "Hola, tengo una bañera de patas para restaurar. Os mando una foto.",
+    "seo": {
+      "title": "Restaurar bañera de patas en Madrid",
+      "description": "Restauramos bañeras antiguas de patas en tu casa. Manda una foto por WhatsApp y te decimos qué podemos hacer."
+    },
+    "imagen_tarjeta": "banera-patas"
+  },
+  {
+    "slug": "juntas-y-sellado",
+    "nombre": "Juntas y sellado con silicona",
+    "ruta": "/servicios/juntas-y-sellado/",
+    "tipo": "servicio",
+    "orden": 7,
+    "resumen": "Cambiamos la silicona negra y sellamos juntas para que no entre agua.",
+    "problema": "La silicona de tu ducha o bañera está negra o despegada. El agua puede colarse por debajo.",
+    "como": [
+      "Quitamos la silicona vieja y limpiamos la junta.",
+      "Secamos y tratamos la zona contra el moho.",
+      "Sellamos con silicona nueva y un acabado limpio."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Por qué se pone negra la silicona?", "r": "Por la humedad y el moho. La cambiamos y tratamos la junta." },
+      { "p": "¿Lo hacéis junto con otra reparación?", "r": "Sí. Suele hacerse al reparar el plato o la bañera." }
+    ],
+    "relacionados": ["platos-de-ducha", "mamparas", "azulejos"],
+    "whatsapp_mensaje": "Hola, quiero cambiar la silicona de la ducha. Os mando una foto.",
+    "seo": {
+      "title": "Cambiar silicona de ducha y bañera en Madrid",
+      "description": "Quitamos la silicona negra y sellamos tus juntas para que no entre agua. Manda una foto por WhatsApp."
+    },
+    "imagen_tarjeta": "juntas"
+  },
+  {
+    "slug": "mamparas",
+    "nombre": "Reparación de mamparas",
+    "ruta": "/servicios/mamparas/",
+    "tipo": "servicio",
+    "orden": 8,
+    "resumen": "Ajustamos y sellamos tu mampara para que cierre bien y no gotee.",
+    "problema": "Tu mampara gotea, roza o tiene la goma gastada. No siempre hay que cambiarla entera.",
+    "como": [
+      "Revisamos perfiles, gomas y ruedas.",
+      "Cambiamos las piezas gastadas y ajustamos la puerta.",
+      "Sellamos los perfiles contra la pared y el plato."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Cambiáis las gomas de la mampara?", "r": "Sí. Ponemos gomas nuevas para que deje de gotear." },
+      { "p": "¿Arregláis mamparas de cualquier marca?", "r": "Mándanos una foto de la tuya y te decimos si tiene arreglo." }
+    ],
+    "relacionados": ["juntas-y-sellado", "platos-de-ducha"],
+    "whatsapp_mensaje": "Hola, mi mampara gotea o no cierra bien. Os mando una foto.",
+    "seo": {
+      "title": "Reparar mampara de ducha en Madrid",
+      "description": "Ajustamos y sellamos tu mampara para que no gotee. Manda una foto por WhatsApp."
+    },
+    "imagen_tarjeta": "mampara"
+  },
+  {
+    "slug": "marmol-y-piedra",
+    "nombre": "Mármol y piedra",
+    "ruta": "/servicios/marmol-y-piedra/",
+    "tipo": "servicio",
+    "orden": 9,
+    "resumen": "Reparamos y pulimos encimeras, platos y bañeras de mármol o piedra.",
+    "problema": "Tu mármol tiene manchas, golpes o ha perdido el brillo. Se puede recuperar sin cambiar la pieza.",
+    "como": [
+      "Limpiamos y estudiamos la piedra.",
+      "Rellenamos golpes y grietas con masilla a juego.",
+      "Pulimos hasta recuperar el brillo."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Se quitan las manchas del mármol?", "r": "Muchas sí, puliendo la superficie. Mándanos una foto." },
+      { "p": "¿Trabajáis también con piedra natural?", "r": "Sí. Con mármol, granito y otras piedras del baño." }
+    ],
+    "relacionados": ["platos-de-ducha", "azulejos"],
+    "whatsapp_mensaje": "Hola, tengo una pieza de mármol para reparar. Os mando una foto.",
+    "seo": {
+      "title": "Reparar y pulir mármol del baño en Madrid",
+      "description": "Reparamos y pulimos mármol y piedra del baño sin cambiar la pieza. Manda una foto por WhatsApp."
+    },
+    "imagen_tarjeta": "marmol"
+  },
+  {
+    "slug": "hoteles-y-comunidades",
+    "nombre": "Hoteles y comunidades",
+    "ruta": "/hoteles-y-comunidades/",
+    "tipo": "empresas",
+    "orden": 10,
+    "resumen": "Renovamos bañeras y platos de hoteles y comunidades sin cerrar habitaciones.",
+    "problema": "Tienes muchas bañeras o platos gastados. Cambiarlos supone obra y dejar habitaciones cerradas.",
+    "como": [
+      "Vemos contigo cuántas piezas son y su estado.",
+      "Planificamos el trabajo por habitaciones o viviendas.",
+      "Reparamos y esmaltamos sin obras ni escombro."
+    ],
+    "precio_desde": { "valor": null, "confirmado": false },
+    "faqs": [
+      { "p": "¿Trabajáis por fases?", "r": "Sí. Organizamos el trabajo para que sigas funcionando." },
+      { "p": "¿Hacéis presupuesto para varias piezas?", "r": "Sí. Cuéntanos cuántas bañeras o platos son y cuándo." }
+    ],
+    "relacionados": ["baneras-completas", "platos-de-ducha", "juntas-y-sellado"],
+    "whatsapp_mensaje": "Hola, escribo de un hotel o comunidad. Queremos renovar varias bañeras o platos.",
+    "seo": {
+      "title": "Esmaltado de bañeras para hoteles y comunidades en Madrid",
+      "description": "Renovamos bañeras y platos de hoteles y comunidades sin cerrar habitaciones. Escríbenos por WhatsApp."
+    },
+    "imagen_tarjeta": "hoteles"
+  }
+]
