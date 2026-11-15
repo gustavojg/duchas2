@@ -1,0 +1,104 @@
+{
+  "temas": [
+    {
+      "tema": "El plato de ducha",
+      "preguntas": [
+        {
+          "p": "¿Mi plato de ducha recupera el brillo?",
+          "r": "Sí. Al esmaltarlo queda liso y brillante, como nuevo.",
+          "en_portada": true
+        },
+        {
+          "p": "¿Puedo cambiar el color del plato?",
+          "r": "Sí. Elige el color y lo esmaltamos entero en ese tono.",
+          "en_portada": false
+        },
+        {
+          "p": "¿Qué materiales de plato reparáis?",
+          "r": "Depende del material y del daño. Mándanos una foto y te lo decimos.",
+          "en_portada": true
+        },
+        {
+          "p": "¿Podéis hacer que el plato no resbale?",
+          "r": "Sí. Aplicamos un acabado antideslizante que se limpia igual de fácil.",
+          "en_portada": false
+        },
+        {
+          "p": "¿Tengo que quitar el plato para repararlo?",
+          "r": "No. Lo reparamos en su sitio, sin levantar azulejos.",
+          "en_portada": false
+        },
+        {
+          "p": "¿También reparáis bañeras antiguas?",
+          "r": "Sí. Restauramos bañeras antiguas, también las de patas.",
+          "en_portada": false
+        }
+      ]
+    },
+    {
+      "tema": "Daños y reparaciones",
+      "preguntas": [
+        {
+          "p": "Tengo un golpe o un desconchón. ¿Qué hago?",
+          "r": "Arréglalo pronto. Por el desconchón entra el agua y acaba filtrando.",
+          "en_portada": true
+        },
+        {
+          "p": "¿Qué hago con el óxido o las manchas junto al desagüe?",
+          "r": "Limpiamos el óxido, tratamos la base y esmaltamos la zona.",
+          "en_portada": false
+        },
+        {
+          "p": "Mi plato tiene un agujero. ¿Tiene arreglo?",
+          "r": "Muchas veces sí. No esperes: el agua puede filtrar al vecino de abajo.",
+          "en_portada": false
+        },
+        {
+          "p": "¿Quitáis el moho de las juntas del plato?",
+          "r": "Sí. Quitamos la junta con moho y ponemos una nueva.",
+          "en_portada": false
+        }
+      ]
+    },
+    {
+      "tema": "Plazos, presupuesto y garantía",
+      "preguntas": [
+        {
+          "p": "¿Cuánto dura la reparación?",
+          "r": "{reparacion}. La hacemos en tu baño, en una sola visita.",
+          "en_portada": true
+        },
+        {
+          "p": "¿Cuándo puedo volver a usar la ducha?",
+          "r": "{uso_ducha}. Antes, el esmalte tiene que secar bien.",
+          "en_portada": false
+        },
+        {
+          "p": "¿Cuánto cuesta el presupuesto?",
+          "r": "{presupuesto}. Mándanos una foto del daño y te lo preparamos.",
+          "en_portada": false
+        },
+        {
+          "p": "¿Qué garantía dais?",
+          "r": "{garantia}. Te la entregamos al terminar el trabajo.",
+          "en_portada": false
+        }
+      ]
+    },
+    {
+      "tema": "Tu foto y el contacto",
+      "preguntas": [
+        {
+          "p": "¿Qué pasa con la foto que os mando?",
+          "r": "Solo la vemos nosotros. Se borra a los {retencion_dias} días.",
+          "en_portada": false
+        },
+        {
+          "p": "¿Cuándo me respondéis?",
+          "r": "{respuesta}. Te contestamos por WhatsApp o por teléfono.",
+          "en_portada": false
+        }
+      ]
+    }
+  ]
+}
