@@ -107,6 +107,13 @@
   min-inline-size: 0;
 }
 
+/* En un tercio de 360 la cinta «ILUSTRACIÓN» no cabe entera: parte la palabra antes que desbordar la fila. */
+.portada-miniatura .cinta-etiqueta {
+  max-inline-size: 100%;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
 /* CTA secundario del antes/después: ancho completo (Button width="100%" pintaría estilo en línea). */
 .portada-cta {
   inline-size: 100%;
