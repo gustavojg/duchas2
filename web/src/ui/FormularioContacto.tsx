@@ -240,7 +240,8 @@ export function FormularioContacto({
         <CheckboxInput
           label="He leído y acepto la política de privacidad"
           htmlName="privacidad"
-          isRequired
+          // Sin isRequired: su marca «∙ Obligatorio» se separa de la casilla a 360 px. Lo exige zod (MENSAJES.privacidad);
+          // CheckboxInput no deja poner aria-required sin pintar la marca.
           value={valores.privacidad}
           onChange={(v) => onCambio('privacidad', v)}
           status={errores.privacidad ? { type: 'error', message: errores.privacidad } : undefined}

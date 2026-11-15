@@ -61,6 +61,14 @@ describe('FormularioContacto (inicial)', () => {
     expect(html).toContain('href="/privacidad/"');
   });
 
+  it('casilla de privacidad sin la marca «Obligatorio» de Astryx (a 360 px queda suelta): avisa MENSAJES.privacidad', () => {
+    const i = html.indexOf('name="privacidad"');
+    const etiqueta = html.slice(i, html.indexOf('href="/privacidad/"', i));
+    expect(etiqueta).toContain('He leído y acepto la política de privacidad');
+    expect(texto(etiqueta)).not.toContain('Obligatorio');
+    expect(texto(etiqueta)).not.toContain('∙');
+  });
+
   it('honeypot `web` oculto con clase, aria-hidden y tabindex -1; pagina_origen oculto', () => {
     expect(html).toMatch(/<input[^>]*name="web"[^>]*>/);
     const trampa = /<input[^>]*name="web"[^>]*>/.exec(html)![0];
