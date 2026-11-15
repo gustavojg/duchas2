@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { LEGALES } from '../config';
@@ -59,5 +61,22 @@ describe('PieSitio', () => {
     const numeros = [...html.matchAll(TELEFONO)].map((m) => nueve(m[0]));
     expect(numeros.length).toBeGreaterThan(0);
     expect(new Set(numeros)).toEqual(new Set([nueve(negocio.telefono.valor!)]));
+  });
+});
+
+describe('.pie-sitio', () => {
+  it('el VStack raíz lleva la clase y la regla de columna usa solo tokens', () => {
+    expect(pinta()).toMatch(/^<[a-z]+ [^>]*class="[^"]*\bpie-sitio\b[^"]*"/);
+    const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+    const regla = /\.pie-sitio\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(regla).toMatch(/box-sizing:\s*border-box/);
+    expect(regla).toMatch(/inline-size:\s*100%/);
+    expect(regla).toMatch(/max-inline-size:\s*var\(--measure\)/);
+    expect(regla).toMatch(/margin-inline:\s*auto/);
+    expect(regla).toMatch(/padding-inline:\s*var\(--spacing-4\)/);
+    expect(regla).toMatch(/padding-block:\s*var\(--spacing-6\)/);
+    for (const decl of regla.split(';').map((d) => d.trim()).filter(Boolean)) {
+      expect(decl).toMatch(/^[a-z-]+:\s*(var\(--[a-z0-9-]+\)|auto|100%|border-box)$/);
+    }
   });
 });

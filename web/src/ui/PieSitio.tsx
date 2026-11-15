@@ -24,7 +24,8 @@ export interface PieSitioProps {
 /**
  * Pie del sitio (brain/design.md § Portada, 12): marca, contacto (el teléfono único de negocio.json, tal cual),
  * horario si está confirmado, servicios, legales y la retención de la foto. Composición registrada en
- * docs/astryx-componentes.md: VStack/HStack + Heading + Text + Link; sin CSS propio.
+ * docs/astryx-componentes.md: VStack/HStack + Heading + Text + Link; la columna la da `.pie-sitio` de
+ * globals.css (solo tokens).
  */
 export function PieSitio({ negocio, config, modo, legales, servicios }: PieSitioProps) {
   const marca = negocio.marca.valor ?? APP_NAME;
@@ -32,7 +33,7 @@ export function PieSitio({ negocio, config, modo, legales, servicios }: PieSitio
   const whatsapp = negocio.whatsapp.valor;
   const horario = texto(negocio.horario, modo);
   return (
-    <VStack gap={4}>
+    <VStack gap={4} className="pie-sitio">
       <HStack gap={8} wrap="wrap">
         <VStack gap={2}>
           <Heading level={2}>{marca}</Heading>
