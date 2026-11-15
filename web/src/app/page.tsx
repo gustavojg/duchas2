@@ -7,12 +7,13 @@ import { type ConfigFormulario, configFormulario } from '../lib/config';
 import { cargarNegocio, type Negocio } from '../lib/content';
 import { type Modo, modoActual } from '../lib/dato';
 import { DESCRIPTION } from '../lib/site';
-import { anios, garantia, titularPortada } from '../lib/textos';
+import { anios, garantia, respuesta, titularPortada } from '../lib/textos';
 import { MENSAJE_PORTADA, telLink } from '../lib/whatsapp';
 import { PlatoPartido } from '../ui/art';
 import { BotonLlamar } from '../ui/BotonLlamar';
 import { BotonWhatsApp } from '../ui/BotonWhatsApp';
 import { CintaEtiqueta } from '../ui/CintaEtiqueta';
+import { EnviarContacto } from '../ui/EnviarContacto';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 
 export interface PortadaProps {
@@ -24,8 +25,8 @@ export interface PortadaProps {
 /**
  * Portada `/` (brain/design.md § Portada): hero con cinta, H1 de beneficio, subtítulo, la acción principal
  * (WhatsApp) + «Llamar» con la retención de la foto junto al botón, y el plato partido; debajo, la franja de
- * confianza. Los botones van antes de la ilustración para que en 360 × 740 se vean sin scroll. Todos los
- * plazos y cifras salen de textos.ts con el contenido que recibe por props (los tests inyectan el suyo).
+ * confianza y, al final, el formulario de contacto. Los botones van antes de la ilustración para que en
+ * 360 × 740 se vean sin scroll. Todos los plazos y cifras salen de textos.ts con el contenido que recibe por props (los tests inyectan el suyo).
  */
 export function Portada({ negocio, config, modo }: PortadaProps) {
   const whatsapp = negocio.whatsapp.valor;
@@ -60,6 +61,22 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
         ]}
         anios={anios(negocio.anios, modo)}
       />
+      {/*
+       * Formulario al final (brain/design.md § Portada, 11). Excepción aceptada por la spec: su «Enviar petición»
+       * es el segundo primario de la portada; el flotante se oculta mientras se ve este o el del hero.
+       */}
+      <VStack gap={4} as="section" aria-labelledby="portada-formulario">
+        <Heading level={2} id="portada-formulario">
+          Mándanos una foto
+        </Heading>
+        <EnviarContacto
+          config={{ retencion_dias: config.retencion_dias, foto_max_mb: config.foto_max_mb }}
+          whatsapp={whatsapp}
+          telefono={telefono}
+          plazoRespuesta={respuesta(negocio.plazos.respuesta, modo)}
+          mensajeWhatsApp={MENSAJE_PORTADA}
+        />
+      </VStack>
     </VStack>
   );
 }

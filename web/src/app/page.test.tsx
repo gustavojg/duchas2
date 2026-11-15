@@ -65,17 +65,33 @@ describe('portada con contenido sin confirmar (modo público)', () => {
     expect(texto).not.toMatch(/PENDIENTE|\{\{|\b0 años|años reparando/);
   });
 
-  it('un solo botón primario (WhatsApp) y la retención con el número de config', () => {
-    expect(html.match(/data-variant="primary"/g)).toHaveLength(1);
-    expect(html).toMatch(/data-variant="primary"[^>]*href="https:\/\/wa\.me\//);
+  it('dos primarios, excepción aceptada solo en la portada: WhatsApp del hero y el submit del formulario', () => {
+    // brain/design.md pide uno por pantalla; la spec acepta estos dos porque el formulario va al final y el
+    // botón flotante se oculta mientras se ve cualquiera de los dos.
+    const primarios = [...html.matchAll(/<(a|button)\b[^>]*data-variant="primary"[^>]*>/g)].map((m) => m[0]);
+    expect(primarios).toHaveLength(2);
+    expect(primarios[0]).toMatch(/href="https:\/\/wa\.me\//);
+    expect(primarios[1]).toMatch(/type="submit"/);
+    expect(primarios[1]).toContain('id="enviar-peticion"');
     expect(texto).toContain('Tu foto solo la vemos nosotros y se borra a los 90 días');
     const otra = textoPlano(pinta(negocio, { ...config, retencion_dias: 30 }));
     expect(otra).toContain('se borra a los 30 días');
   });
 
+  it('el formulario va al final, después del CTA del hero, con su H2', () => {
+    const cta = html.indexOf('Manda la foto por WhatsApp');
+    const form = html.indexOf('name="telefono"');
+    expect(cta).toBeGreaterThan(-1);
+    expect(form).toBeGreaterThan(cta);
+    expect(form).toBeGreaterThan(html.indexOf('Sin obras ni polvo'));
+    expect(html).toMatch(/<h2[^>]*>(?:(?!<\/h2>).)*Mándanos una foto(?:(?!<\/h2>).)*<\/h2>/s);
+    expect(texto).toContain('Guardamos tu foto 90 días');
+  });
+
   it('sin estilos sueltos ni hex', () => {
     expect(html).not.toContain('<style');
-    expect(html).not.toContain('style=');
+    // El CheckboxInput de Astryx pinta este estilo en línea (StyleX, centrado del input); no es nuestro.
+    expect(html.replaceAll('style="--x-transform:translate(-50%, -50%)"', '')).not.toContain('style=');
     expect(html).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
 
