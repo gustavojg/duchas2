@@ -145,6 +145,16 @@ describe('TablaRepararCambiar', () => {
     sinEstilos(html);
   });
 
+  it('ninguna celda de cabecera queda vacía y la primera es «Concepto»', () => {
+    const html = renderToStaticMarkup(
+      <TablaRepararCambiar filas={filasComparativa(comparativa, 'publico')} fuente={comparativa.fuente} conCoste={false} />,
+    );
+    const ths = [...html.matchAll(/<th\b[^>]*>((?:(?!<\/th>).)*)<\/th>/gs)].map((m) => textoPlano(m[1]).trim());
+    expect(ths.length).toBeGreaterThan(0);
+    for (const t of ths) expect(t).not.toBe('');
+    expect(ths[0]).toContain('Concepto');
+  });
+
   it('con el coste confirmado muestra la cifra en mono y la fuente', () => {
     const c = structuredClone(comparativa);
     c.filas[0].reparar = { valor: 'Desde 150 €', confirmado: true };

@@ -24,7 +24,7 @@ export function TablaRepararCambiar({ filas, fuente, conCoste }: TablaRepararCam
       <Table dividers="rows" verticalAlign="top">
         <TableHeader>
           <TableRow>
-            <TableHeaderCell>{''}</TableHeaderCell>
+            <TableHeaderCell>Concepto</TableHeaderCell>
             <TableHeaderCell className="tabla-cabecera-reparar">Reparar</TableHeaderCell>
             <TableHeaderCell>Cambiar</TableHeaderCell>
           </TableRow>
