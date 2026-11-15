@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contactoSchema, erroresPorCampo, MENSAJES, normalizarTelefono, PIEZAS } from './contacto.ts';
+import { contactoSchema, erroresPorCampo, fotoDemasiadoGrande, MENSAJES, normalizarTelefono, PIEZAS } from './contacto.ts';
 
 const base = { nombre: 'Marta', telefono: '612345678', pieza: 'plato_ducha', privacidad: 'on' };
 
@@ -85,5 +85,12 @@ describe('contactoSchema', () => {
     expect(errores({ ...base, dano: 'a'.repeat(101) }).dano).toBe(MENSAJES.dano);
     expect(errores({ ...base, pagina_origen: 'a'.repeat(301) })).toHaveProperty('pagina_origen');
     expect(contactoSchema.safeParse({ ...base, nombre: 'a'.repeat(100), zona: 'a'.repeat(100), mensaje: 'a'.repeat(2000) }).success).toBe(true);
+  });
+});
+
+describe('textos de la foto', () => {
+  it('siguen brain/design.md', () => {
+    expect(fotoDemasiadoGrande(10)).toBe('La foto pesa más de 10 MB; prueba con otra o envíala por WhatsApp');
+    expect(MENSAJES.foto_tipo).toBe('Solo se admiten fotos (JPG, PNG, WebP o HEIC)');
   });
 });

@@ -2,6 +2,7 @@ import { Hono, type Context } from 'hono';
 import type { DatabaseSync } from 'node:sqlite';
 import type { Config } from './config.js';
 import type { Mailer } from './mailer.js';
+import { contactoRoutes } from './routes/contacto.js';
 import { mountWeb } from './web.js';
 import { APP_NAME } from '../web/src/lib/site.js';
 import type { ConfigFormulario } from '../web/src/lib/config.js';
@@ -30,6 +31,7 @@ export function createApp(deps: Deps): Hono {
   app.get('/health', (c) => c.json({ ok: true, app: APP_NAME }));
 
   // Rutas de la API aquí, un módulo por recurso: app.route('/api/<recurso>', <recurso>Routes(deps)).
+  app.route('/api/contacto', contactoRoutes(deps));
   app.all('/api/*', (c) => c.json({ error: 'not_found' }, 404));
 
   // El frontend estático va el último: captura todo lo que no sea /health ni /api.

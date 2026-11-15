@@ -18,7 +18,11 @@ export const MENSAJES = {
   mensaje: 'El mensaje es demasiado largo; resúmelo un poco.',
   pagina_origen: 'La página de origen es demasiado larga.',
   privacidad: 'Marca la casilla de privacidad para enviar.',
+  foto_tipo: 'Solo se admiten fotos (JPG, PNG, WebP o HEIC)',
 } as const;
+
+/** Texto del 413 (brain/design.md §Errores) con el límite de foto_max_mb de web/content/config.json. */
+export const fotoDemasiadoGrande = (mb: number) => `La foto pesa más de ${mb} MB; prueba con otra o envíala por WhatsApp`;
 
 /** Quita espacios, puntos y guiones; admite +34/0034. Devuelve +34XXXXXXXXX (9 cifras, empieza por 6-9) o null. */
 export function normalizarTelefono(raw: string): string | null {
