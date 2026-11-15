@@ -14,7 +14,7 @@ export const DESCRIPTION =
   'Lo esmaltamos en tu baño, sin polvo y con garantía por escrito. Mándanos una foto y te decimos si tiene arreglo.';
 
 /** Rutas públicas que se exportan como página y van al sitemap (con barra final: trailingSlash). */
-export const PAGES: readonly string[] = ['/'];
+export const PAGES: readonly string[] = ['/', '/zonas/'];
 
 export function sitemapXml(baseUrl: string, pages: readonly string[] = PAGES): string {
   const urls = pages.map((p) => `  <url><loc>${baseUrl}${p}</loc></url>`).join('\n');

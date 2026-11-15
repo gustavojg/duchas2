@@ -4,23 +4,55 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { APP_NAME, NAV } from '../config';
 import { configFormulario } from '../lib/config';
-import { cargarNegocio, type Negocio } from '../lib/content';
-import { DESCRIPTION } from '../lib/site';
+import {
+  cargarComparativa,
+  cargarNegocio,
+  cargarPasos,
+  cargarServicios,
+  cargarZonas,
+  type Comparativa,
+  type Negocio,
+  type Servicio,
+} from '../lib/content';
+import { DESCRIPTION, PAGES } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
-import { Portada } from './page';
+import { Portada, type PortadaProps } from './page';
+import { metadata as metadataZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
 const config = configFormulario({});
+const servicios = cargarServicios();
+const pasos = cargarPasos();
+const comparativa = cargarComparativa();
+const zonas = cargarZonas();
 const llamar = { href: telLink(negocio.telefono.valor!), etiqueta: 'Llamar' };
 
-const pinta = (n: Negocio, c = config) =>
+const contenido = { servicios, pasos, comparativa, zonas };
+type Contenido = Partial<Omit<PortadaProps, 'negocio' | 'config' | 'modo'>>;
+
+const pinta = (n: Negocio, c = config, otro: Contenido = {}) =>
   renderToStaticMarkup(
     <Frame brand={APP_NAME} nav={NAV} llamar={llamar}>
-      <Portada negocio={n} config={c} modo="publico" />
+      <Portada negocio={n} config={c} modo="publico" {...contenido} {...otro} />
     </Frame>,
   );
+
+/**
+ * Estilos en línea que no son el del contenedor de scroll de Table de Astryx, que siempre pinta
+ * `style="--x-overflowX:clip;--x-overflowY:clip;overscroll-behavior-x:auto"` (no lo escribe nuestro código).
+ */
+const estilosEnLinea = (html: string) =>
+  [...html.matchAll(/<[^>]*\bstyle="([^"]*)"[^>]*>/g)]
+    .filter(
+      ([tag, decl]) =>
+        !(
+          /class="astryx-table-scroll-wrapper\b/.test(tag) &&
+          decl.split(';').every((d) => /^(--x-overflow[XY]:clip|overscroll-behavior-[xy]:auto)$/.test(d))
+        ),
+    )
+    .map((m) => m[0]);
 
 const h1 = (html: string) => /<h1[^>]*>((?:(?!<\/h1>).)*)<\/h1>/s.exec(html)?.[1].replace(/<[^>]+>/g, '') ?? '';
 const textoPlano = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
@@ -75,12 +107,12 @@ describe('portada con contenido sin confirmar (modo público)', () => {
 
   it('sin estilos sueltos ni hex', () => {
     expect(html).not.toContain('<style');
-    expect(html).not.toContain('style=');
+    expect(estilosEnLinea(html)).toEqual([]);
     expect(html).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
 
   it('todo el contenido, franja incluida, va dentro del contenedor con margen lateral `portada`', () => {
-    const portada = renderToStaticMarkup(<Portada negocio={negocio} config={config} modo="publico" />);
+    const portada = renderToStaticMarkup(<Portada negocio={negocio} config={config} modo="publico" {...contenido} />);
     expect(portada).toMatch(/^<[a-z]+ [^>]*class="[^"]*\bportada\b[^"]*"/);
     const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
     const regla = /\.portada\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
@@ -110,6 +142,130 @@ describe('portada con plazos, garantía y años confirmados', () => {
     expect(texto).toContain('Garantía por escrito de 2 años');
     expect(texto).toContain('15 años reparando baños');
     expect(texto).not.toMatch(/PENDIENTE|\{\{/);
+  });
+});
+
+const h2s = (html: string) => [...html.matchAll(/<h2[^>]*>((?:(?!<\/h2>).)*)<\/h2>/gs)].map((m) => m[1].replace(/<[^>]+>/g, ''));
+const tarjetas = (html: string) =>
+  [...html.matchAll(/class="[^"]*\bastryx-clickable-card\b[^"]*"[^>]*><a aria-label="([^"]*)"[^>]*href="([^"]*)"/g)].map((m) => ({
+    nombre: m[1],
+    href: m[2],
+  }));
+/** Trozo del HTML entre dos H2 (la sección que empieza en `desde`). */
+const seccion = (html: string, desde: string, hasta: string) => {
+  const inicio = html.indexOf(`>${desde}</h2>`);
+  return html.slice(inicio, html.indexOf(`>${hasta}</h2>`, inicio));
+};
+
+describe('portada: módulos tras la franja de confianza', () => {
+  const html = pinta(negocio);
+  const texto = textoPlano(html);
+
+  it('los H2 van en el orden de design.md y después de la franja', () => {
+    expect(h2s(html)).toEqual(['¿Reparar o cambiar?', 'Cómo trabajamos', 'Servicios', 'Precios orientativos', 'Zonas']);
+    const franja = html.indexOf('aria-label="Nuestros compromisos"');
+    expect(franja).toBeGreaterThan(0);
+    expect(html.indexOf('>¿Reparar o cambiar?<')).toBeGreaterThan(franja);
+  });
+
+  it('una tarjeta por servicio, el plato primero y Hoteles al final, cada una a su ruta', () => {
+    const t = tarjetas(html);
+    expect(t).toHaveLength(servicios.length);
+    expect(t[0].nombre).toBe('Reparación y esmaltado de platos de ducha');
+    expect(t.at(-1)!.nombre).toBe('Hoteles y comunidades');
+    const rutas = new Map(servicios.map((s) => [s.nombre, s.ruta]));
+    for (const { nombre, href } of t) expect(href).toBe(rutas.get(nombre));
+  });
+
+  it('un servicio nuevo en el contenido aparece sin tocar componentes', () => {
+    const nuevo: Servicio = {
+      ...structuredClone(servicios[1]),
+      slug: 'lavabos',
+      nombre: 'Reparación de lavabos',
+      ruta: '/servicios/lavabos/',
+      orden: 11,
+    };
+    const t = tarjetas(pinta(negocio, config, { servicios: [...servicios, nuevo] }));
+    expect(t).toHaveLength(11);
+    expect(t).toContainEqual({ nombre: 'Reparación de lavabos', href: '/servicios/lavabos/' });
+  });
+
+  it('los pasos sin plazos confirmados usan los textos sin plazo; con plazos, los plazos', () => {
+    expect(texto).toContain('Presupuesto gratuito y sin compromiso');
+    expect(texto).toContain('Reparación sin obras ni polvo');
+    const n: Negocio = structuredClone(negocio);
+    n.plazos.presupuesto = { valor: 'en 24 h', confirmado: true };
+    n.plazos.reparacion = { valor: 'en unas horas', confirmado: true };
+    const otro = textoPlano(pinta(n));
+    expect(otro).toContain('Presupuesto gratuito en 24 h');
+    expect(otro).toContain('Reparación en unas horas');
+  });
+
+  it('la tabla sin cifras confirmadas no habla de coste; con el coste confirmado, sí', () => {
+    expect(texto).not.toContain('Coste');
+    expect(texto).not.toContain('865');
+    const c: Comparativa = structuredClone(comparativa);
+    c.filas[0].reparar = { valor: 'Desde 150 €', confirmado: true };
+    c.filas[0].cambiar = { valor: '865-1.200 €', confirmado: true };
+    const otro = textoPlano(pinta(negocio, config, { comparativa: c }));
+    expect(otro).toContain('Coste');
+    expect(otro).toContain('865-1.200 €');
+  });
+
+  it('sin precios confirmados: «Pide presupuesto gratuito» y WhatsApp secundario; con uno, «Desde X €»', () => {
+    const precios = seccion(html, 'Precios orientativos', 'Zonas');
+    expect(textoPlano(precios)).toContain('Pide presupuesto gratuito');
+    expect(precios).toMatch(/<a[^>]*data-variant="secondary"[^>]*href="https:\/\/wa\.me\//);
+    const s = structuredClone(servicios);
+    s[0].precio_desde = { valor: 90, confirmado: true };
+    const otro = textoPlano(seccion(pinta(negocio, config, { servicios: s }), 'Precios orientativos', 'Zonas'));
+    expect(otro).toContain(s[0].nombre);
+    expect(otro).toContain('Desde 90 €');
+    expect(otro).not.toContain(s[1].nombre);
+  });
+
+  it('sigue habiendo un solo primario y nada pendiente ni hex', () => {
+    expect(html.match(/data-variant="primary"/g)).toHaveLength(1);
+    expect(texto).not.toMatch(/PENDIENTE|\{\{/);
+    expect(html).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+  });
+
+  it('cierra con las zonas y «¿No ves tu zona? Pregúntanos por WhatsApp»', () => {
+    expect(texto).toContain('¿No ves tu zona? Pregúntanos por WhatsApp');
+    for (const z of [...zonas.madrid_capital, ...zonas.municipios]) expect(texto).toContain(z);
+  });
+});
+
+describe('página /zonas/', () => {
+  const html = renderToStaticMarkup(
+    <Frame brand={APP_NAME} nav={NAV} llamar={llamar}>
+      <Zonas negocio={negocio} zonas={zonas} />
+    </Frame>,
+  );
+  const texto = textoPlano(html);
+
+  it('un único H1, todos los distritos y municipios y un solo primario de WhatsApp', () => {
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(h1(html)).toBe('Zonas donde reparamos en Madrid');
+    for (const z of [...zonas.madrid_capital, ...zonas.municipios]) expect(texto).toContain(z);
+    expect(texto).toContain('¿No ves tu zona? Pregúntanos por WhatsApp');
+    expect(html.match(/data-variant="primary"/g)).toHaveLength(1);
+    expect(html).toMatch(/data-variant="primary"[^>]*href="https:\/\/wa\.me\/\d+\?text=Hola%2C%20vivo%20en/);
+    expect(texto).not.toMatch(/PENDIENTE|\{\{/);
+    expect(estilosEnLinea(html)).toEqual([]);
+  });
+
+  it('va dentro del contenedor `portada` y tiene metadatos propios sin plazos', () => {
+    const vista = renderToStaticMarkup(<Zonas negocio={negocio} zonas={zonas} />);
+    expect(vista).toMatch(/^<[a-z]+ [^>]*class="[^"]*\bportada\b[^"]*"/);
+    expect(String(metadataZonas.title)).toMatch(/[Zz]onas/);
+    expect(String(metadataZonas.description)).toMatch(/Madrid/);
+    expect(`${metadataZonas.title} ${metadataZonas.description}`).not.toMatch(/\d+\s*(h|horas|días|años)\b|en el día|en unas horas|PENDIENTE/);
+  });
+
+  it('está en la navegación y en las páginas públicas', () => {
+    expect(NAV).toContainEqual({ href: '/zonas/', label: 'Zonas' });
+    expect(PAGES).toContain('/zonas/');
   });
 });
 
