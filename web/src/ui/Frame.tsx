@@ -1,4 +1,5 @@
 import { AppShell } from '@astryxdesign/core/AppShell';
+import { HStack } from '@astryxdesign/core/HStack';
 import { InternationalizationProvider } from '@astryxdesign/core/i18n';
 import { Layout, LayoutFooter } from '@astryxdesign/core/Layout';
 import esES from '@astryxdesign/core/locales/es-ES.generated.js';
@@ -6,6 +7,7 @@ import { Theme } from '@astryxdesign/core/theme';
 import { TopNav, TopNavHeading } from '@astryxdesign/core/TopNav';
 import { neutralTheme } from '@astryxdesign/theme-neutral/built';
 import type { ReactNode } from 'react';
+import { BotonLlamar } from './BotonLlamar';
 import { Nav, type NavItem } from './Nav';
 
 /**
@@ -21,24 +23,33 @@ export interface FrameProps {
   nav?: NavItem[];
   /** Quién está dentro y sus acciones (p. ej. nombre + botón salir). Vacío en páginas públicas. */
   who?: ReactNode;
+  /** Botón «Llamar» de la cabecera fija (secundario, con icono). `href` sale de telLink(); sin él no se pinta. */
+  llamar?: { href: string; etiqueta: string };
   footer?: ReactNode;
   children: ReactNode;
 }
 
-export function Frame({ brand, brandHref = '/', nav, who, footer, children }: FrameProps) {
+export function Frame({ brand, brandHref = '/', nav, who, llamar, footer, children }: FrameProps) {
+  const end =
+    llamar || who ? (
+      <HStack gap={2} vAlign="center">
+        {llamar ? <BotonLlamar {...llamar} /> : null}
+        {who}
+      </HStack>
+    ) : undefined;
   const topNav = (
     <TopNav
       label="Principal"
       heading={<TopNavHeading heading={brand} headingHref={brandHref} />}
       startContent={nav?.length ? <Nav items={nav} /> : undefined}
-      endContent={who}
+      endContent={end}
     />
   );
   return (
     <InternationalizationProvider locale="es-ES" messages={{ 'es-ES': esES }}>
       <Theme theme={neutralTheme}>
         <AppShell height="auto" topNav={topNav}>
-          {/* Sin contentWidth: Layout lo pasaría como style="--…" en línea. */}
+          {/* Sin contentWidth: Layout lo pasaría como estilo en línea con una variable CSS. */}
           <Layout height="auto" footer={footer ? <LayoutFooter hasDivider>{footer}</LayoutFooter> : undefined}>
             {children}
           </Layout>

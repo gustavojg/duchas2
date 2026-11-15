@@ -1,0 +1,26 @@
+{
+  "marca": { "valor": "Duchas 2", "confirmado": false },
+  "telefono": { "valor": "+34 600 000 000", "confirmado": false },
+  "whatsapp": { "valor": "+34 600 000 000", "confirmado": false },
+  "email": { "valor": null, "confirmado": false },
+  "email_destino": { "valor": null, "confirmado": false },
+  "horario": { "valor": null, "confirmado": false },
+  "legal": {
+    "razon_social": { "valor": null, "confirmado": false },
+    "nif": { "valor": null, "confirmado": false },
+    "domicilio": { "valor": null, "confirmado": false }
+  },
+  "anios": { "valor": null, "confirmado": false },
+  "garantia": {
+    "anios": { "valor": null, "confirmado": false },
+    "condiciones": { "valor": null, "confirmado": false }
+  },
+  "plazos": {
+    "presupuesto": { "valor": null, "confirmado": false },
+    "respuesta": { "valor": null, "confirmado": false },
+    "reparacion": { "valor": null, "confirmado": false },
+    "uso_ducha": { "valor": null, "confirmado": false }
+  },
+  "url_base": "http://localhost:3000",
+  "analitica": { "ga4_id": null }
+}

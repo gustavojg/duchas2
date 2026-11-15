@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME, TAGLINE } from '../../web/src/lib/site.js';
+import { APP_NAME } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -17,12 +17,26 @@ describe('web/out servido por Hono', () => {
     const res = await app.request('/');
     expect(res.status).toBe(200);
     const html = await res.text();
-    const tagline = TAGLINE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    expect(html).toMatch(new RegExp(`<h1[^>]*>(?:(?!</h1>).)*${tagline}`, 's'));
+    expect(html).toMatch(/<h1[^>]*>(?:(?!<\/h1>).)*plato de ducha se repara/s);
     expect(html).toContain(APP_NAME);
     expect(html).toMatch(/<main[\s>]|role="main"/);
     expect(html).toMatch(/<nav[^>]*aria-label="[^"]+"/);
     expect(html).toContain('data-astryx-theme="neutral"');
+  });
+
+  it('el HTML público no muestra datos pendientes ni cifras vacías', () => {
+    // Sin <script>: el payload RSC lleva el catálogo i18n de Astryx, cuyas plantillas ICU usan «{{».
+    const html = fs.readFileSync(path.join(webDir, 'index.html'), 'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+    expect(html).toContain('Garantía por escrito');
+    expect(html).not.toContain('PENDIENTE');
+    expect(html).not.toContain('{{');
+    expect(html).not.toMatch(/\b0 años/);
+  });
+
+  it('la portada enlaza a WhatsApp y al teléfono', () => {
+    const html = fs.readFileSync(path.join(webDir, 'index.html'), 'utf8');
+    expect(html).toMatch(/href="https:\/\/wa\.me\/\d+\?text=/);
+    expect(html).toMatch(/href="tel:\+34\d{9}"/);
   });
 
   it('enlaza CSS de /_next/static servido con caché immutable', async () => {
