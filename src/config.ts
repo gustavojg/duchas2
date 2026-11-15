@@ -13,7 +13,7 @@ const Env = z.object({
   BASE_URL: z.string().url().default('http://127.0.0.1:3000'),
   MAIL_TRANSPORT: z.enum(['file', 'smtp']).default('file'),
   SMTP_URL: z.string().optional(),
-  MAIL_FROM: z.string().default('factory <no-reply@localhost>'),
+  MAIL_FROM: z.string().default('duchas2 <no-reply@localhost>'),
 });
 
 export interface Config {
