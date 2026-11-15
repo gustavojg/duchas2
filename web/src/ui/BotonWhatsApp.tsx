@@ -6,7 +6,7 @@ import type { SVGProps } from 'react';
 import { esNumeroValido, waLink } from '../lib/whatsapp';
 
 /** Glifo propio de WhatsApp (bocadillo con auricular), en currentColor: blanco sobre el botón de marca. */
-function GlifoWhatsApp(props: SVGProps<SVGSVGElement>) {
+export function GlifoWhatsApp(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden {...props}>
       <path d="M4 20 l1.3 -3.9 A8 8 0 1 1 8 18.8 z" />
@@ -22,19 +22,22 @@ export interface BotonWhatsAppProps {
   mensaje: string;
   /** Texto del botón (p. ej. «Manda la foto por WhatsApp»). */
   etiqueta: string;
+  /** Primario por defecto, solo en la acción principal de la pantalla (hero); el resto, secondary (p. ej. junto a «Enviar petición»). */
+  variante?: 'primary' | 'secondary';
 }
 
 /**
  * La acción principal del producto: Button primario de Astryx con glifo, enlazado a wa.me con waLink().
  * Tamaño lg: su alto sale del token --size-element-lg, que globals.css fija en var(--spacing-12) (≥ 44 px).
- * Es el único Button primario de cada pantalla. Cliente porque Icon de Astryx lo es y recibe el glifo como
- * componente. No se pinta si el número no es válido (esNumeroValido): devuelve null antes de llamar a waLink().
+ * La variante primary es el único Button primario de cada pantalla; los demás WhatsApp van en secondary. Cliente
+ * porque Icon de Astryx lo es y recibe el glifo como componente. No se pinta si el número no es válido
+ * (esNumeroValido): devuelve null antes de llamar a waLink().
  */
-export function BotonWhatsApp({ numero, mensaje, etiqueta }: BotonWhatsAppProps) {
+export function BotonWhatsApp({ numero, mensaje, etiqueta, variante = 'primary' }: BotonWhatsAppProps) {
   if (!esNumeroValido(numero)) return null;
   return (
     <Button
-      variant="primary"
+      variant={variante}
       size="lg"
       label={etiqueta}
       href={waLink(numero, mensaje)}
