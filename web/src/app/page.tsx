@@ -20,12 +20,13 @@ import {
 } from '../lib/content';
 import { type Modo, modoActual } from '../lib/dato';
 import { DESCRIPTION } from '../lib/site';
-import { compromisosFranja, titularPortada } from '../lib/textos';
-import { telLink } from '../lib/whatsapp';
+import { compromisosFranja, respuesta, titularPortada } from '../lib/textos';
+import { MENSAJE_PORTADA, telLink } from '../lib/whatsapp';
 import { PlatoPartido } from '../ui/art';
 import { BotonLlamar } from '../ui/BotonLlamar';
 import { BotonWhatsApp } from '../ui/BotonWhatsApp';
 import { CintaEtiqueta } from '../ui/CintaEtiqueta';
+import { EnviarContacto } from '../ui/EnviarContacto';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { ListaZonas } from '../ui/ListaZonas';
 import { PasosTrabajo } from '../ui/PasosTrabajo';
@@ -33,7 +34,6 @@ import { PrecioDesde } from '../ui/PrecioDesde';
 import { TablaRepararCambiar } from '../ui/TablaRepararCambiar';
 import { TarjetaServicio } from '../ui/TarjetaServicio';
 
-const MENSAJE_WHATSAPP = 'Hola, os mando una foto del daño para que me digáis si tiene arreglo.';
 const MENSAJE_PRECIO = 'Hola, quiero saber cuánto costaría arreglar mi baño. Os mando una foto.';
 const MENSAJE_ZONA = 'Hola, vivo en… ¿venís a mi zona?';
 const NO_VES_TU_ZONA = '¿No ves tu zona? Pregúntanos por WhatsApp';
@@ -64,17 +64,18 @@ function Seccion({ id, titulo, children }: { id: string; titulo: string; childre
  * Portada `/` (brain/design.md § Portada): hero con cinta, H1 de beneficio, subtítulo, la acción principal
  * (WhatsApp) + «Llamar» con la retención de la foto junto al botón, y el plato partido; debajo, la franja de
  * confianza (compromisos de textos.compromisosFranja()) y los módulos ¿Reparar o cambiar?, Cómo trabajamos,
- * Servicios, Precios orientativos y Zonas.
+ * Servicios, Precios orientativos y Zonas; al final, el formulario de contacto.
  * Los botones van antes de la ilustración para que en 360 × 740 se vean sin scroll. Todos los plazos y
  * cifras salen de textos.ts y catalogo.ts con el contenido que recibe por props (los tests inyectan el suyo).
- * El único botón primario es el WhatsApp del hero; el resto son secundarios.
+ * El único botón primario es el WhatsApp del hero; el resto son secundarios, salvo «Enviar petición» del
+ * formulario (excepción aceptada por la spec).
  */
 export function Portada({ negocio, config, modo, servicios, pasos, comparativa, zonas }: PortadaProps) {
   const whatsapp = negocio.whatsapp.valor;
   const telefono = negocio.telefono.valor;
   const filas = filasComparativa(comparativa, modo);
   const conPrecio = serviciosConPrecio(serviciosOrdenados(servicios), modo);
-  const mensajePaso = pasos.find((p) => p.accion === 'whatsapp')?.mensaje ?? MENSAJE_WHATSAPP;
+  const mensajePaso = pasos.find((p) => p.accion === 'whatsapp')?.mensaje ?? MENSAJE_PORTADA;
   return (
     <VStack gap={8} className="portada">
       <VStack gap={4} as="section" aria-labelledby="portada-titulo">
@@ -85,8 +86,8 @@ export function Portada({ negocio, config, modo, servicios, pasos, comparativa, 
         <Text type="large" as="p">
           {DESCRIPTION}
         </Text>
-        <HStack gap={2} wrap="wrap" vAlign="center">
-          {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_WHATSAPP} etiqueta="Manda la foto por WhatsApp" /> : null}
+        <HStack gap={2} wrap="wrap" vAlign="center" id="cta-hero">
+          {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_PORTADA} etiqueta="Manda la foto por WhatsApp" /> : null}
           {telefono ? <BotonLlamar href={telLink(telefono)} etiqueta="Llamar" /> : null}
         </HStack>
         <Text type="supporting" as="p">
@@ -138,6 +139,22 @@ export function Portada({ negocio, config, modo, servicios, pasos, comparativa, 
           {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_ZONA} etiqueta="Pregunta por tu zona" variante="secondary" /> : null}
         </VStack>
       </Seccion>
+      {/*
+       * Formulario al final (brain/design.md § Portada, 11). Excepción aceptada por la spec: su «Enviar petición»
+       * es el segundo primario de la portada; el flotante se oculta mientras se ve este o el del hero.
+       */}
+      <VStack gap={4} as="section" aria-labelledby="portada-formulario">
+        <Heading level={2} id="portada-formulario">
+          Mándanos una foto
+        </Heading>
+        <EnviarContacto
+          config={{ retencion_dias: config.retencion_dias, foto_max_mb: config.foto_max_mb }}
+          whatsapp={whatsapp}
+          telefono={telefono}
+          plazoRespuesta={respuesta(negocio.plazos.respuesta, modo)}
+          mensajeWhatsApp={MENSAJE_PORTADA}
+        />
+      </VStack>
     </VStack>
   );
 }
