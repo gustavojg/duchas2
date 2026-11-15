@@ -1,14 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { expect, type Page, type Request, test } from '@playwright/test';
+import { dataDirE2E } from '../../playwright.config.ts';
 
 /**
  * `pnpm e2e`: formulario de contacto, página /contacto/ y botón flotante de WhatsApp contra `pnpm start`.
  * playwright.config.ts arranca el servidor con MAIL_TRANSPORT=file y un DATA_DIR de e2e que vacía al empezar:
  * el mailer deja cada mensaje como .eml en DATA_DIR/mail (src/mailer.ts).
  */
-const DATA_DIR = path.resolve(process.env.E2E_DATA_DIR ?? 'data/e2e');
-const OUTBOX = path.join(DATA_DIR, 'mail');
+const OUTBOX = path.join(dataDirE2E(), 'mail');
 const MB = 1024 * 1024;
 
 /** JPEG mínimo: el servidor solo mira los bytes mágicos (src/domain/foto.ts). */

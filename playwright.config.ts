@@ -10,7 +10,22 @@ const PORT = Number(process.env.E2E_PORT ?? 3100);
  * Se vacían al empezar para que el límite por IP (envios_ip) y el outbox no arrastren otras ejecuciones; solo en el
  * proceso principal: los workers también cargan este fichero y el servidor ya está usando el directorio.
  */
-const DATA_DIR = path.resolve(process.env.E2E_DATA_DIR ?? 'data/e2e');
+const RAIZ_E2E = path.resolve('data');
+
+/**
+ * DATA_DIR del e2e: E2E_DATA_DIR o data/e2e, y siempre por debajo de ./data (nunca ./data mismo ni fuera), porque
+ * se borra entero. Si no cumple, lanza antes de borrar nada. Lo usa también tests/e2e/contacto.spec.ts (OUTBOX).
+ */
+export function dataDirE2E(valor = process.env.E2E_DATA_DIR): string {
+  const dir = path.resolve(valor ?? 'data/e2e');
+  const rel = path.relative(RAIZ_E2E, dir);
+  if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel)) {
+    throw new Error(`E2E_DATA_DIR tiene que estar dentro de ${RAIZ_E2E} (sin ser esa carpeta); recibido: ${dir}. No se ha borrado nada.`);
+  }
+  return dir;
+}
+
+const DATA_DIR = dataDirE2E();
 if (process.env.TEST_WORKER_INDEX === undefined) fs.rmSync(DATA_DIR, { recursive: true, force: true });
 
 export default defineConfig({
