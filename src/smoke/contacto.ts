@@ -105,10 +105,29 @@ async function json(res: Response): Promise<Record<string, unknown> | null> {
  * límite por IP: 3 de 5 por ventana); el 4 es un GET. Sin reintentos ni envíos extra. No llama a process.exit.
  */
 export async function ejecutarSmoke(opts: { baseUrl: string; dataDir: string; fetchFn?: FetchFn }): Promise<ResultadoSmoke> {
+  const pasos: PasoSmoke[] = [];
+  try {
+    await pasosSmoke(opts, pasos);
+  } catch (e) {
+    // Los errores de disco (DATA_DIR/mail ilegible) se convierten en un paso fallido; los de red se propagan.
+    const code = (e as NodeJS.ErrnoException | null)?.code;
+    if (typeof code !== 'string' || (e as NodeJS.ErrnoException).path === undefined) throw e;
+    pasos.push({
+      nombre: 'lectura de DATA_DIR/mail',
+      ok: false,
+      detalle: `no se puede leer ${path.join(opts.dataDir, 'mail')} (${code}); revisa DATA_DIR y sus permisos`,
+    });
+  }
+  return { ok: pasos.every((p) => p.ok), pasos };
+}
+
+async function pasosSmoke(
+  opts: { baseUrl: string; dataDir: string; fetchFn?: FetchFn },
+  pasos: PasoSmoke[],
+): Promise<void> {
   const { baseUrl, dataDir, fetchFn = fetch } = opts;
   const url = `${baseUrl.replace(/\/+$/, '')}/api/contacto`;
   const post = (body: FormData) => fetchFn(url, { method: 'POST', body });
-  const pasos: PasoSmoke[] = [];
   const paso = (nombre: string, ok: boolean, detalle: string) => void pasos.push({ nombre, ok, detalle });
   const comun = (status: number, esperado: number) =>
     status === 429 ? LIMITE_AGOTADO : `se esperaba ${esperado} y llegó ${status}`;
@@ -165,8 +184,6 @@ export async function ejecutarSmoke(opts: { baseUrl: string; dataDir: string; fe
     if (res.status >= 200 && res.status < 300) paso(nombre, false, `llegó ${res.status}; GET no debe responder 2xx`);
     else paso(nombre, true, `${res.status}`);
   }
-
-  return { ok: pasos.every((p) => p.ok), pasos };
 }
 
 function contiene(haystack: Uint8Array, needle: Uint8Array): boolean {

@@ -142,4 +142,29 @@ describe('ejecutarSmoke', () => {
     expect(r.pasos.slice(0, 3).every((p) => p.ok)).toBe(true);
     expect(r.pasos[3]!.ok).toBe(false);
   });
+
+  it('si DATA_DIR/mail no se puede leer (ENOTDIR) da un paso fallido sin excepción ni envíos', async () => {
+    const dataDir = tmp('smoke-enotdir-');
+    fs.writeFileSync(path.join(dataDir, 'mail'), 'no soy un directorio');
+    let llamadas = 0;
+    const fetchFn = async () => {
+      llamadas++;
+      return new Response(null, { status: 201 });
+    };
+    const r = await ejecutarSmoke({ baseUrl: 'http://127.0.0.1:3000', dataDir, fetchFn });
+    expect(r.ok).toBe(false);
+    expect(llamadas).toBe(0);
+    const fallido = r.pasos.find((p) => !p.ok)!;
+    expect(fallido.detalle).toContain('DATA_DIR');
+    expect(fallido.detalle).toContain('ENOTDIR');
+    expect(fallido.detalle).toContain(path.join(dataDir, 'mail'));
+  });
+
+  it('un error de red de fetch se sigue propagando (el script lo muestra como fallo de conexión)', async () => {
+    const dataDir = tmp('smoke-red-');
+    const fetchFn = async (): Promise<Response> => {
+      throw new TypeError('fetch failed');
+    };
+    await expect(ejecutarSmoke({ baseUrl: 'http://127.0.0.1:3000', dataDir, fetchFn })).rejects.toThrow(TypeError);
+  });
 });
