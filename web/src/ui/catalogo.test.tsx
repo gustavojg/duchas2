@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { filasComparativa, resolverPasos } from '../lib/catalogo';
 import { cargarComparativa, cargarNegocio, cargarPasos, cargarServicios } from '../lib/content';
+import { rutaGenerada } from '../lib/paginas';
 import { BotonWhatsApp } from './BotonWhatsApp';
 import { ListaZonas } from './ListaZonas';
 import { PasosTrabajo } from './PasosTrabajo';
@@ -32,10 +33,12 @@ const sinEstilos = (html: string) => {
 };
 
 describe('TarjetaServicio', () => {
-  const grande = renderToStaticMarkup(<TarjetaServicio servicio={plato} />);
-  const compacta = renderToStaticMarkup(<TarjetaServicio servicio={azulejos} />);
+  const grande = renderToStaticMarkup(<TarjetaServicio servicio={plato} enlazar />);
+  const compacta = renderToStaticMarkup(<TarjetaServicio servicio={azulejos} enlazar />);
+  const grandeSin = renderToStaticMarkup(<TarjetaServicio servicio={plato} enlazar={false} />);
+  const compactaSin = renderToStaticMarkup(<TarjetaServicio servicio={azulejos} enlazar={false} />);
 
-  it('la del plato enlaza a su página, lleva el nombre en H3 y se marca como grande', () => {
+  it('con enlace, la del plato enlaza a su página, lleva el nombre en H3 y se marca como grande', () => {
     expect(grande).toContain('href="/platos-de-ducha/"');
     expect(grande).toMatch(/<h3[^>]*>(?:(?!<\/h3>).)*Reparación y esmaltado de platos de ducha/s);
     expect(textoPlano(grande)).toContain(plato.resumen);
@@ -44,16 +47,43 @@ describe('TarjetaServicio', () => {
     sinEstilos(grande);
   });
 
-  it('las demás son compactas y enlazan a su ruta', () => {
-    expect(compacta).toContain(`href="${azulejos.ruta}"`);
+  it('con enlace, las demás son compactas y enlazan a su ruta', () => {
+    expect(compacta).toContain('href="/servicios/azulejos/"');
     expect(compacta).toContain('data-tamano="compacta"');
     expect(compacta).not.toContain('data-tamano="grande"');
-    expect(textoPlano(compacta)).toContain(azulejos.nombre);
+    expect(compacta).toMatch(/<h3[^>]*>(?:(?!<\/h3>).)*Esmaltado de azulejos/s);
+    expect(textoPlano(compacta)).toContain(azulejos.resumen);
     sinEstilos(compacta);
+  });
+
+  it('sin enlace no hay href ni <a>, y se conservan H3, resumen y tamaño', () => {
+    for (const [html, s, tamano] of [
+      [grandeSin, plato, 'grande'],
+      [compactaSin, azulejos, 'compacta'],
+    ] as const) {
+      expect(html).not.toContain('href=');
+      expect(html).not.toContain('<a');
+      expect(html).not.toContain('astryx-clickable-card');
+      expect(html).toMatch(new RegExp(`<h3[^>]*>(?:(?!<\\/h3>).)*${s.nombre}`, 's'));
+      expect(textoPlano(html)).toContain(s.resumen);
+      expect(html).toContain(`data-tamano="${tamano}"`);
+      sinEstilos(html);
+    }
+  });
+
+  it('sin la prop, enlaza solo si el build genera la página de su ruta', () => {
+    for (const s of [plato, azulejos]) {
+      const html = renderToStaticMarkup(<TarjetaServicio servicio={s} />);
+      expect(html.includes(`href="${s.ruta}"`)).toBe(rutaGenerada(s.ruta));
+    }
+    // Hoy no existen /platos-de-ducha/ ni /servicios/*: ninguna de las dos enlaza.
+    expect(renderToStaticMarkup(<TarjetaServicio servicio={plato} />)).not.toContain('href=');
+    expect(renderToStaticMarkup(<TarjetaServicio servicio={azulejos} />)).not.toContain('href=');
   });
 
   it('no muestra precio', () => {
     expect(grande).not.toMatch(/€|Desde|presupuesto/i);
+    expect(grandeSin).not.toMatch(/€|Desde|presupuesto/i);
   });
 });
 
