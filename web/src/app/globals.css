@@ -100,6 +100,30 @@
   padding-inline: var(--spacing-4);
 }
 
+/*
+ * Antes/después de la portada (BloqueAntesDespues en src/app/page.tsx): las miniaturas reparten la fila a partes
+ * iguales y pueden encogerse por debajo de su contenido (sin scroll horizontal en 360).
+ */
+.portada-miniatura {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+/*
+ * Cintas «ANTES»/«DESPUÉS» del deslizador (DeslizadorAntesDespues en src/ui/): el contenido de Overlay es una
+ * columna flex con align-items: flex-start, así que la fila se encogería al contenido y justify="between" no
+ * separaría las cintas. A todo el ancho, «DESPUÉS» queda arriba a la derecha, sobre la capa «después».
+ */
+.deslizador-cintas {
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+/* CTA secundario del antes/después: ancho completo (Button width="100%" pintaría estilo en línea). */
+.portada-cta {
+  inline-size: 100%;
+}
+
 .franja-confianza-icono {
   display: block;
   flex: none;
