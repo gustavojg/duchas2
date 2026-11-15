@@ -103,3 +103,34 @@
   flex: none;
   inline-size: var(--spacing-10);
 }
+
+/* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) encima, al doble. */
+.tarjeta-servicio-icono {
+  flex: none;
+  inline-size: var(--spacing-12);
+}
+
+.tarjeta-servicio-icono[data-tamano="grande"] {
+  inline-size: calc(var(--spacing-12) * 2);
+}
+
+/* «PASO N» de PasosTrabajo: la cinta (firma), como cinta-etiqueta. */
+.paso-numero {
+  align-self: flex-start;
+  background-color: var(--color-tape);
+  color: var(--color-on-tape);
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-2);
+}
+
+/* Cabecera «Reparar» de TablaRepararCambiar: la cinta. */
+.tabla-cabecera-reparar {
+  background-color: var(--color-tape);
+  color: var(--color-on-tape);
+}
+
+/* Esquema de anillos de ListaZonas: no ocupa todo el ancho en escritorio. */
+.lista-zonas-anillos {
+  inline-size: 100%;
+  max-inline-size: calc(var(--spacing-12) * 6);
+}
