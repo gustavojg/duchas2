@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME } from '../../web/src/lib/site.js';
+import { APP_NAME, PAGES } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -111,6 +111,18 @@ describe('web/out servido por Hono', () => {
     expect(sinScripts).not.toContain('PENDIENTE');
     expect(sinScripts).not.toContain('{{');
     expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
+  });
+
+  it('todas las páginas de PAGES llevan un único canonical = url_base + ruta', () => {
+    const base = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
+    const vistos = new Set<string>();
+    for (const ruta of PAGES) {
+      const html = fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /href="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, `canonical en ${ruta}`).toEqual([`${base}${ruta}`]);
+      vistos.add(canonicals[0]!);
+    }
+    expect(vistos.size).toBe(PAGES.length);
   });
 
   it('/health sigue respondiendo JSON', async () => {
