@@ -12,7 +12,7 @@ API de formulario por **un solo proceso Node con Hono** (un puerto), que guarda 
 
 ```
 Navegador ──► Hono (PORT=3000)
-               ├── GET  /health                 → JSON
+               ├── GET  /health                 → { ok, app, commit }
                ├── POST /api/contacto           → valida, limita, guarda (SQLite + fotos), envía SMTP
                └── GET  /*                      → ficheros de web/out (HTML estático de Next)
 ```
@@ -26,7 +26,7 @@ En desarrollo hay dos procesos (`next dev` en :3000 con rewrites de `/api/*` y `
 /                         raíz pnpm (workspace: ".", "web")
 ├── src/                  SERVIDOR (Hono). Solo TypeScript, sin React.
 │   ├── server.ts         arranque: openDb, mailer, limpieza al arrancar + cada 24 h, serve()
-│   ├── app.ts            createApp(deps) → Hono: /health, /api/contacto, estáticos y 404
+│   ├── app.ts            createApp(deps) → Hono: /health ({ ok, app, commit }), /api/contacto, estáticos y 404
 │   ├── db.ts             openDb + MIGRATIONS (aditivas, como la plantilla)
 │   ├── contacto.ts       handler de POST /api/contacto (orquesta los módulos de abajo)
 │   ├── foto.ts           detección de tipo por bytes mágicos, guardado en DATA_DIR/fotos
@@ -134,7 +134,7 @@ build; trailing slash activado (`/tarifas/` → `web/out/tarifas/index.html`).
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| GET | `/health` | `{ ok: true, app }` (staging) |
+| GET | `/health` | `{ ok: true, app, commit }` (staging). `commit` sale de la variable de entorno `GIT_SHA` (la inyecta el staging de la fábrica; `src/config.ts` la lee recortada como `Config.commit` y llega a `createApp` por `Deps.commit`); vale «desconocido» si falta o está vacía |
 | POST | `/api/contacto` | `multipart/form-data`; ver §6.3. Respuestas 201 / 400 / 413 / 415 / 429 / 503 |
 | GET | `/_next/static/*` | estáticos con `Cache-Control: public, max-age=31536000, immutable` |
 | GET | `/*` | fichero de `web/out`; si no existe, `web/out/404.html` con **404** |
@@ -246,13 +246,14 @@ confirmación con plazo de respuesta (tabla) y botón de WhatsApp.
 | `TRUST_PROXY` | `0` | leer `X-Forwarded-For` |
 | `MOSTRAR_PENDIENTES` | `0` | build con `{{PENDIENTE}}` visibles |
 | `CONTENT_DIR` | `./web/content` | carpeta de JSON que lee `content.ts` (tests de build con fixtures) |
+| `GIT_SHA` | «desconocido» si falta | commit servido en `/health` |
 
 ## 8. Estrategia de tests
 
 `pnpm test` (vitest) — servidor y lógica, sin red ni navegador:
 - **Servidor sobre `app.request()`** con `createApp({ db: openDb(':memory:'), mailer: fakeMailer,
   dataDir: tmp, config, ahora: () => t, ipDe: () => '1.2.3.4' })`:
-  - `/health` 200; ruta inexistente → 404 con HTML; `/tarifas/` sirve el `index.html` de un `WEB_DIR` de
+  - `/health` 200, también con `commit` (es «desconocido» sin `GIT_SHA`); ruta inexistente → 404 con HTML; `/tarifas/` sirve el `index.html` de un `WEB_DIR` de
     fixture.
   - `/api/contacto`: 201 válido (fila en BD, foto en disco, 1 email con adjunto y todos los campos);
     400 por nombre vacío, teléfono inválido (`12345`, `5xxxxxxxx`), sin privacidad — con el campo en
