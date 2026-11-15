@@ -7,6 +7,7 @@ import { configFormulario } from '../lib/config';
 import { cargarNegocio, type Negocio } from '../lib/content';
 import { DESCRIPTION } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
+import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
 import { Portada } from './page';
@@ -110,6 +111,43 @@ describe('portada con plazos, garantía y años confirmados', () => {
     expect(texto).toContain('Garantía por escrito de 2 años');
     expect(texto).toContain('15 años reparando baños');
     expect(texto).not.toMatch(/PENDIENTE|\{\{/);
+  });
+});
+
+describe('FranjaConfianza', () => {
+  const lis = (html: string) => html.match(/<li[\s>]/g) ?? [];
+  const svgDe = (html: string, texto: string) => {
+    const li = [...html.matchAll(/<li[\s>](?:(?!<\/li>).)*<\/li>/gs)].map((m) => m[0]).find((l) => l.includes(texto)) ?? '';
+    return /<svg(?:(?!<\/svg>).)*<\/svg>/s.exec(li)?.[0] ?? '';
+  };
+
+  it('pinta garantía y años con iconos distintos, y sin «anios» no hay fila de años', () => {
+    const html = renderToStaticMarkup(
+      <FranjaConfianza
+        compromisos={[
+          { tipo: 'garantia', texto: 'Garantía por escrito' },
+          { tipo: 'anios', texto: '15 años reparando baños' },
+        ]}
+      />,
+    );
+    expect(lis(html)).toHaveLength(2);
+    const garantia = svgDe(html, 'Garantía por escrito');
+    const anios = svgDe(html, '15 años reparando baños');
+    expect(garantia).not.toBe('');
+    expect(anios).not.toBe('');
+    expect(anios).toMatch(/<(path|rect|circle|ellipse)[\s>]/);
+    expect(anios).not.toBe(garantia);
+    expect(anios).not.toContain(/<path[^>]*>/.exec(garantia)![0]);
+
+    const sinAnios = renderToStaticMarkup(<FranjaConfianza compromisos={[{ tipo: 'garantia', texto: 'Garantía por escrito' }]} />);
+    expect(lis(sinAnios)).toHaveLength(1);
+    expect(sinAnios).not.toContain('años reparando');
+  });
+
+  it('el fuente tiene un solo IconoCompromiso y ninguna prop `anios`', () => {
+    const src = readFileSync(join(process.cwd(), 'src/ui/FranjaConfianza.tsx'), 'utf8');
+    expect(src.match(/<IconoCompromiso/g)).toHaveLength(1);
+    expect(src).not.toContain('anios?');
   });
 });
 

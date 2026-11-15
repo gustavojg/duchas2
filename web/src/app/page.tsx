@@ -57,10 +57,9 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
         compromisos={[
           { tipo: 'garantia', texto: garantia(negocio.garantia.anios, modo) },
           { tipo: 'sin-obras', texto: 'Sin obras ni polvo' },
-          { tipo: 'un-telefono', texto: 'Un solo teléfono, siempre el mismo' },
           { tipo: 'hoteles', texto: 'Trabajamos para hoteles y comunidades' },
+          { tipo: 'anios', texto: anios(negocio.anios, modo) },
         ]}
-        anios={anios(negocio.anios, modo)}
       />
     </VStack>
   );
