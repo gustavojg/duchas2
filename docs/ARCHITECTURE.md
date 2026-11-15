@@ -178,6 +178,8 @@ en modo borrador, banner de cookies solo si `ga4_id`.
 ### 6.2 Contacto único
 - Un teléfono y un WhatsApp en `negocio.json`; `telLink`/`waLink` son la única forma de construir
   enlaces. `waLink` usa `https://wa.me/<digitos>?text=<encodeURIComponent(mensaje)>`.
+- `waLink` y `telLink` **lanzan** un `Error` ante un número inválido: antes de pintar un botón de
+  contacto se comprueba `esNumeroValido(numero)` y, si da `false`, no se pinta (ver §10 «Contratos»).
 - Mensajes precargados: por página de servicio (`whatsapp_mensaje`), plato de ducha (menciona la página y
   pide la foto), empresas, confirmación del formulario, y uno por defecto.
 
@@ -306,3 +308,22 @@ el servidor local, portada, platos de ducha y FAQ); validador de schema.org; rec
 - Las fotos HEIC solo viajan como adjunto; la web muestra únicamente WebP de `web/public/fotos`.
 - Las peticiones no se consultan desde la web: se reciben por email; la BD solo es respaldo local.
 - No se copian textos, nombres ni fotos de competidores.
+
+## 10. Contratos
+
+### 10.1 `GET /health`
+- `{ ok: true, app, commit }`; `commit` es `GIT_SHA` recortado, o «desconocido» si falta o está vacía
+  (detalle en §5.1).
+
+### 10.2 Enlaces de contacto (`web/src/lib/whatsapp.ts`)
+- Número válido: teléfono español de 9 cifras que empieza por 6-9; se admiten espacios y los prefijos
+  `+34` y `0034`.
+- `waLink(numero, mensaje)` devuelve `https://wa.me/<solo dígitos>?text=<encodeURIComponent(mensaje)>` y
+  **lanza un `Error`** si el número no es válido.
+- `telLink(numero)` devuelve `tel:+34XXXXXXXXX` y lanza igual, con el mismo error que `waLink`.
+- `esNumeroValido(numero)` devuelve `boolean` con la misma validación que `waLink` y `telLink`. Quien pinte
+  un botón de contacto la llama **antes** y no pinta el botón si da `false`:
+
+```ts
+const href = esNumeroValido(n) ? waLink(n, mensaje) : null; // null → no se pinta el botón
+```
