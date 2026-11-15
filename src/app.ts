@@ -4,6 +4,7 @@ import type { Config } from './config.js';
 import type { Mailer } from './mailer.js';
 import { mountWeb } from './web.js';
 import { APP_NAME } from '../web/src/lib/site.js';
+import type { ConfigFormulario } from '../web/src/lib/config.js';
 
 /** Todo lo que la app necesita del exterior, por parámetro: los tests pasan BD ':memory:', mailer falso y reloj fijo. */
 export interface Deps {
@@ -13,6 +14,14 @@ export interface Deps {
   /** IP del cliente (en el servidor, getConnInfo); para límites de envío y auditoría. */
   clientIp: (c: Context) => string;
   config: Pick<Config, 'webDir' | 'baseUrl'>;
+  /** DATA_DIR: fotos en DATA_DIR/fotos (nunca servidas por HTTP). */
+  dataDir: string;
+  /** Retención y límites del formulario (web/content/config.json + overrides). */
+  formulario: ConfigFormulario;
+  /** Sal del HMAC de la IP (IP_SALT). */
+  ipSalt: string;
+  /** Adónde se envían las peticiones; null si aún no está confirmado (el formulario responde 503). */
+  emailDestino: string | null;
 }
 
 export function createApp(deps: Deps): Hono {
