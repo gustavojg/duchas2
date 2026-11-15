@@ -158,20 +158,23 @@ export function FormularioContacto({
       }}
     >
       <Field label="¿Qué quieres reparar?" inputID="pieza" isGroupLabel status={error(errores.pieza)} statusVariant="detached">
-        <SegmentedControl label="¿Qué quieres reparar?" value={valores.pieza} onChange={(v) => onCambio('pieza', v)} isDisabled={enviando}>
-          {PIEZAS.map((p) => (
-            <SegmentedControlItem
-              key={p}
-              value={p}
-              label={NOMBRE_PIEZA[p].label}
-              icon={
-                <span className="campo-pieza-icono">
-                  <IconoServicio tipo={NOMBRE_PIEZA[p].icono} decorative />
-                </span>
-              }
-            />
-          ))}
-        </SegmentedControl>
+        {/* .campo-pieza-opciones (globals.css): a 360 px las opciones saltan de línea en vez de recortarse («Ba…»). */}
+        <div className="campo-pieza-opciones">
+          <SegmentedControl label="¿Qué quieres reparar?" value={valores.pieza} onChange={(v) => onCambio('pieza', v)} isDisabled={enviando}>
+            {PIEZAS.map((p) => (
+              <SegmentedControlItem
+                key={p}
+                value={p}
+                label={NOMBRE_PIEZA[p].label}
+                icon={
+                  <span className="campo-pieza-icono">
+                    <IconoServicio tipo={NOMBRE_PIEZA[p].icono} decorative />
+                  </span>
+                }
+              />
+            ))}
+          </SegmentedControl>
+        </div>
       </Field>
 
       <CampoFoto

@@ -170,6 +170,28 @@ test.describe('botón flotante de WhatsApp', () => {
       expect(tapa).toBe(false);
     });
 
+    test('las cuatro opciones de «¿Qué quieres reparar?» se leen enteras en /contacto/', async ({ page }) => {
+      await page.goto('/contacto/');
+      const grupo = page.getByRole('radiogroup', { name: '¿Qué quieres reparar?' });
+      const opciones = grupo.getByRole('radio');
+      await expect(opciones).toHaveCount(4);
+      for (const [i, texto] of ['Plato de ducha', 'Bañera', 'Azulejos', 'Otro'].entries()) {
+        const opcion = opciones.nth(i);
+        await opcion.scrollIntoViewIfNeeded();
+        await expect(opcion).toContainText(texto);
+        await expect(opcion.getByText(texto, { exact: true })).toBeVisible();
+        // Ninguna etiqueta recortada: ni la opción ni ningún elemento dentro de ella desborda su caja.
+        const recortes = await opcion.evaluate((el) =>
+          [el, ...Array.from(el.querySelectorAll('*'))]
+            .filter((n) => n.scrollWidth > n.clientWidth && n.clientWidth > 0)
+            .map((n) => `${n.tagName}.${n.className} ${n.scrollWidth}>${n.clientWidth}`),
+        );
+        expect(recortes, texto).toEqual([]);
+        const caja = (await opcion.boundingBox())!;
+        expect(caja.x + caja.width, texto).toBeLessThanOrEqual(360);
+      }
+    });
+
     test('en la portada se oculta mientras se ve el CTA del hero', async ({ page }) => {
       await page.goto('/');
       await expect(page.locator('#cta-hero')).toBeInViewport();

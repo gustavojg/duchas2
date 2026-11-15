@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { fotoDemasiadoGrande, MENSAJES } from '../lib/contacto';
+import { fotoDemasiadoGrande, MENSAJES, PIEZAS } from '../lib/contacto';
 import { type EstadoEnvio, FormularioContacto, type FormularioContactoProps, VALORES_INICIALES } from './FormularioContacto';
 
 const base: FormularioContactoProps = {
@@ -54,6 +56,21 @@ describe('FormularioContacto (inicial)', () => {
     expect(t).toContain('Añadir foto del daño');
     expect(t).toContain('Con una foto del daño te decimos si tiene arreglo. Máximo 10 MB.');
     expect(texto(pinta({ config: { retencion_dias: 90, foto_max_mb: 5 } }))).toContain('Máximo 5 MB.');
+  });
+
+  it('pieza: SegmentedControl con icono y los valores de PIEZAS, dentro de .campo-pieza-opciones que deja saltar de línea', () => {
+    const i = html.indexOf('class="campo-pieza-opciones"');
+    expect(i).toBeGreaterThan(-1);
+    const control = html.slice(i, html.indexOf('</template>', i));
+    expect(control).toContain('role="radiogroup"');
+    for (const v of PIEZAS) expect(control).toContain(`data-value="${v}"`);
+    expect(control.match(/campo-pieza-icono/g)).toHaveLength(PIEZAS.length);
+    const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+    const regla = css.match(/\.campo-pieza-opciones \.astryx-segmented-control\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(regla).toMatch(/flex-wrap:\s*wrap/);
+    expect(regla).toMatch(/max-inline-size:\s*100%/);
+    const reglas = css.match(/\.campo-pieza-opciones[^{]*\{[^}]*\}/g)!.join('\n');
+    expect(reglas).not.toMatch(/#[0-9a-fA-F]{3,8}\b|\d+(px|rem)\b/);
   });
 
   it('casilla de privacidad con enlace a /privacidad/', () => {

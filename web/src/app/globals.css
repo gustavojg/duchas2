@@ -140,6 +140,21 @@
   white-space: nowrap;
 }
 
+/*
+ * SegmentedControl de pieza: Astryx (hug) recorta las etiquetas cuando no caben («Ba…» a 360 px) y no tiene prop
+ * para envolver. Aquí las opciones saltan de línea y cada fila se reparte el ancho. El lens del seleccionado se
+ * coloca con las cajas medidas (left/top), así que funciona en varias filas.
+ */
+.campo-pieza-opciones .astryx-segmented-control {
+  flex-wrap: wrap;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.campo-pieza-opciones .astryx-segmented-control-item {
+  flex: 1 1 auto;
+}
+
 /* Icono de cada pieza en el SegmentedControl del formulario. */
 .campo-pieza-icono {
   display: block;
