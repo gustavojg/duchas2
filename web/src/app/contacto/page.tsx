@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import { type ConfigFormulario, configFormulario } from '../../lib/config';
 import { cargarNegocio, type Negocio } from '../../lib/content';
 import { type Modo, modoActual } from '../../lib/dato';
+import { canonicalUrl } from '../../lib/seo';
 import { APP_NAME } from '../../lib/site';
 import { presupuesto, respuesta } from '../../lib/textos';
 import { mensajePorRuta, telLink } from '../../lib/whatsapp';
@@ -17,6 +18,7 @@ import { EnviarContacto } from '../../ui/EnviarContacto';
 export const metadata: Metadata = {
   title: `Contacto · ${APP_NAME}`,
   description: 'Mándanos una foto del daño por WhatsApp, llámanos o rellena el formulario y te decimos si tiene arreglo.',
+  alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/contacto/') },
 };
 
 export interface ContactoProps {
