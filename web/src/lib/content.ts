@@ -76,7 +76,7 @@ export function cargarNegocio(): Negocio {
  * Servicios publicados (web/content/servicios.json): schema mínimo y tolerante hasta que exista el definitivo;
  * sin fichero, ningún servicio. Se mantiene la firma `{ slug, nombre }[]`.
  */
-const serviciosSchema = z.array(z.object({ slug: z.string().min(1), nombre: z.string().min(1) }).passthrough());
+const serviciosSchema = z.array(z.object({ slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), nombre: z.string().min(1) }).passthrough());
 
 export function cargarServicios(): { slug: string; nombre: string }[] {
   if (!existsSync(join(contentDir(), 'servicios.json'))) return [];

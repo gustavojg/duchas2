@@ -53,4 +53,14 @@ describe('cargarServicios()', () => {
     directorio();
     expect(cargarServicios()).toEqual([]);
   });
+
+  it('un slug con ../ o con / hace fallar la carga', () => {
+    directorio([{ slug: '../x', nombre: 'X' }]);
+    expect(() => cargarServicios()).toThrow();
+  });
+
+  it('un slug con caracteres XML hace fallar la carga', () => {
+    directorio([{ slug: 'a<b', nombre: 'X' }]);
+    expect(() => cargarServicios()).toThrow();
+  });
 });
