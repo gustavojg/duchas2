@@ -1,5 +1,19 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { e2eTarget } from './e2e-target.js';
+
+describe('script e2e:staging', () => {
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+    scripts: Record<string, string>;
+  };
+
+  it('existe, lanza playwright test, apunta por defecto a :8804 y respeta E2E_BASE_URL', () => {
+    const script = pkg.scripts['e2e:staging'];
+    expect(script).toBeDefined();
+    expect(script).toContain('playwright test');
+    expect(script).toContain('E2E_BASE_URL=${E2E_BASE_URL:-http://127.0.0.1:8804}');
+  });
+});
 
 describe('e2eTarget', () => {
   it('sin variables apunta a 127.0.0.1:3100 y levanta servidor local', () => {
