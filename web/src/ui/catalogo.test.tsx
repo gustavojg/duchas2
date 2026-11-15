@@ -1,8 +1,12 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { cargarServicios } from '../lib/content';
+import { filasComparativa, resolverPasos } from '../lib/catalogo';
+import { cargarComparativa, cargarNegocio, cargarPasos, cargarServicios } from '../lib/content';
 import { BotonWhatsApp } from './BotonWhatsApp';
+import { ListaZonas } from './ListaZonas';
+import { PasosTrabajo } from './PasosTrabajo';
 import { PrecioDesde } from './PrecioDesde';
+import { TablaRepararCambiar } from './TablaRepararCambiar';
 import { TarjetaServicio } from './TarjetaServicio';
 
 const servicios = cargarServicios();
@@ -10,8 +14,20 @@ const plato = servicios.find((s) => s.tipo === 'principal')!;
 const azulejos = servicios.find((s) => s.slug === 'azulejos')!;
 
 const textoPlano = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+/**
+ * Estilos en línea que no son el del contenedor de scroll de Table de Astryx, que siempre pinta
+ * `style="--x-overflowX:clip;--x-overflowY:clip;overscroll-behavior-x:auto"` (no lo escribe nuestro código).
+ */
+const estilosEnLinea = (html: string) =>
+  [...html.matchAll(/<[^>]*\bstyle="([^"]*)"[^>]*>/g)].filter(
+    ([tag, decl]) =>
+      !(
+        /class="astryx-table-scroll-wrapper\b/.test(tag) &&
+        decl.split(';').every((d) => /^(--x-overflow[XY]:clip|overscroll-behavior-[xy]:auto)$/.test(d))
+      ),
+  );
 const sinEstilos = (html: string) => {
-  expect(html).not.toContain('style=');
+  expect(estilosEnLinea(html).map((m) => m[0])).toEqual([]);
   expect(html).not.toContain('<style');
 };
 
@@ -70,5 +86,94 @@ describe('BotonWhatsApp', () => {
     expect(html).toContain('data-variant="secondary"');
     expect(html).not.toContain('data-variant="primary"');
     expect(html).toContain('href="https://wa.me/');
+  });
+});
+
+const negocio = cargarNegocio();
+const pasos = cargarPasos();
+const comparativa = cargarComparativa();
+
+describe('PasosTrabajo', () => {
+  const html = renderToStaticMarkup(
+    <PasosTrabajo pasos={resolverPasos(pasos, negocio, 'publico')} whatsapp="+34 600 000 000" mensaje="Hola, os mando una foto" />,
+  );
+  const items = [...html.matchAll(/<li\b[^>]*>((?:(?!<\/li>).)*)<\/li>/gs)].map((m) => m[1]);
+
+  it('pinta los 4 pasos en una lista ordenada con «PASO N» en la cinta', () => {
+    expect(html).toMatch(/^<ol\b/);
+    expect(items).toHaveLength(4);
+    items.forEach((li, i) => {
+      expect(li).toMatch(new RegExp(`class="[^"]*\\bpaso-numero\\b[^"]*"[^>]*>PASO ${i + 1}<`));
+    });
+    expect(textoPlano(items[1])).toContain('Presupuesto gratuito y sin compromiso');
+  });
+
+  it('solo el paso 1 lleva el botón de WhatsApp, y es secundario', () => {
+    expect(items[0]).toMatch(/href="https:\/\/wa\.me\//);
+    expect(items[0]).toContain('data-variant="secondary"');
+    for (const li of items.slice(1)) expect(li).not.toContain('wa.me');
+    expect(html).not.toContain('data-variant="primary"');
+    sinEstilos(html);
+  });
+
+  it('sin número de WhatsApp no pinta el botón', () => {
+    const sin = renderToStaticMarkup(<PasosTrabajo pasos={resolverPasos(pasos, negocio, 'publico')} whatsapp={null} mensaje="Hola" />);
+    expect(sin).not.toContain('wa.me');
+    expect(sin.match(/<li\b/g)).toHaveLength(4);
+  });
+});
+
+describe('TablaRepararCambiar', () => {
+  const cabeceras = (html: string) =>
+    [...html.matchAll(/<tr\b[^>]*>((?:(?!<\/tr>).)*)<\/tr>/gs)].map((m) => (m[1].match(/<th\b/g) ?? []).length).filter((n) => n > 0);
+
+  it('sin cifras confirmadas compara solo tiempo y obra, sin coste ni fuente', () => {
+    const filas = filasComparativa(comparativa, 'publico');
+    const html = renderToStaticMarkup(<TablaRepararCambiar filas={filas} fuente={comparativa.fuente} conCoste={false} />);
+    const texto = textoPlano(html);
+    expect(html).toMatch(/<table\b/);
+    expect(texto).not.toContain('Coste');
+    expect(texto).not.toContain('€');
+    expect(texto).not.toContain(comparativa.fuente);
+    expect(html).toMatch(/<th\b[^>]*class="[^"]*\btabla-cabecera-reparar\b[^"]*"[^>]*>(?:(?!<\/th>).)*Reparar/s);
+    expect(texto).toContain('Cambiar');
+    for (const n of cabeceras(html)) expect(n).toBeLessThanOrEqual(3);
+    for (const f of filas) {
+      expect(texto).toContain(f.reparar);
+      expect(texto).toContain(f.cambiar);
+    }
+    sinEstilos(html);
+  });
+
+  it('con el coste confirmado muestra la cifra en mono y la fuente', () => {
+    const c = structuredClone(comparativa);
+    c.filas[0].reparar = { valor: 'Desde 150 €', confirmado: true };
+    c.filas[0].cambiar = { valor: '865-1.200 €', confirmado: true };
+    const filas = filasComparativa(c, 'publico');
+    const html = renderToStaticMarkup(<TablaRepararCambiar filas={filas} fuente={c.fuente} conCoste />);
+    expect(html).toMatch(/data-type="code"[^>]*>865-1\.200 €</);
+    expect(textoPlano(html)).toContain('Coste');
+    expect(textoPlano(html)).toContain(c.fuente);
+  });
+});
+
+describe('ListaZonas', () => {
+  const zonas = { madrid_capital: ['Centro', 'Retiro', 'Usera'], municipios: ['Getafe', 'Coslada'] };
+  const html = renderToStaticMarkup(<ListaZonas zonas={zonas} />);
+
+  it('pinta los anillos y dos grupos con H3 y todas las zonas en listas', () => {
+    const texto = textoPlano(html);
+    expect(html).toMatch(/<svg[^>]*aria-label="Esquema: Madrid capital/);
+    expect(html).toMatch(/<h3[^>]*>(?:(?!<\/h3>).)*Madrid capital/s);
+    expect(html).toMatch(/<h3[^>]*>(?:(?!<\/h3>).)*Municipios del área metropolitana/s);
+    expect(html.match(/<ul\b/g)).toHaveLength(2);
+    expect(html.match(/<li\b/g)).toHaveLength(5);
+    for (const z of [...zonas.madrid_capital, ...zonas.municipios]) expect(texto).toContain(z);
+  });
+
+  it('sin Badge, sin CTA y sin estilos sueltos', () => {
+    expect(html).not.toContain('astryx-badge');
+    expect(html).not.toContain('wa.me');
+    sinEstilos(html);
   });
 });
