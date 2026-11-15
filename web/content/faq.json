@@ -65,12 +65,12 @@
       "preguntas": [
         {
           "p": "¿Cuánto dura la reparación?",
-          "r": "{reparacion}. La hacemos en tu baño, en una sola visita.",
+          "r": "Se hace en una sola visita, en tu baño. {reparacion}. Con la foto del daño te decimos cuánto tardará la tuya.",
           "en_portada": true
         },
         {
           "p": "¿Cuándo puedo volver a usar la ducha?",
-          "r": "{uso_ducha}. Antes, el esmalte tiene que secar bien.",
+          "r": "El esmalte tiene que secar bien antes de usar la ducha. {uso_ducha}. Mándanos la foto del daño y lo concretamos.",
           "en_portada": false
         },
         {

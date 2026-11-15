@@ -12,6 +12,7 @@ import { configFormulario } from '../web/src/lib/config.js';
 import { cargarNegocio } from '../web/src/lib/content.js';
 
 const config = loadConfig();
+if (config.ipSaltGenerada) console.warn('aviso: falta IP_SALT; se usa una sal aleatoria y el límite por IP no sobrevive a reinicios. Fija IP_SALT.');
 if (!fs.existsSync(path.join(config.webDir, 'index.html'))) {
   console.warn(`aviso: no hay ${config.webDir}/index.html; ejecuta \`pnpm build\` (solo responde /health y /api)`);
 }
@@ -40,6 +41,7 @@ const app = createApp({
   db,
   mailer: createMailer(config),
   now: () => new Date(),
+  commit: config.commit,
   clientIp: (c) => resolverIp(getConnInfo(c).remote.address, c.req.header('x-forwarded-for') ?? null, config.trustProxy),
   config,
   dataDir,

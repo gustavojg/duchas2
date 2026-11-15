@@ -71,3 +71,39 @@ describe('preguntasResueltas', () => {
     expect(anclaTema('Tu foto y el contacto')).toBe('tu-foto-y-el-contacto');
   });
 });
+
+describe('respuestas de tiempo en faq.json', () => {
+  const preguntas = cargarFaq().temas.flatMap((t) => t.preguntas);
+  const buscar = (texto: string) => {
+    const q = preguntas.find((p) => p.p === texto);
+    if (!q) throw new Error(`no está la pregunta «${texto}»`);
+    return q;
+  };
+  const reparacion = buscar('¿Cuánto dura la reparación?');
+  const uso = buscar('¿Cuándo puedo volver a usar la ducha?');
+  const c = { ...ctx, negocio: confirmado };
+
+  it('sin confirmar, la respuesta de reparación no empieza solo con «Sin obras ni polvo»', () => {
+    const primera = (respuestaFaq(reparacion.r, ctx).split('.')[0] ?? '').trim();
+    expect(primera).not.toBe('Sin obras ni polvo');
+  });
+
+  it('sin confirmar, ninguna respuesta lleva cifras ni horas o días', () => {
+    for (const q of [reparacion, uso]) {
+      expect(respuestaFaq(q.r, ctx)).not.toMatch(/\d|\bhoras?\b|\bd[ií]as?\b/i);
+    }
+  });
+
+  it('con plazos confirmados publica el dato', () => {
+    expect(respuestaFaq(reparacion.r, c)).toContain('Reparado en unas horas');
+    expect(respuestaFaq(uso.r, c)).toContain('Puedes usar la ducha a las 24 h');
+  });
+
+  it('sin confirmar, la reparación sigue diciendo «Sin obras ni polvo»', () => {
+    expect(respuestaFaq(reparacion.r, ctx)).toContain('Sin obras ni polvo');
+  });
+
+  it('la pregunta de reparación sigue en portada', () => {
+    expect(reparacion.en_portada).toBe(true);
+  });
+});
