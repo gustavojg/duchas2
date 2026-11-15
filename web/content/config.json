@@ -1,0 +1,6 @@
+{
+  "retencion_dias": 90,
+  "foto_max_mb": 10,
+  "limite_envios": 5,
+  "ventana_min": 60
+}
