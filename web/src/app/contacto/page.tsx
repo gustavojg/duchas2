@@ -12,6 +12,7 @@ import { presupuesto, respuesta } from '../../lib/textos';
 import { mensajePorRuta, telLink } from '../../lib/whatsapp';
 import { BotonLlamar } from '../../ui/BotonLlamar';
 import { BotonWhatsApp } from '../../ui/BotonWhatsApp';
+import { CintaEtiqueta } from '../../ui/CintaEtiqueta';
 import { EnviarContacto } from '../../ui/EnviarContacto';
 
 export const metadata: Metadata = {
@@ -43,10 +44,11 @@ export function Contacto({ negocio, config, modo }: ContactoProps) {
   return (
     <VStack gap={6} className="portada">
       <VStack gap={4} as="section" aria-labelledby="contacto-titulo">
+        <CintaEtiqueta>Contacto · Madrid</CintaEtiqueta>
         <Heading level={1} id="contacto-titulo">
           Mándanos una foto y te decimos si tiene arreglo
         </Heading>
-        <Text type="large" as="p">
+        <Text type="body" as="p">
           Llámanos, escríbenos por WhatsApp o rellena el formulario.
         </Text>
         <HStack gap={2} wrap="wrap" vAlign="center">
