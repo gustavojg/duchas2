@@ -33,7 +33,7 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
   const whatsapp = negocio.whatsapp.valor;
   const telefono = negocio.telefono.valor;
   return (
-    <VStack gap={6}>
+    <VStack gap={6} className="portada">
       <VStack gap={4} as="section" aria-labelledby="portada-titulo">
         <CintaEtiqueta>Madrid · Platos de ducha, bañeras y azulejos</CintaEtiqueta>
         <Heading level={1} id="portada-titulo">

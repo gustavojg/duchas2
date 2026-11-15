@@ -79,6 +79,19 @@ describe('portada con contenido sin confirmar (modo público)', () => {
     expect(html).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
 
+  it('todo el contenido, franja incluida, va dentro del contenedor con margen lateral `portada`', () => {
+    const portada = renderToStaticMarkup(<Portada negocio={negocio} config={config} modo="publico" />);
+    expect(portada).toMatch(/^<[a-z]+ [^>]*class="[^"]*\bportada\b[^"]*"/);
+    const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+    const regla = /\.portada\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(regla).toMatch(/padding-inline:\s*var\(--spacing-\d+\)/);
+    expect(regla).toMatch(/max-inline-size:\s*var\(--measure\)/);
+    expect(regla).toMatch(/margin-inline:\s*auto/);
+    for (const decl of regla.split(';').map((d) => d.trim()).filter(Boolean)) {
+      expect(decl).toMatch(/^[a-z-]+:\s*(var\(--[a-z0-9-]+\)|auto|100%|border-box)$/);
+    }
+  });
+
   it('no lleva enlaces a endpoints JSON y mantiene la navegación', () => {
     const hrefs = [...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
     for (const href of hrefs) expect(href).not.toMatch(/^\/(health|api)(\/|$|\?|#)/);

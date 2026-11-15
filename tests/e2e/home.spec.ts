@@ -39,6 +39,19 @@ test.describe('portada en un móvil de 360 × 740', () => {
     expect(errors).toEqual([]);
   });
 
+  test('el contenido de la portada tiene margen lateral (H1 y WhatsApp entre x=8 y x=352)', async ({ page }) => {
+    await page.goto('/');
+    for (const loc of [
+      page.getByRole('heading', { level: 1 }),
+      page.getByRole('link', { name: 'Manda la foto por WhatsApp' }),
+    ]) {
+      const box = await loc.boundingBox();
+      expect(box, 'sin caja').not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(8);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(352);
+    }
+  });
+
   test('sin scroll horizontal', async ({ page }) => {
     await page.goto('/');
     const ancho = await page.evaluate(() => document.documentElement.scrollWidth);
