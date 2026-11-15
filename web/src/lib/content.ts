@@ -127,6 +127,8 @@ export const serviciosSchema = z
       slugs.add(s.slug);
       if (s.tipo === 'servicio' && s.ruta !== `/servicios/${s.slug}/`)
         ctx.addIssue({ code: 'custom', path: [i, 'ruta'], message: `un servicio va en /servicios/${s.slug}/` });
+      if (s.tipo === 'principal' && s.ruta !== '/platos-de-ducha/')
+        ctx.addIssue({ code: 'custom', path: [i, 'ruta'], message: 'el servicio principal va en /platos-de-ducha/' });
     });
     servicios.forEach((s, i) =>
       s.relacionados.forEach((r, j) => {

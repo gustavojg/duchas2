@@ -137,6 +137,20 @@ describe('content.ts', () => {
       expect(() => cargarServicios()).toThrow(/servicios\.json.*9\.ruta/s);
     });
 
+    it('el servicio principal fuera de /platos-de-ducha/ falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/otra-ruta/';
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*0\.ruta/s);
+    });
+
+    it('el servicio principal en /platos-de-ducha/ valida', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/platos-de-ducha/';
+      conServicios(data);
+      expect(cargarServicios()[0].ruta).toBe('/platos-de-ducha/');
+    });
+
     it('una ruta válida sigue validando', () => {
       const data = leer('servicios.json');
       data[4].ruta = '/servicios/azulejos/';
