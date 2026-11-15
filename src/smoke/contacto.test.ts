@@ -4,8 +4,10 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { detectarFoto } from '../domain/foto.js';
 import { createMailer } from '../mailer.js';
+import { testApp } from '../testing.js';
 import { contactoSchema } from '../../web/src/lib/contacto.js';
 import {
+  ejecutarSmoke,
   emlTieneFotoPng,
   formularioHoneypot,
   formularioTelefonoMalo,
@@ -63,5 +65,58 @@ describe('piezas del smoke de contacto', () => {
     await mailerFile(sinDir).send({ to: 'a@localhost', subject: 'sin foto', text: 'hola' });
     const [sin] = listarEml(sinDir);
     expect(emlTieneFotoPng(fs.readFileSync(path.join(sinDir, 'mail', sin!), 'utf8'))).toBe(false);
+  });
+});
+
+describe('ejecutarSmoke', () => {
+  const montar = (over: Parameters<typeof testApp>[0] = {}) => {
+    const dataDir = tmp('smoke-app-');
+    const t = testApp({ dataDir, mailer: mailerFile(dataDir), ...over });
+    const fetchFn = async (url: string, init?: RequestInit) => t.app.request(new URL(url).pathname, init);
+    return { ...t, fetchFn };
+  };
+  const filasIp = (db: ReturnType<typeof testApp>['deps']['db']) =>
+    (db.prepare('SELECT COUNT(*) AS n FROM envios_ip').get() as { n: number }).n;
+
+  it('camino feliz: 4 pasos ok, 1 .eml con la foto y solo 3 intentos contra el límite', async () => {
+    const { fetchFn, dataDir, deps } = montar();
+    const r = await ejecutarSmoke({ baseUrl: 'http://127.0.0.1:3000', dataDir, fetchFn });
+    expect(r.pasos).toHaveLength(4);
+    expect(r.pasos.every((p) => p.ok)).toBe(true);
+    expect(r.ok).toBe(true);
+    const eml = listarEml(dataDir);
+    expect(eml).toHaveLength(1);
+    expect(emlTieneFotoPng(fs.readFileSync(path.join(dataDir, 'mail', eml[0]!), 'utf8'))).toBe(true);
+    expect(filasIp(deps.db)).toBe(3);
+    for (const p of r.pasos) {
+      expect(p.detalle).not.toMatch(/203\.0\.113\.1|600123456|Smoke staging/);
+    }
+  });
+
+  it('sin email de destino el paso 1 falla y apunta a EMAIL_DESTINO', async () => {
+    const { fetchFn, dataDir } = montar({ emailDestino: null });
+    const r = await ejecutarSmoke({ baseUrl: 'http://127.0.0.1:3000', dataDir, fetchFn });
+    expect(r.ok).toBe(false);
+    expect(r.pasos[0]!.ok).toBe(false);
+    expect(r.pasos[0]!.detalle).toContain('EMAIL_DESTINO');
+  });
+
+  it('con el límite por IP agotado falla y lo explica', async () => {
+    const { fetchFn, dataDir } = montar({
+      formulario: { retencion_dias: 90, foto_max_mb: 10, limite_envios: 1, ventana_min: 60 },
+    });
+    const r = await ejecutarSmoke({ baseUrl: 'http://127.0.0.1:3000', dataDir, fetchFn });
+    expect(r.ok).toBe(false);
+    expect(r.pasos.some((p) => !p.ok && p.detalle.includes('límite por IP'))).toBe(true);
+  });
+
+  it('si GET /api/contacto respondiera 2xx el paso 4 falla', async () => {
+    const { fetchFn: real, dataDir } = montar();
+    const fetchFn = async (url: string, init?: RequestInit) =>
+      (init?.method ?? 'GET') === 'GET' ? new Response('{}', { status: 200 }) : real(url, init);
+    const r = await ejecutarSmoke({ baseUrl: 'http://127.0.0.1:3000', dataDir, fetchFn });
+    expect(r.ok).toBe(false);
+    expect(r.pasos.slice(0, 3).every((p) => p.ok)).toBe(true);
+    expect(r.pasos[3]!.ok).toBe(false);
   });
 });

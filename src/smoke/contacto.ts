@@ -56,6 +56,92 @@ export function listarEml(dataDir: string): string[] {
   }
 }
 
+export interface PasoSmoke { nombre: string; ok: boolean; detalle: string }
+export interface ResultadoSmoke { ok: boolean; pasos: PasoSmoke[] }
+export type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
+
+const LIMITE_AGOTADO = 'límite por IP agotado (5 por 60 min); espera o usa otro origen';
+const SIN_EMAIL_DESTINO = '503: ¿falta EMAIL_DESTINO en el arranque del staging?';
+
+/** Cuerpo JSON de la respuesta o null; nunca se copia al detalle (podría llevar datos). */
+async function json(res: Response): Promise<Record<string, unknown> | null> {
+  try {
+    const v: unknown = await res.json();
+    return v && typeof v === 'object' ? (v as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Ejecuta el smoke contra `baseUrl` y lee los .eml de `dataDir`. Solo los pasos 1-3 son POST (cuentan contra el
+ * límite por IP: 3 de 5 por ventana); el 4 es un GET. Sin reintentos ni envíos extra. No llama a process.exit.
+ */
+export async function ejecutarSmoke(opts: { baseUrl: string; dataDir: string; fetchFn?: FetchFn }): Promise<ResultadoSmoke> {
+  const { baseUrl, dataDir, fetchFn = fetch } = opts;
+  const url = `${baseUrl.replace(/\/+$/, '')}/api/contacto`;
+  const post = (body: FormData) => fetchFn(url, { method: 'POST', body });
+  const pasos: PasoSmoke[] = [];
+  const paso = (nombre: string, ok: boolean, detalle: string) => void pasos.push({ nombre, ok, detalle });
+  const comun = (status: number, esperado: number) =>
+    status === 429 ? LIMITE_AGOTADO : `se esperaba ${esperado} y llegó ${status}`;
+
+  // 1. Petición válida con foto: 201 y exactamente un .eml nuevo con el PNG adjunto.
+  {
+    const nombre = 'POST válido con foto → 201 y .eml con la foto';
+    const antes = new Set(listarEml(dataDir));
+    const res = await post(formularioValido(PNG_MINIMO));
+    await res.body?.cancel();
+    if (res.status !== 201) {
+      paso(nombre, false, res.status === 503 ? SIN_EMAIL_DESTINO : comun(res.status, 201));
+    } else {
+      const nuevos = listarEml(dataDir).filter((f) => !antes.has(f));
+      if (nuevos.length !== 1) {
+        paso(nombre, false, `201, pero hay ${nuevos.length} .eml nuevos en ${path.join(dataDir, 'mail')} (se esperaba 1)`);
+      } else if (!emlTieneFotoPng(fs.readFileSync(path.join(dataDir, 'mail', nuevos[0]!), 'utf8'))) {
+        paso(nombre, false, `201, pero el .eml ${nuevos[0]} no trae la foto PNG adjunta`);
+      } else {
+        paso(nombre, true, `201 y ${nuevos[0]} con la foto adjunta`);
+      }
+    }
+  }
+
+  // 2. Honeypot: 201 sin enviar nada.
+  {
+    const nombre = 'POST con honeypot → 201 sin .eml';
+    const antes = listarEml(dataDir).length;
+    const res = await post(formularioHoneypot());
+    await res.body?.cancel();
+    const nuevos = listarEml(dataDir).length - antes;
+    if (res.status !== 201) paso(nombre, false, comun(res.status, 201));
+    else if (nuevos !== 0) paso(nombre, false, `201, pero se han generado ${nuevos} .eml`);
+    else paso(nombre, true, '201 y ningún .eml nuevo');
+  }
+
+  // 3. Teléfono inválido: 400 con error de validación en telefono.
+  {
+    const nombre = 'POST con teléfono 123 → 400 validación en telefono';
+    const res = await post(formularioTelefonoMalo());
+    const cuerpo = await json(res);
+    const campos = cuerpo?.campos as Record<string, unknown> | undefined;
+    if (res.status !== 400) paso(nombre, false, comun(res.status, 400));
+    else if (cuerpo?.error !== 'validacion') paso(nombre, false, '400, pero error no es «validacion»');
+    else if (!campos || !('telefono' in campos)) paso(nombre, false, '400, pero campos.telefono no viene');
+    else paso(nombre, true, '400 con campos.telefono');
+  }
+
+  // 4. GET no está permitido (no cuenta contra el límite).
+  {
+    const nombre = 'GET /api/contacto → sin 2xx';
+    const res = await fetchFn(url, { method: 'GET' });
+    await res.body?.cancel();
+    if (res.status >= 200 && res.status < 300) paso(nombre, false, `llegó ${res.status}; GET no debe responder 2xx`);
+    else paso(nombre, true, `${res.status}`);
+  }
+
+  return { ok: pasos.every((p) => p.ok), pasos };
+}
+
 function contiene(haystack: Uint8Array, needle: Uint8Array): boolean {
   outer: for (let i = 0; i + needle.length <= haystack.length; i++) {
     for (let j = 0; j < needle.length; j++) if (haystack[i + j] !== needle[j]) continue outer;
