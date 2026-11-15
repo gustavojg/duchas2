@@ -5,6 +5,11 @@ import { z } from 'zod';
  * Configuración por entorno. Único sitio que lee process.env; nunca secretos en el repo
  * (`.env.example` solo lleva nombres). Las rutas relativas se resuelven contra el cwd (la raíz del repo).
  */
+/** Variable con la que el staging de la fábrica inyecta el commit (la misma que lee padel). */
+export const COMMIT_ENV = 'GIT_SHA';
+/** Valor de `commit` cuando no llega la variable (misma convención que padel). */
+export const UNKNOWN_COMMIT = 'desconocido';
+
 const Env = z.object({
   HOST: z.string().default('127.0.0.1'),
   PORT: z.coerce.number().int().positive().default(3000),
@@ -14,6 +19,8 @@ const Env = z.object({
   MAIL_TRANSPORT: z.enum(['file', 'smtp']).default('file'),
   SMTP_URL: z.string().optional(),
   MAIL_FROM: z.string().default('duchas2 <no-reply@localhost>'),
+  /** Commit servido en GET /health; lo inyecta el staging de la fábrica (scripts/staging-start.sh). */
+  [COMMIT_ENV]: z.string().optional(),
 });
 
 export interface Config {
@@ -23,6 +30,8 @@ export interface Config {
   webDir: string;
   baseUrl: string;
   mail: { transport: 'file' | 'smtp'; smtpUrl?: string; from: string };
+  /** Commit servido (GIT_SHA, recortado); UNKNOWN_COMMIT si falta o está vacío. */
+  commit: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -35,5 +44,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     webDir: path.resolve(e.WEB_DIR),
     baseUrl: e.BASE_URL.replace(/\/+$/, ''),
     mail: { transport: e.MAIL_TRANSPORT, smtpUrl: e.SMTP_URL, from: e.MAIL_FROM },
+    commit: e[COMMIT_ENV]?.trim() || UNKNOWN_COMMIT,
   };
 }
