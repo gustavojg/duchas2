@@ -1,0 +1,42 @@
+{
+  "madrid_capital": [
+    "Centro",
+    "Arganzuela",
+    "Retiro",
+    "Salamanca",
+    "Chamartín",
+    "Tetuán",
+    "Chamberí",
+    "Fuencarral-El Pardo",
+    "Moncloa-Aravaca",
+    "Latina",
+    "Carabanchel",
+    "Usera",
+    "Puente de Vallecas",
+    "Moratalaz",
+    "Ciudad Lineal",
+    "Hortaleza",
+    "Villaverde",
+    "Villa de Vallecas",
+    "Vicálvaro",
+    "San Blas-Canillejas",
+    "Barajas"
+  ],
+  "municipios": [
+    "Alcobendas",
+    "Pozuelo de Alarcón",
+    "Las Rozas",
+    "Majadahonda",
+    "Getafe",
+    "Leganés",
+    "Alcorcón",
+    "Móstoles",
+    "Fuenlabrada",
+    "Alcalá de Henares",
+    "Torrejón de Ardoz",
+    "San Sebastián de los Reyes",
+    "Boadilla del Monte",
+    "Rivas-Vaciamadrid",
+    "Coslada"
+  ]
+}

@@ -2,9 +2,17 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { cargarNegocio, contentDir } from './content.ts';
+import {
+  cargarComparativa,
+  cargarNegocio,
+  cargarPasos,
+  cargarServicios,
+  cargarZonas,
+  contentDir,
+} from './content.ts';
 
-const original = () => JSON.parse(readFileSync(join(contentDir(), 'negocio.json'), 'utf8'));
+const leer = (f: string) => JSON.parse(readFileSync(join(contentDir(), f), 'utf8'));
+const original = () => leer('negocio.json');
 
 describe('content.ts', () => {
   const dirs: string[] = [];
@@ -46,5 +54,67 @@ describe('content.ts', () => {
 
   it('se encuentra web/content tanto desde la raíz como desde web/', () => {
     expect(contentDir().replace(/\\/g, '/')).toMatch(/web\/content$/);
+  });
+
+  describe('servicios, pasos, comparativa y zonas', () => {
+    const conServicios = (data: unknown) => {
+      const dir = mkdtempSync(join(tmpdir(), 'contenido-'));
+      dirs.push(dir);
+      writeFileSync(join(dir, 'servicios.json'), JSON.stringify(data));
+      process.env.CONTENT_DIR = dir;
+    };
+
+    it('los cuatro JSON reales validan', () => {
+      const s = cargarServicios();
+      expect(s).toHaveLength(10);
+      expect(s[0]).toMatchObject({ nombre: 'Reparación y esmaltado de platos de ducha', tipo: 'principal', ruta: '/platos-de-ducha/' });
+      expect(s[9].tipo).toBe('empresas');
+      for (const x of s.slice(1, 9)) {
+        expect(x.tipo).toBe('servicio');
+        expect(x.ruta).toBe(`/servicios/${x.slug}/`);
+      }
+      for (const x of s) expect(x.precio_desde.confirmado).toBe(false);
+      expect(s[0].whatsapp_mensaje).toMatch(/plato de ducha/);
+
+      const p = cargarPasos();
+      expect(p.map((x) => x.numero)).toEqual([1, 2, 3, 4]);
+
+      const c = cargarComparativa();
+      expect(c.filas.map((f) => f.id)).toEqual(['coste', 'tiempo', 'obra']);
+      expect(c.filas[0].cambiar.confirmado).toBe(false);
+
+      const z = cargarZonas();
+      expect(z.madrid_capital).toHaveLength(21);
+      expect(z.municipios.length).toBeGreaterThan(0);
+    });
+
+    it('un `relacionados` a un slug inexistente falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[1].relacionados = ['no-existe'];
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*1\.relacionados/s);
+    });
+
+    it('un slug repetido falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[2].slug = data[1].slug;
+      data[2].ruta = `/servicios/${data[1].slug}/`;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*2\.slug/s);
+    });
+
+    it('un `imagen_tarjeta` desconocido falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[3].imagen_tarjeta = 'foto-rara';
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*3\.imagen_tarjeta/s);
+    });
+
+    it('una ruta de servicio que no es /servicios/<slug>/ falla', () => {
+      const data = leer('servicios.json');
+      data[4].ruta = '/otra/';
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
+    });
   });
 });
