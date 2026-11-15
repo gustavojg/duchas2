@@ -3,6 +3,7 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { filasComparativa, resolverPasos, serviciosConPrecio, serviciosOrdenados } from '../lib/catalogo';
 import { type ConfigFormulario, configFormulario } from '../lib/config';
@@ -19,6 +20,7 @@ import {
   type Zonas,
 } from '../lib/content';
 import { type Modo, modoActual } from '../lib/dato';
+import { canonicalUrl } from '../lib/seo';
 import { DESCRIPTION } from '../lib/site';
 import { compromisosFranja, titularPortada } from '../lib/textos';
 import { telLink } from '../lib/whatsapp';
@@ -33,7 +35,12 @@ import { PrecioDesde } from '../ui/PrecioDesde';
 import { TablaRepararCambiar } from '../ui/TablaRepararCambiar';
 import { TarjetaServicio } from '../ui/TarjetaServicio';
 
-const MENSAJE_WHATSAPP = 'Hola, os mando una foto del daño para que me digáis si tiene arreglo.';
+/** Title y description los pone el layout; aquí solo el canonical propio de `/` (no se hereda). */
+export const metadata: Metadata = {
+  alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/') },
+};
+
+const MENSAJE_WHATSAPP ='Hola, os mando una foto del daño para que me digáis si tiene arreglo.';
 const MENSAJE_PRECIO = 'Hola, quiero saber cuánto costaría arreglar mi baño. Os mando una foto.';
 const MENSAJE_ZONA = 'Hola, vivo en… ¿venís a mi zona?';
 const NO_VES_TU_ZONA = '¿No ves tu zona? Pregúntanos por WhatsApp';

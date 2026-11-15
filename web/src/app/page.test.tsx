@@ -19,7 +19,7 @@ import { telLink } from '../lib/whatsapp';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
-import { Portada, type PortadaProps } from './page';
+import { metadata as metadataPortada, Portada, type PortadaProps } from './page';
 import { metadata as metadataZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
@@ -271,6 +271,12 @@ describe('página /zonas/', () => {
     expect(String(metadataZonas.title)).toMatch(/[Zz]onas/);
     expect(String(metadataZonas.description)).toMatch(/Madrid/);
     expect(`${metadataZonas.title} ${metadataZonas.description}`).not.toMatch(/\d+\s*(h|horas|días|años)\b|en el día|en unas horas|PENDIENTE/);
+  });
+
+  it('cada página lleva su propio canonical: url_base + ruta', () => {
+    const base = negocio.url_base.replace(/\/+$/, '');
+    expect(metadataPortada.alternates?.canonical).toBe(`${base}/`);
+    expect(metadataZonas.alternates?.canonical).toBe(`${base}/zonas/`);
   });
 
   it('está en la navegación y en las páginas públicas', () => {

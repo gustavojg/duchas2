@@ -8,13 +8,14 @@ import { configFormulario } from '../../lib/config';
 import { cargarFaq, cargarNegocio, type Faq, type Negocio } from '../../lib/content';
 import { type Modo, modoActual } from '../../lib/dato';
 import { preguntasResueltas } from '../../lib/faq';
-import { jsonLdFaqPage } from '../../lib/seo';
+import { canonicalUrl, jsonLdFaqPage } from '../../lib/seo';
 import { AcordeonFaq } from '../../ui/AcordeonFaq';
 import { JsonLd } from '../../ui/JsonLd';
 
 export const metadata: Metadata = {
   title: `Preguntas frecuentes · ${APP_NAME}`,
   description: 'Resolvemos tus dudas sobre la reparación de tu plato de ducha: daños, presupuesto, garantía y tu foto.',
+  alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/preguntas-frecuentes/') },
 };
 
 export interface PaginaFaqProps {
