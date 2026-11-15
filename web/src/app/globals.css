@@ -70,6 +70,8 @@
   --measure: 65ch;
   /* Botones de acción ≥ 44 px (brain/design.md: ≥ 48): Button size="lg" toma su alto de este token. */
   --size-element-lg: var(--spacing-12);
+  /* Capa del botón flotante de WhatsApp: por encima del contenido de la página. */
+  --z-flotante: 10;
 }
 
 /*
@@ -102,4 +104,23 @@
   display: block;
   flex: none;
   inline-size: var(--spacing-10);
+}
+
+/*
+ * BotonFlotanteWhatsApp (src/ui/BotonFlotanteWhatsApp.tsx): píldora de marca fija abajo a la derecha con la única
+ * sombra del producto. Alto ≥ 48 px por Button size="lg" (--size-element-lg). Se oculta sin desmontarse mientras
+ * se ve el CTA del hero o el «Enviar petición» (IDS_SIN_FLOTANTE en src/lib/whatsapp.ts).
+ */
+.boton-flotante {
+  position: fixed;
+  inset-block-end: var(--spacing-4);
+  inset-inline-end: var(--spacing-4);
+  z-index: var(--z-flotante);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-1);
+}
+
+.boton-flotante-oculto {
+  visibility: hidden;
+  pointer-events: none;
 }

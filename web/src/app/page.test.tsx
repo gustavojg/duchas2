@@ -126,6 +126,35 @@ describe('marco', () => {
   });
 });
 
+describe('botón flotante en globals.css', () => {
+  const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+  const regla = (sel: string) => new RegExp(`\\${sel}\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? '';
+  const decls = (r: string) => r.split(';').map((d) => d.trim()).filter(Boolean);
+
+  it('.boton-flotante: fijo abajo a la derecha, píldora y --shadow-1, solo con var(--…) o palabras clave', () => {
+    const r = regla('.boton-flotante');
+    expect(r).toMatch(/box-shadow:\s*var\(--shadow-1\)/);
+    expect(r).toMatch(/position:\s*fixed/);
+    expect(r).toMatch(/inset-block-end:\s*var\(--spacing-\d+\)/);
+    expect(r).toMatch(/inset-inline-end:\s*var\(--spacing-\d+\)/);
+    expect(r).toMatch(/border-radius:\s*var\(--radius-full\)/);
+    for (const d of decls(r)) expect(d).toMatch(/^[a-z-]+:\s*(var\(--[a-z0-9-]+\)|[a-z-]+)$/);
+  });
+
+  it('.boton-flotante-oculto lo esconde sin valores sueltos', () => {
+    const r = regla('.boton-flotante-oculto');
+    expect(r).toMatch(/visibility:\s*hidden/);
+    for (const d of decls(r)) expect(d).toMatch(/^[a-z-]+:\s*(var\(--[a-z0-9-]+\)|[a-z-]+)$/);
+  });
+});
+
+describe('hero', () => {
+  it('los botones del hero llevan id="cta-hero" (el flotante se oculta mientras se ven)', () => {
+    const html = renderToStaticMarkup(<Portada negocio={negocio} config={config} modo="publico" />);
+    expect(html).toMatch(/id="cta-hero"[^>]*>(?:(?!<\/section>).)*Manda la foto por WhatsApp/s);
+  });
+});
+
 describe('404', () => {
   it('explica el error y lleva a la portada', () => {
     const html = renderToStaticMarkup(<NotFound />);
@@ -139,6 +168,10 @@ describe('layout', () => {
   it('importa solo globals.css', () => {
     expect(src).toContain("import './globals.css'");
     expect(src).not.toMatch(/theme\.css|base\.css/);
+  });
+  it('monta el botón flotante de WhatsApp una sola vez', () => {
+    expect(src.match(/import \{ BotonFlotanteWhatsApp \} from '\.\.\/ui\/BotonFlotanteWhatsApp'/g)).toHaveLength(1);
+    expect(src.match(/<BotonFlotanteWhatsApp\b/g)).toHaveLength(1);
   });
   it('pasa a Frame el teléfono del contenido con telLink', () => {
     expect(src).toMatch(/telLink\(/);

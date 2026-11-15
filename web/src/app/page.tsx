@@ -40,7 +40,7 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
         <Text type="large" as="p">
           {DESCRIPTION}
         </Text>
-        <HStack gap={2} wrap="wrap" vAlign="center">
+        <HStack gap={2} wrap="wrap" vAlign="center" id="cta-hero">
           {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_PORTADA} etiqueta="Manda la foto por WhatsApp" /> : null}
           {telefono ? <BotonLlamar href={telLink(telefono)} etiqueta="Llamar" /> : null}
         </HStack>
