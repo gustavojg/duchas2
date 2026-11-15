@@ -71,3 +71,14 @@ export function leerContenido<S extends z.ZodTypeAny>(fichero: string, schema: S
 export function cargarNegocio(): Negocio {
   return leerContenido('negocio.json', negocioSchema);
 }
+
+/**
+ * Servicios publicados (web/content/servicios.json): schema mínimo y tolerante hasta que exista el definitivo;
+ * sin fichero, ningún servicio. Se mantiene la firma `{ slug, nombre }[]`.
+ */
+const serviciosSchema = z.array(z.object({ slug: z.string().min(1), nombre: z.string().min(1) }).passthrough());
+
+export function cargarServicios(): { slug: string; nombre: string }[] {
+  if (!existsSync(join(contentDir(), 'servicios.json'))) return [];
+  return leerContenido('servicios.json', serviciosSchema).map(({ slug, nombre }) => ({ slug, nombre }));
+}
