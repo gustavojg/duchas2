@@ -4,6 +4,26 @@ import { describe, expect, it } from 'vitest';
 import { testApp } from './testing.js';
 import { APP_NAME } from '../web/src/lib/site.js';
 
+describe('testApp()', () => {
+  it('crea un dataDir temporal y un reloj que avanza', () => {
+    const { deps, dataDir, clock } = testApp();
+    expect(fs.statSync(dataDir).isDirectory()).toBe(true);
+    expect(deps.dataDir).toBe(dataDir);
+    const antes = deps.now().getTime();
+    clock.advance(61);
+    expect(deps.now().getTime() - antes).toBe(61 * 60000);
+  });
+
+  it('trae la configuración del formulario y se puede sobrescribir', () => {
+    const { deps } = testApp({ emailDestino: null });
+    expect(deps.formulario).toEqual({ retencion_dias: 90, foto_max_mb: 10, limite_envios: 5, ventana_min: 60 });
+    expect(deps.ipSalt).toBe('sal-de-test');
+    expect(deps.emailDestino).toBeNull();
+    expect(testApp().deps.emailDestino).toBe('taller@ejemplo.test');
+  });
+});
+
+
 /** web/out de mentira: el de verdad lo prueba `pnpm test:build` (tests/build/). */
 function fakeWeb() {
   const { app, webDir } = testApp();

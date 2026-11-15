@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import path from 'node:path';
 import { z } from 'zod';
 
@@ -21,6 +22,12 @@ const Env = z.object({
   MAIL_FROM: z.string().default('duchas2 <no-reply@localhost>'),
   /** Commit servido en GET /health; lo inyecta el staging de la fábrica (scripts/staging-start.sh). */
   [COMMIT_ENV]: z.string().optional(),
+  // Sal del HMAC de la IP (límite por IP). Secreto: `sf secret set`, nunca en el repo.
+  IP_SALT: z.string().optional(),
+  // 1 detrás de un proxy de confianza: la IP del cliente sale del primer elemento de X-Forwarded-For.
+  TRUST_PROXY: z.enum(['0', '1']).default('0'),
+  // Override de email_destino de web/content/negocio.json.
+  EMAIL_DESTINO: z.string().optional(),
 });
 
 export interface Config {
@@ -32,11 +39,19 @@ export interface Config {
   mail: { transport: 'file' | 'smtp'; smtpUrl?: string; from: string };
   /** Commit servido (GIT_SHA, recortado); UNKNOWN_COMMIT si falta o está vacío. */
   commit: string;
+  ipSalt: string;
+  /** true si falta IP_SALT y se generó una sal aleatoria; quien arranca el servidor decide si avisa. */
+  ipSaltGenerada: boolean;
+  trustProxy: boolean;
+  emailDestino?: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const e = Env.parse(env);
   if (e.MAIL_TRANSPORT === 'smtp' && !e.SMTP_URL) throw new Error('MAIL_TRANSPORT=smtp necesita SMTP_URL');
+  const saltEnv = e.IP_SALT?.trim();
+  const ipSaltGenerada = !saltEnv;
+  const ipSalt = saltEnv || randomBytes(32).toString('hex');
   return {
     host: e.HOST,
     port: e.PORT,
@@ -45,5 +60,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     baseUrl: e.BASE_URL.replace(/\/+$/, ''),
     mail: { transport: e.MAIL_TRANSPORT, smtpUrl: e.SMTP_URL, from: e.MAIL_FROM },
     commit: e[COMMIT_ENV]?.trim() || UNKNOWN_COMMIT,
+    ipSalt,
+    ipSaltGenerada,
+    trustProxy: e.TRUST_PROXY === '1',
+    emailDestino: e.EMAIL_DESTINO?.trim() || undefined,
   };
 }
