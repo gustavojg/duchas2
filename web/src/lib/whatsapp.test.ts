@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { telLink, waLink } from './whatsapp.js';
+import { telLink, waLink } from './whatsapp.ts';
 
 describe('waLink()', () => {
   it('solo dígitos y el mensaje con encodeURIComponent', () => {

@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { cargarNegocio, contentDir } from './content.js';
+import { cargarNegocio, contentDir } from './content.ts';
 
 const original = () => JSON.parse(readFileSync(join(contentDir(), 'negocio.json'), 'utf8'));
 

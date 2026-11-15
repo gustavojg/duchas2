@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { anios, garantia, precioDesde, presupuesto, reparacion, respuesta, titularPortada } from './textos.js';
+import { anios, garantia, precioDesde, presupuesto, reparacion, respuesta, titularPortada } from './textos.ts';
 
 const si = <T>(valor: T) => ({ valor, confirmado: true });
 const no = <T>(valor: T | null = null) => ({ valor, confirmado: false });

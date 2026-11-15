@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { modoActual, PENDIENTE, texto } from './dato.js';
+import { modoActual, PENDIENTE, texto } from './dato.ts';
 
 describe('texto()', () => {
   const si = { valor: 'en 24 h', confirmado: true };

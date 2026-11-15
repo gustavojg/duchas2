@@ -3,7 +3,7 @@
  * no, el visitante ve el texto alternativo y, en local (modo `pendientes`), el marcador {{PENDIENTE}} para que
  * el cliente detecte el hueco. Puro: sin React, Next, node:* ni window.
  */
-import type { Dato } from './content.js';
+import type { Dato } from './content.ts';
 
 export type Modo = 'pendientes' | 'publico';
 

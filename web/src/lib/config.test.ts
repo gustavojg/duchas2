@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { configFormulario } from './config.js';
+import { configFormulario } from './config.ts';
 
 describe('configFormulario()', () => {
   it('sin variables de entorno devuelve config.json', () => {

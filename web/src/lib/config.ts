@@ -4,7 +4,7 @@
  * páginas (texto de retención) y el servidor (borrado y límites). Sin React ni Next.
  */
 import { z } from 'zod';
-import { leerContenido } from './content.js';
+import { leerContenido } from './content.ts';
 
 const positivo = z.number().int().positive();
 

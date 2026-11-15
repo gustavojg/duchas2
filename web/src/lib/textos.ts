@@ -8,8 +8,8 @@
  *   «en 24 h», «en menos de 24 h», «en unas horas» / «en el día».
  * - anios y garantia.anios son enteros; 0 no se publica nunca.
  */
-import type { Dato } from './content.js';
-import { confirmado, type Modo, PENDIENTE, texto } from './dato.js';
+import type { Dato } from './content.ts';
+import { confirmado, type Modo, PENDIENTE, texto } from './dato.ts';
 
 const plural = (n: number) => (n === 1 ? `${n} año` : `${n} años`);
 
