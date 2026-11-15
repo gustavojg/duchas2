@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { Metadata } from 'next';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { APP_NAME, NAV } from '../config';
@@ -20,6 +21,8 @@ import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
 import { metadata as metadataPortada, Portada, type PortadaProps } from './page';
+import { metadata as metadataContacto } from './contacto/page';
+import { metadata as metadataFaq } from './preguntas-frecuentes/page';
 import { metadata as metadataZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
@@ -296,8 +299,20 @@ describe('página /zonas/', () => {
 
   it('cada página lleva su propio canonical: url_base + ruta', () => {
     const base = negocio.url_base.replace(/\/+$/, '');
-    expect(metadataPortada.alternates?.canonical).toBe(`${base}/`);
-    expect(metadataZonas.alternates?.canonical).toBe(`${base}/zonas/`);
+    const porRuta: Record<string, Metadata> = {
+      '/': metadataPortada,
+      '/zonas/': metadataZonas,
+      '/preguntas-frecuentes/': metadataFaq,
+      '/contacto/': metadataContacto,
+    };
+    const canonicals = new Set<unknown>();
+    for (const ruta of PAGES) {
+      const meta = porRuta[ruta];
+      expect(meta, `falta metadata para ${ruta}`).toBeDefined();
+      expect(meta!.alternates?.canonical, `canonical en ${ruta}`).toBe(`${base}${ruta}`);
+      canonicals.add(meta!.alternates?.canonical);
+    }
+    expect(canonicals.size).toBe(PAGES.length);
   });
 
   it('está en la navegación y en las páginas públicas', () => {
