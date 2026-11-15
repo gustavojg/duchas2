@@ -124,3 +124,25 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+/*
+ * FormularioContacto y CampoFoto (src/ui/): inputs nativos que no se ven. `campo-foto-input` es el <input
+ * type="file"> que abre el botón «Añadir foto del daño»; `campo-trampa` es el honeypot `web` (aria-hidden y
+ * tabindex -1). Ocultos sin display:none, fuera del flujo y recortados.
+ */
+.campo-foto-input,
+.campo-trampa {
+  position: absolute;
+  inline-size: var(--spacing-0-5);
+  block-size: var(--spacing-0-5);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Icono de cada pieza en el SegmentedControl del formulario. */
+.campo-pieza-icono {
+  display: block;
+  flex: none;
+  inline-size: var(--spacing-5);
+}

@@ -50,6 +50,8 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | BotonLlamar | `web/src/ui/BotonLlamar.tsx` | Button (secondary, lg) + Icon con glifo propio; href con `telLink()`. Lo usan la cabecera (`Frame`) y el hero | creada |
 | Contenedor `portada` | `web/src/app/page.tsx` (+ `.portada` en globals.css) | VStack (`className="portada"`) que envuelve hero y franja: padding-inline var(--spacing-4), max-inline-size var(--measure), margin-inline auto. Solo clase, sin `<div>`/`<span>` propios; no usa `Section maxWidth` ni `Layout contentWidth` porque pintan estilo en línea | creada |
 | FranjaConfianza | `web/src/ui/FranjaConfianza.tsx` | Section (muted) + VStack/HStack (`ul`/`li`) + Text + IconoCompromiso de art.tsx; hueco del icono con la clase `franja-confianza-icono` (var(--spacing-10)) | creada |
+| FormularioContacto | `web/src/ui/FormularioContacto.tsx` | Componente puro (sin fetch): VStack `as="form"` + Field + SegmentedControl (icono de art.tsx en `campo-pieza-icono`) + TextInput + Selector + TextArea + CheckboxInput + Link + Banner (`collapsible={false}`, sin `endContent`, que pinta estilo en línea) + Button primario «Enviar petición» (`#enviar-peticion`) + BotonLlamar/BotonWhatsApp secundarios. Honeypot `web` como `<input>` nativo con la clase `campo-trampa`, y `pagina_origen` oculto | creada |
+| CampoFoto | `web/src/ui/CampoFoto.tsx` | Field (ayuda y error `detached`) + Button «Añadir foto del daño» / «Quitar foto» + Text sobre `<input type="file">` nativo con la clase `campo-foto-input`. No usa FileInput: descarta en silencio los tipos fuera de `accept` y el aviso tiene que ser el de lib/contacto.ts | creada |
 
 Notas de implementación:
 
@@ -64,5 +66,5 @@ Notas de implementación:
 
 Previstas por `brain/design.md` (las construye la funcionalidad que las usa): DeslizadorAntesDespues,
 PasosTrabajo, TablaRepararCambiar, TarjetaServicio, BotonFlotanteWhatsApp, CabeceraContacto, PrecioDesde,
-BloqueResenas, ListaZonas, FormularioContacto (+ CampoFoto), GaleriaFiltrable, MigasDePan, AcordeonFaq,
+BloqueResenas, ListaZonas, GaleriaFiltrable, MigasDePan, AcordeonFaq,
 IlustracionSvg, HuecoFoto.
