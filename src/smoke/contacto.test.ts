@@ -12,6 +12,7 @@ import {
   formularioHoneypot,
   formularioTelefonoMalo,
   formularioValido,
+  leerEntornoSmoke,
   listarEml,
   PNG_MINIMO,
 } from './contacto.js';
@@ -65,6 +66,28 @@ describe('piezas del smoke de contacto', () => {
     await mailerFile(sinDir).send({ to: 'a@localhost', subject: 'sin foto', text: 'hola' });
     const [sin] = listarEml(sinDir);
     expect(emlTieneFotoPng(fs.readFileSync(path.join(sinDir, 'mail', sin!), 'utf8'))).toBe(false);
+  });
+});
+
+describe('leerEntornoSmoke', () => {
+  it('por defecto apunta a 127.0.0.1:3000 y a ./data absoluto', () => {
+    const e = leerEntornoSmoke({});
+    expect(e.baseUrl).toBe('http://127.0.0.1:3000');
+    expect(e.dataDir).toBe(path.resolve('./data'));
+    expect(path.isAbsolute(e.dataDir)).toBe(true);
+    expect(e.local).toBe(true);
+  });
+
+  it('quita la barra final de BASE_URL y marca si no es local', () => {
+    const e = leerEntornoSmoke({ BASE_URL: 'https://staging.ejemplo.test/', DATA_DIR: 'data/smoke' });
+    expect(e.baseUrl).toBe('https://staging.ejemplo.test');
+    expect(e.dataDir).toBe(path.resolve('data/smoke'));
+    expect(e.local).toBe(false);
+  });
+
+  it('con BASE_URL inválida lanza un error claro', () => {
+    expect(() => leerEntornoSmoke({ BASE_URL: 'no es una url' })).toThrow(/BASE_URL/);
+    expect(() => leerEntornoSmoke({ BASE_URL: 'ftp://x.test' })).toThrow(/BASE_URL/);
   });
 });
 

@@ -56,6 +56,33 @@ export function listarEml(dataDir: string): string[] {
   }
 }
 
+export interface EntornoSmoke { baseUrl: string; dataDir: string; local: boolean }
+
+const HOSTS_LOCALES = new Set(['localhost', '127.0.0.1', '[::1]', '::1']);
+
+/**
+ * BASE_URL (por defecto http://127.0.0.1:3000, sin barra final) y DATA_DIR (por defecto ./data, absoluto).
+ * Recibe el entorno por parámetro: process.env solo se lee en scripts/smoke-contacto.ts.
+ * `local` es false si BASE_URL no apunta a esta máquina (los .eml se leen del disco local).
+ */
+export function leerEntornoSmoke(env: Record<string, string | undefined>): EntornoSmoke {
+  const bruta = env.BASE_URL?.trim() || 'http://127.0.0.1:3000';
+  let url: URL;
+  try {
+    url = new URL(bruta);
+  } catch {
+    throw new Error(`BASE_URL no es una URL válida: «${bruta}» (ejemplo: http://127.0.0.1:3000)`);
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error(`BASE_URL debe empezar por http:// o https://: «${bruta}»`);
+  }
+  return {
+    baseUrl: bruta.replace(/\/+$/, ''),
+    dataDir: path.resolve(env.DATA_DIR?.trim() || './data'),
+    local: HOSTS_LOCALES.has(url.hostname),
+  };
+}
+
 export interface PasoSmoke { nombre: string; ok: boolean; detalle: string }
 export interface ResultadoSmoke { ok: boolean; pasos: PasoSmoke[] }
 export type FetchFn = (url: string, init?: RequestInit) => Promise<Response>;
