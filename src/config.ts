@@ -31,6 +31,8 @@ export interface Config {
   baseUrl: string;
   mail: { transport: 'file' | 'smtp'; smtpUrl?: string; from: string };
   ipSalt: string;
+  /** true si falta IP_SALT y se generó una sal aleatoria; quien arranca el servidor decide si avisa. */
+  ipSaltGenerada: boolean;
   trustProxy: boolean;
   emailDestino?: string;
 }
@@ -38,11 +40,9 @@ export interface Config {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const e = Env.parse(env);
   if (e.MAIL_TRANSPORT === 'smtp' && !e.SMTP_URL) throw new Error('MAIL_TRANSPORT=smtp necesita SMTP_URL');
-  let ipSalt = e.IP_SALT?.trim();
-  if (!ipSalt) {
-    ipSalt = randomBytes(32).toString('hex');
-    console.warn('aviso: falta IP_SALT; se usa una sal aleatoria y el límite por IP no sobrevive a reinicios. Fija IP_SALT.');
-  }
+  const saltEnv = e.IP_SALT?.trim();
+  const ipSaltGenerada = !saltEnv;
+  const ipSalt = saltEnv || randomBytes(32).toString('hex');
   return {
     host: e.HOST,
     port: e.PORT,
@@ -51,6 +51,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     baseUrl: e.BASE_URL.replace(/\/+$/, ''),
     mail: { transport: e.MAIL_TRANSPORT, smtpUrl: e.SMTP_URL, from: e.MAIL_FROM },
     ipSalt,
+    ipSaltGenerada,
     trustProxy: e.TRUST_PROXY === '1',
     emailDestino: e.EMAIL_DESTINO?.trim() || undefined,
   };

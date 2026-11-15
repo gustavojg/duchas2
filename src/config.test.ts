@@ -4,18 +4,25 @@ import { loadConfig } from './config.js';
 describe('loadConfig()', () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it('sin IP_SALT genera una sal aleatoria de 64 hex y avisa', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('sin IP_SALT no escribe en consola y devuelve una sal no vacía', () => {
+    const spies = (['warn', 'log', 'error', 'info'] as const).map((m) =>
+      vi.spyOn(console, m).mockImplementation(() => {}),
+    );
     const a = loadConfig({});
     expect(a.ipSalt).toMatch(/^[0-9a-f]{64}$/);
-    expect(warn).toHaveBeenCalledOnce();
-    expect(String(warn.mock.calls[0]![0])).toMatch(/IP_SALT/);
+    expect(a.ipSaltGenerada).toBe(true);
+    const b = loadConfig({ IP_SALT: '   ' });
+    expect(b.ipSalt).toMatch(/^[0-9a-f]{64}$/);
+    expect(b.ipSaltGenerada).toBe(true);
     expect(loadConfig({}).ipSalt).not.toBe(a.ipSalt);
+    for (const s of spies) expect(s).not.toHaveBeenCalled();
   });
 
   it('con IP_SALT la usa sin avisar', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    expect(loadConfig({ IP_SALT: 'abc' }).ipSalt).toBe('abc');
+    const c = loadConfig({ IP_SALT: 'abc' });
+    expect(c.ipSalt).toBe('abc');
+    expect(c.ipSaltGenerada).toBe(false);
     expect(warn).not.toHaveBeenCalled();
   });
 
