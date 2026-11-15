@@ -106,4 +106,18 @@ test.describe('portada en un móvil de 360 × 740', () => {
     expect(ancho).toBeLessThanOrEqual(360);
     expect(errors).toEqual([]);
   });
+
+  test('la cinta «Después» queda a la derecha del centro del slider y «Antes» a la izquierda', async ({ page }) => {
+    const slider = await abrirPortada(page);
+    await slider.scrollIntoViewIfNeeded();
+    const seccion = page.locator('section[aria-labelledby="portada-antes-despues-titulo"]');
+    const cintas = seccion.locator('.deslizador-cintas');
+    const caja = await slider.boundingBox();
+    const antes = await cintas.getByText('ANTES', { exact: true }).boundingBox();
+    const despues = await cintas.getByText('DESPUÉS', { exact: true }).boundingBox();
+    expect(caja && antes && despues).toBeTruthy();
+    const centro = caja!.x + caja!.width / 2;
+    expect(despues!.x).toBeGreaterThan(centro);
+    expect(antes!.x).toBeLessThan(centro);
+  });
 });

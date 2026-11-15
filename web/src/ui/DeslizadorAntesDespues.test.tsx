@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ParGaleria } from '../lib/content';
@@ -61,6 +63,15 @@ describe('DeslizadorAntesDespues', () => {
       const html = renderToStaticMarkup(<DeslizadorAntesDespues par={par} />);
       expect(html).toMatch(/<clipPath[^>]*>\s*<rect[^>]*\bx="50"[^>]*\bwidth="50"/);
     }
+  });
+
+  it('las cintas ocupan todo el ancho para que «DESPUÉS» quede a la derecha', () => {
+    const html = renderToStaticMarkup(<DeslizadorAntesDespues par={conHueco} />);
+    expect(html).toMatch(/class="[^"]*\bdeslizador-cintas\b[^"]*"[^>]*>(?:(?!<\/div>)[\s\S])*ANTES/);
+    const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+    const regla = /\.deslizador-cintas\s*\{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(regla).toMatch(/inline-size:\s*100%/);
+    expect(regla).toMatch(/box-sizing:\s*border-box/);
   });
 
   it('sin hex ni <style', () => {

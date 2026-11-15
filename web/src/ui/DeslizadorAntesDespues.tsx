@@ -36,7 +36,7 @@ export function DeslizadorAntesDespues({ par }: DeslizadorAntesDespuesProps) {
   const recorte = `recorte${useId()}`;
   const conFotos = Boolean(!par.hueco && par.antes && par.despues);
   const cintas = (
-    <HStack gap={2} justify="between" vAlign="center">
+    <HStack gap={2} justify="between" vAlign="center" className="deslizador-cintas">
       <CintaEtiqueta>Antes</CintaEtiqueta>
       <CintaEtiqueta>Después</CintaEtiqueta>
     </HStack>

@@ -114,6 +114,16 @@
   overflow-wrap: anywhere;
 }
 
+/*
+ * Cintas «ANTES»/«DESPUÉS» del deslizador (DeslizadorAntesDespues en src/ui/): el contenido de Overlay es una
+ * columna flex con align-items: flex-start, así que la fila se encogería al contenido y justify="between" no
+ * separaría las cintas. A todo el ancho, «DESPUÉS» queda arriba a la derecha, sobre la capa «después».
+ */
+.deslizador-cintas {
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
 /* CTA secundario del antes/después: ancho completo (Button width="100%" pintaría estilo en línea). */
 .portada-cta {
   inline-size: 100%;
