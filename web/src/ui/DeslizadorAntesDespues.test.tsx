@@ -56,6 +56,13 @@ describe('DeslizadorAntesDespues', () => {
     expect(sinVariablesAstryx(html)).not.toContain('style=');
   });
 
+  it('el recorte deja la capa «después» a la derecha del asa, bajo la cinta «DESPUÉS»', () => {
+    for (const par of [conHueco, conFotos]) {
+      const html = renderToStaticMarkup(<DeslizadorAntesDespues par={par} />);
+      expect(html).toMatch(/<clipPath[^>]*>\s*<rect[^>]*\bx="50"[^>]*\bwidth="50"/);
+    }
+  });
+
   it('sin hex ni <style', () => {
     for (const par of [conHueco, conFotos]) {
       const html = renderToStaticMarkup(<DeslizadorAntesDespues par={par} />);

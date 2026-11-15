@@ -27,7 +27,7 @@ export interface DeslizadorAntesDespuesProps {
  * Comparador antes/después (docs/astryx-componentes.md, fila «deslizador antes/después»). Un Slider de Astryx
  * (arrastre táctil y flechas, con aria-valuenow) mueve la posición 0-100. Overlay (cintas «ANTES»/«DESPUÉS»)
  * + AspectRatio 4:3 + un <svg viewBox="0 0 100 75">: la capa de abajo, la de arriba recortada con un
- * <clipPath> cuyo <rect> mide la posición (atributos SVG, sin estilo en línea), y el asa en el borde.
+ * <clipPath> cuyo <rect> va de la posición al borde derecho (atributos SVG, sin estilo en línea), y el asa en el borde.
  * Con fotos, «antes» debajo y «después» encima. Sin fotos (hueco), la ilustración de art.tsx en las dos capas
  * (la de abajo velada), rotulada «ILUSTRACIÓN», con el aviso y el texto del hueco una sola vez, debajo.
  */
@@ -73,7 +73,8 @@ export function DeslizadorAntesDespues({ par }: DeslizadorAntesDespuesProps) {
             >
               <defs>
                 <clipPath id={recorte}>
-                  <rect x={0} y={0} width={posicion} height={ALTO} />
+                  {/* La capa «después» se ve a la derecha del asa, bajo la cinta «DESPUÉS». */}
+                  <rect x={posicion} y={0} width={ANCHO - posicion} height={ALTO} />
                 </clipPath>
               </defs>
               {/* Con ilustración, el <svg> de art.tsx ya lleva role="img" y su título. */}
