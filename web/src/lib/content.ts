@@ -82,3 +82,98 @@ export function cargarServicios(): { slug: string; nombre: string }[] {
   if (!existsSync(join(contentDir(), 'servicios.json'))) return [];
   return leerContenido('servicios.json', serviciosSchema).map(({ slug, nombre }) => ({ slug, nombre }));
 }
+
+/** Foto de la galería: solo WebP de web/public/fotos (`/fotos/<nombre>.webp`). */
+const foto = z
+  .string()
+  .regex(/^\/fotos\/[a-z0-9-]+\.webp$/, 'debe ser /fotos/<nombre>.webp')
+  .nullable();
+
+/** Pares antes/después (galeria.json). Sin fotos, `hueco` dice qué foto falta y se pinta la ilustración. */
+export const galeriaSchema = z.array(
+  z
+    .object({
+      servicio: z.string().regex(/^[a-z0-9-]+$/, 'debe ser un slug'),
+      antes: foto,
+      despues: foto,
+      alt_antes: z.string().min(1),
+      alt_despues: z.string().min(1),
+      hueco: z.string().min(1).optional(),
+    })
+    .strict()
+    .superRefine((par, ctx) => {
+      if (par.hueco) return;
+      for (const campo of ['antes', 'despues'] as const) {
+        if (par[campo] === null) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: [campo], message: 'obligatoria si no hay `hueco`' });
+        }
+      }
+    }),
+);
+
+export type ParGaleria = z.infer<typeof galeriaSchema>[number];
+
+export function cargarGaleria(): ParGaleria[] {
+  return leerContenido('galeria.json', galeriaSchema);
+}
+
+const preguntaSchema = z.object({ p: z.string().min(1), r: z.string().min(1), en_portada: z.boolean() }).strict();
+
+/**
+ * FAQ (faq.json). Las respuestas no llevan cifras: los plazos y números salen de los marcadores `{...}` que
+ * resuelve faq.ts con textos.ts. Entre 4 y 6 preguntas van a la FAQ resumida de la portada.
+ */
+export const faqSchema = z
+  .object({
+    temas: z
+      .array(z.object({ tema: z.string().min(1), preguntas: z.array(preguntaSchema).min(1) }).strict())
+      .min(1),
+  })
+  .strict()
+  .superRefine((faq, ctx) => {
+    const enPortada = faq.temas.flatMap((t) => t.preguntas).filter((p) => p.en_portada).length;
+    if (enPortada < 4 || enPortada > 6) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['temas'],
+        message: `entre 4 y 6 preguntas con en_portada (hay ${enPortada})`,
+      });
+    }
+    faq.temas.forEach((t, i) =>
+      t.preguntas.forEach((p, j) => {
+        if (/\d/.test(p.r.replace(/\{[^}]*\}/g, ''))) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['temas', i, 'preguntas', j, 'r'],
+            message: 'sin cifras literales: usa un marcador como {reparacion}',
+          });
+        }
+      }),
+    );
+  });
+
+export type Faq = z.infer<typeof faqSchema>;
+export type PreguntaFaq = Faq['temas'][number]['preguntas'][number];
+
+export function cargarFaq(): Faq {
+  return leerContenido('faq.json', faqSchema);
+}
+
+/** Reseñas reales (resenas.json, ARCHITECTURE §4.1). Vacío ⇒ ni bloque ni AggregateRating. */
+export const resenasSchema = z.array(
+  z
+    .object({
+      autor: z.string().min(1),
+      nota: z.number().int().min(1).max(5),
+      texto: z.string().min(1),
+      fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'debe ser YYYY-MM-DD'),
+      fuente: z.string().min(1),
+    })
+    .strict(),
+);
+
+export type Resena = z.infer<typeof resenasSchema>[number];
+
+export function cargarResenas(): Resena[] {
+  return leerContenido('resenas.json', resenasSchema);
+}

@@ -50,6 +50,8 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | BotonLlamar | `web/src/ui/BotonLlamar.tsx` | Button (secondary, lg) + Icon con glifo propio; href con `telLink()`. Lo usan la cabecera (`Frame`) y el hero | creada |
 | Contenedor `portada` | `web/src/app/page.tsx` (+ `.portada` en globals.css) | VStack (`className="portada"`) que envuelve hero y franja: padding-inline var(--spacing-4), max-inline-size var(--measure), margin-inline auto. Solo clase, sin `<div>`/`<span>` propios; no usa `Section maxWidth` ni `Layout contentWidth` porque pintan estilo en línea | creada |
 | FranjaConfianza | `web/src/ui/FranjaConfianza.tsx` | Section (muted) + VStack/HStack (`ul`/`li`) + Text + IconoCompromiso de art.tsx; hueco del icono con la clase `franja-confianza-icono` (var(--spacing-10)) | creada |
+| AcordeonFaq | `web/src/ui/AcordeonFaq.tsx` | Collapsible + CollapsibleGroup (`type="single"`, `hasDividers`) + Text (`as="p"`); todos cerrados al principio, disparador `<button>` nativo con `aria-expanded`. `'use client'` (Collapsible guarda el estado) | creada |
+| BloqueResenas | `web/src/ui/BloqueResenas.tsx` | VStack (`section`/`ul`/`li`) + Heading (level 2) + Text (`type="code"` para la nota); nota y número de `resumenResenas()`/`notaVisible()` de seo.ts. Sin reseñas devuelve null | creada |
 
 Notas de implementación:
 
@@ -64,5 +66,4 @@ Notas de implementación:
 
 Previstas por `brain/design.md` (las construye la funcionalidad que las usa): DeslizadorAntesDespues,
 PasosTrabajo, TablaRepararCambiar, TarjetaServicio, BotonFlotanteWhatsApp, CabeceraContacto, PrecioDesde,
-BloqueResenas, ListaZonas, FormularioContacto (+ CampoFoto), GaleriaFiltrable, MigasDePan, AcordeonFaq,
-IlustracionSvg, HuecoFoto.
+ListaZonas, FormularioContacto (+ CampoFoto), GaleriaFiltrable, MigasDePan, IlustracionSvg, HuecoFoto.

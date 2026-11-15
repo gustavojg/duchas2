@@ -6,6 +6,7 @@ export { APP_NAME } from './lib/site';
 export const NAV: NavItem[] = [
   { href: '/', label: 'Inicio' },
   { href: '/quienes-somos/', label: 'Quiénes somos' },
+  { href: '/preguntas-frecuentes/', label: 'Preguntas frecuentes' },
 ];
 
 /** Páginas legales: van en el pie (PieSitio), no en la navegación principal. */
