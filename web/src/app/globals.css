@@ -103,3 +103,13 @@
   flex: none;
   inline-size: var(--spacing-10);
 }
+
+/* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) encima, al doble. */
+.tarjeta-servicio-icono {
+  flex: none;
+  inline-size: var(--spacing-12);
+}
+
+.tarjeta-servicio-icono[data-tamano="grande"] {
+  inline-size: calc(var(--spacing-12) * 2);
+}
