@@ -6,6 +6,7 @@ import { createApp } from './app.js';
 import { resolverIp } from './client-ip.js';
 import { loadConfig } from './config.js';
 import { openDb } from './db.js';
+import { borrarCaducadas } from './domain/limpieza.js';
 import { createMailer } from './mailer.js';
 import { configFormulario } from '../web/src/lib/config.js';
 import { cargarNegocio } from '../web/src/lib/content.js';
@@ -23,6 +24,18 @@ if (!emailDestino) {
   );
 }
 const db = openDb(path.join(dataDir, 'app.db'));
+
+// Retención (ADR 0006): al arrancar y cada 24 h. Un fallo se registra pero no tumba el proceso.
+function limpiar(): void {
+  try {
+    const r = borrarCaducadas(db, dataDir, formulario.retencion_dias, new Date(), formulario.ventana_min);
+    if (r.peticiones || r.ips) console.log(`limpieza: ${r.peticiones} peticiones y ${r.ips} IPs borradas`);
+  } catch (e) {
+    console.error(`limpieza: error al borrar caducadas (${e instanceof Error ? e.name : 'error'})`);
+  }
+}
+limpiar();
+setInterval(limpiar, 24 * 60 * 60 * 1000).unref();
 const app = createApp({
   db,
   mailer: createMailer(config),

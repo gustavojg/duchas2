@@ -62,4 +62,13 @@ describe('borrarCaducadas()', () => {
     expect(borrarCaducadas(e.db, e.dataDir, 90, ahora)).toEqual({ peticiones: 0, ips: 1 });
     expect(e.ips()).toEqual(['reciente']);
   });
+
+  it('respeta una ventanaMin personalizada', () => {
+    const e = escenario();
+    e.ip.run('hace20', ahora.getTime() - 20 * 60000);
+    e.ip.run('hace5', ahora.getTime() - 5 * 60000);
+    expect(borrarCaducadas(e.db, e.dataDir, 90, ahora, 15)).toEqual({ peticiones: 0, ips: 1 });
+    expect(e.ips()).toEqual(['hace5']);
+    expect(borrarCaducadas(e.db, e.dataDir, 90, ahora, 120).ips).toBe(0);
+  });
 });
