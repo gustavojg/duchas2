@@ -6,7 +6,8 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { type ConfigFormulario, configFormulario } from '../lib/config';
 import { cargarNegocio, type Negocio } from '../lib/content';
 import { type Modo, modoActual } from '../lib/dato';
-import { DESCRIPTION } from '../lib/site';
+import { metadataPagina } from '../lib/seo';
+import { APP_NAME, DESCRIPTION } from '../lib/site';
 import { anios, garantia, titularPortada } from '../lib/textos';
 import { telLink } from '../lib/whatsapp';
 import { PlatoPartido } from '../ui/art';
@@ -14,6 +15,14 @@ import { BotonLlamar } from '../ui/BotonLlamar';
 import { BotonWhatsApp } from '../ui/BotonWhatsApp';
 import { CintaEtiqueta } from '../ui/CintaEtiqueta';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
+
+export const metadata = metadataPagina({
+  ruta: '/',
+  titulo: 'Reparación y esmaltado de platos de ducha en Madrid',
+  descripcion: DESCRIPTION,
+  baseUrl: cargarNegocio().url_base,
+  nombreSitio: APP_NAME,
+});
 
 const MENSAJE_WHATSAPP = 'Hola, os mando una foto del daño para que me digáis si tiene arreglo.';
 
