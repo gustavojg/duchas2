@@ -1,13 +1,16 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
-import { APP_NAME, NAV } from '../config';
+import { APP_NAME, LEGALES, NAV } from '../config';
 import { esBorrador } from '../lib/borrador';
-import { cargarNegocio } from '../lib/content';
+import { configFormulario } from '../lib/config';
+import { cargarNegocio, cargarServicios } from '../lib/content';
+import { modoActual } from '../lib/dato';
 import { robotsMeta } from '../lib/seo';
 import { DESCRIPTION } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
 import { Frame } from '../ui/Frame';
+import { PieSitio } from '../ui/PieSitio';
 
 const negocio = cargarNegocio();
 
@@ -26,7 +29,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <body>
-        <Frame brand={APP_NAME} nav={NAV} llamar={llamar}>
+        <Frame
+          brand={APP_NAME}
+          nav={NAV}
+          llamar={llamar}
+          footer={
+            <PieSitio
+              negocio={negocio}
+              config={configFormulario()}
+              modo={modoActual()}
+              legales={LEGALES}
+              servicios={cargarServicios()}
+            />
+          }
+        >
           {children}
         </Frame>
       </body>
