@@ -55,6 +55,8 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | PasosTrabajo | `web/src/ui/PasosTrabajo.tsx` | VStack (`as="ol"`/`"li"`) + Text (`type="code"`, «PASO N», clase `paso-numero`: var(--color-tape), var(--color-on-tape), var(--spacing-*)) + Heading 3 + Text + BotonWhatsApp secondary en el paso con `accion: 'whatsapp'` (sin número, sin botón). Textos ya resueltos por `resolverPasos()` | creada |
 | TablaRepararCambiar | `web/src/ui/TablaRepararCambiar.tsx` | Table en modo children (TableHeader/TableBody/TableRow/TableHeaderCell/TableCell), 3 columnas (concepto, Reparar, Cambiar), texto que envuelve; cabecera «Reparar» con la clase `tabla-cabecera-reparar` (cinta); cifras del coste en Text `type="code"`; fuente en Text supporting solo con la fila de coste. Filas de `filasComparativa()`. Ojo: Table pinta en su contenedor de scroll un `style` propio de overflow (`--x-overflowX:clip…`), que los tests toleran solo en ese elemento | creada |
 | ListaZonas | `web/src/ui/ListaZonas.tsx` | VStack + AnillosZonas de art.tsx (ancho con la clase `lista-zonas-anillos`) + dos grupos con Heading 3 y HStack (`as="ul"`, `wrap`) de VStack `as="li"` con Text. Sin Badge ni CTA (lo pone el padre) | creada |
+| AcordeonFaq | `web/src/ui/AcordeonFaq.tsx` | Collapsible + CollapsibleGroup (`type="single"`, `hasDividers`) + Text (`as="p"`); todos cerrados al principio, disparador `<button>` nativo con `aria-expanded`. `'use client'` (Collapsible guarda el estado) | creada |
+| BloqueResenas | `web/src/ui/BloqueResenas.tsx` | VStack (`section`/`ul`/`li`) + Heading (level 2) + Text (`type="code"` para la nota); nota y número de `resumenResenas()`/`notaVisible()` de seo.ts. Sin reseñas devuelve null | creada |
 
 Notas de implementación:
 
@@ -69,5 +71,4 @@ Notas de implementación:
 
 Previstas por `brain/design.md` (las construye la funcionalidad que las usa): DeslizadorAntesDespues,
 BotonFlotanteWhatsApp, CabeceraContacto,
-BloqueResenas, FormularioContacto (+ CampoFoto), GaleriaFiltrable, MigasDePan, AcordeonFaq,
-IlustracionSvg, HuecoFoto.
+FormularioContacto (+ CampoFoto), GaleriaFiltrable, MigasDePan, IlustracionSvg, HuecoFoto.

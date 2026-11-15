@@ -16,6 +16,7 @@ import {
 } from '../lib/content';
 import { DESCRIPTION, PAGES } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
+import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
 import { Portada, type PortadaProps } from './page';
@@ -55,6 +56,9 @@ const estilosEnLinea = (html: string) =>
     .map((m) => m[0]);
 
 const h1 = (html: string) => /<h1[^>]*>((?:(?!<\/h1>).)*)<\/h1>/s.exec(html)?.[1].replace(/<[^>]+>/g, '') ?? '';
+const ulFranja = (html: string) => /<ul[^>]*aria-label="Nuestros compromisos"[^>]*>((?:(?!<\/ul>).)*)<\/ul>/s.exec(html)?.[1] ?? '';
+const franja = (html: string) =>
+  [...ulFranja(html).matchAll(/<li[\s>](?:(?!<\/li>).)*<\/li>/gs)].map((m) => m[0].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
 const textoPlano = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
 
 const confirmado: Negocio = structuredClone(negocio);
@@ -89,11 +93,10 @@ describe('portada con contenido sin confirmar (modo público)', () => {
     expect(html.match(/href="tel:\+34/g)!.length).toBeGreaterThanOrEqual(2); // cabecera + hero
   });
 
-  it('franja de confianza: garantía sin plazo, sin obras y hoteles; sin años', () => {
-    expect(texto).toContain('Garantía por escrito');
+  it('franja de confianza: exactamente garantía sin plazo, sin obras y hoteles; sin años ni «Un solo teléfono»', () => {
+    expect(franja(html)).toEqual(['Garantía por escrito', 'Sin obras ni polvo', 'Trabajamos para hoteles y comunidades']);
     expect(texto).not.toMatch(/Garantía por escrito de/);
-    expect(texto).toContain('Sin obras ni polvo');
-    expect(texto).toMatch(/hoteles/i);
+    expect(texto).not.toContain('Un solo teléfono');
     expect(texto).not.toMatch(/PENDIENTE|\{\{|\b0 años|años reparando/);
   });
 
@@ -141,6 +144,13 @@ describe('portada con plazos, garantía y años confirmados', () => {
     expect(h1(html)).toContain('en unas horas');
     expect(texto).toContain('Garantía por escrito de 2 años');
     expect(texto).toContain('15 años reparando baños');
+    expect(franja(html)).toEqual([
+      'Garantía por escrito de 2 años',
+      'Sin obras ni polvo',
+      'Trabajamos para hoteles y comunidades',
+      '15 años reparando baños',
+    ]);
+    expect(texto).not.toContain('Un solo teléfono');
     expect(texto).not.toMatch(/PENDIENTE|\{\{/);
   });
 });
@@ -266,6 +276,59 @@ describe('página /zonas/', () => {
   it('está en la navegación y en las páginas públicas', () => {
     expect(NAV).toContainEqual({ href: '/zonas/', label: 'Zonas' });
     expect(PAGES).toContain('/zonas/');
+  });
+});
+
+describe('franja de la portada desde textos.ts', () => {
+  it('page.tsx no escribe los textos de la franja: usa compromisosFranja', () => {
+    const src = readFileSync(join(process.cwd(), 'src/app/page.tsx'), 'utf8');
+    expect(src).not.toContain('Sin obras ni polvo');
+    expect(src).not.toContain('hoteles y comunidades');
+    expect(src).not.toContain('Un solo teléfono');
+    expect(src).toContain('compromisosFranja');
+  });
+
+  it('cuenta los <li> de «Nuestros compromisos»: 3 sin confirmar y 4 con todo confirmado', () => {
+    const cuenta = (html: string) => ulFranja(html).match(/<li[\s>]/g)?.length ?? 0;
+    expect(cuenta(pinta(negocio))).toBe(3);
+    expect(cuenta(pinta(confirmado))).toBe(4);
+  });
+});
+
+describe('FranjaConfianza', () => {
+  const lis = (html: string) => html.match(/<li[\s>]/g) ?? [];
+  const svgDe = (html: string, texto: string) => {
+    const li = [...html.matchAll(/<li[\s>](?:(?!<\/li>).)*<\/li>/gs)].map((m) => m[0]).find((l) => l.includes(texto)) ?? '';
+    return /<svg(?:(?!<\/svg>).)*<\/svg>/s.exec(li)?.[0] ?? '';
+  };
+
+  it('pinta garantía y años con iconos distintos, y sin «anios» no hay fila de años', () => {
+    const html = renderToStaticMarkup(
+      <FranjaConfianza
+        compromisos={[
+          { tipo: 'garantia', texto: 'Garantía por escrito' },
+          { tipo: 'anios', texto: '15 años reparando baños' },
+        ]}
+      />,
+    );
+    expect(lis(html)).toHaveLength(2);
+    const garantia = svgDe(html, 'Garantía por escrito');
+    const anios = svgDe(html, '15 años reparando baños');
+    expect(garantia).not.toBe('');
+    expect(anios).not.toBe('');
+    expect(anios).toMatch(/<(path|rect|circle|ellipse)[\s>]/);
+    expect(anios).not.toBe(garantia);
+    expect(anios).not.toContain(/<path[^>]*>/.exec(garantia)![0]);
+
+    const sinAnios = renderToStaticMarkup(<FranjaConfianza compromisos={[{ tipo: 'garantia', texto: 'Garantía por escrito' }]} />);
+    expect(lis(sinAnios)).toHaveLength(1);
+    expect(sinAnios).not.toContain('años reparando');
+  });
+
+  it('el fuente tiene un solo IconoCompromiso y ninguna prop `anios`', () => {
+    const src = readFileSync(join(process.cwd(), 'src/ui/FranjaConfianza.tsx'), 'utf8');
+    expect(src.match(/<IconoCompromiso/g)).toHaveLength(1);
+    expect(src).not.toContain('anios?');
   });
 });
 

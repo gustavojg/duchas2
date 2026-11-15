@@ -100,6 +100,19 @@ describe('web/out servido por Hono', () => {
     expect(await (await app.request('/sitemap.xml')).text()).toMatch(/<loc>[^<]*\/zonas\/<\/loc>/);
   });
 
+  it('/preguntas-frecuentes/ se exporta con su FAQPage, sin pendientes y en el sitemap', async () => {
+    expect(fs.existsSync(path.join(webDir, 'preguntas-frecuentes', 'index.html'))).toBe(true);
+    const res = await app.request('/preguntas-frecuentes/');
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('"@type":"FAQPage"');
+    expect(html).toMatch(/<h1[^>]*>(?:(?!<\/h1>).)*Preguntas frecuentes/s);
+    const sinScripts = visible(html);
+    expect(sinScripts).not.toContain('PENDIENTE');
+    expect(sinScripts).not.toContain('{{');
+    expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
+  });
+
   it('/health sigue respondiendo JSON', async () => {
     expect(await (await app.request('/health')).json()).toMatchObject({ ok: true });
   });
