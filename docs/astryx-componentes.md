@@ -52,6 +52,7 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | FranjaConfianza | `web/src/ui/FranjaConfianza.tsx` | Section (muted) + VStack/HStack (`ul`/`li`) + Text + IconoCompromiso de art.tsx; hueco del icono con la clase `franja-confianza-icono` (var(--spacing-10)) | creada |
 | AcordeonFaq | `web/src/ui/AcordeonFaq.tsx` | Collapsible + CollapsibleGroup (`type="single"`, `hasDividers`) + Text (`as="p"`); todos cerrados al principio, disparador `<button>` nativo con `aria-expanded`. `'use client'` (Collapsible guarda el estado) | creada |
 | BloqueResenas | `web/src/ui/BloqueResenas.tsx` | VStack (`section`/`ul`/`li`) + Heading (level 2) + Text (`type="code"` para la nota); nota y número de `resumenResenas()`/`notaVisible()` de seo.ts. Sin reseñas devuelve null | creada |
+| HuecoFoto | `web/src/ui/HuecoFoto.tsx` | AspectRatio + `<img>` nativo + art.tsx + CintaEtiqueta | creada |
 
 Notas de implementación:
 
