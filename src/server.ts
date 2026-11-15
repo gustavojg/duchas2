@@ -15,6 +15,7 @@ const app = createApp({
   db: openDb(path.join(config.dataDir, 'app.db')),
   mailer: createMailer(config),
   now: () => new Date(),
+  commit: config.commit,
   clientIp: (c) => getConnInfo(c).remote.address ?? 'desconocida',
   config,
 });

@@ -10,6 +10,8 @@ export interface Deps {
   db: DatabaseSync;
   mailer: Mailer;
   now: () => Date;
+  /** Commit servido, que informa /health (en el servidor, config.commit de GIT_SHA). */
+  commit: string;
   /** IP del cliente (en el servidor, getConnInfo); para límites de envío y auditoría. */
   clientIp: (c: Context) => string;
   config: Pick<Config, 'webDir' | 'baseUrl'>;
@@ -18,7 +20,7 @@ export interface Deps {
 export function createApp(deps: Deps): Hono {
   const app = new Hono();
 
-  app.get('/health', (c) => c.json({ ok: true, app: APP_NAME }));
+  app.get('/health', (c) => c.json({ ok: true, app: APP_NAME, commit: deps.commit }));
 
   // Rutas de la API aquí, un módulo por recurso: app.route('/api/<recurso>', <recurso>Routes(deps)).
   app.all('/api/*', (c) => c.json({ error: 'not_found' }, 404));
