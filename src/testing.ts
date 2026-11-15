@@ -7,8 +7,8 @@ import type { Mail } from './mailer.js';
 
 /**
  * App lista para tests con app.request(): BD en memoria, mailer que guarda en `sent`, reloj controlable
- * (`clock.advance(minutos)`), IP fija y DATA_DIR temporal. Por defecto WEB_DIR es un directorio temporal vacío;
- * pasa `webDir` para probar contra web/out. Cualquier dep se sobrescribe con `over`.
+ * (`clock.advance(minutos)`), IP fija, commit fijo ('test-commit') y DATA_DIR temporal. Por defecto WEB_DIR es
+ * un directorio temporal vacío; pasa `webDir` para probar contra web/out. Cualquier dep se sobrescribe con `over`.
  */
 export function testApp(over: Partial<Deps> & { webDir?: string } = {}) {
   const sent: Mail[] = [];
@@ -25,6 +25,7 @@ export function testApp(over: Partial<Deps> & { webDir?: string } = {}) {
     db: openDb(':memory:'),
     mailer: { send: async (m) => void sent.push(m) },
     now: () => clock.now,
+    commit: 'test-commit',
     clientIp: () => '203.0.113.1',
     config: { webDir, baseUrl: 'http://127.0.0.1:3000' },
     dataDir,
