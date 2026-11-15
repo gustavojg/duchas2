@@ -45,9 +45,21 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 
 | Composición | Fichero | Primitivas | Estado |
 |---|---|---|---|
-| CintaEtiqueta | `web/src/ui/CintaEtiqueta.tsx` | Text (code) + var(--color-tape) | esta entrega |
-| BotonWhatsApp | `web/src/ui/BotonWhatsApp.tsx` | Button primary + Icon | esta entrega |
-| FranjaConfianza | `web/src/ui/FranjaConfianza.tsx` | Grid/HStack, Text, IconoCompromiso | esta entrega |
+| CintaEtiqueta | `web/src/ui/CintaEtiqueta.tsx` | Text (`type="code"`, `as="p"`) + clase `cinta-etiqueta` de globals.css (var(--color-tape), var(--color-on-tape), var(--spacing-*)) | creada |
+| BotonWhatsApp | `web/src/ui/BotonWhatsApp.tsx` | Button (primary, lg) + Icon con glifo propio; href con `waLink()` | creada |
+| BotonLlamar | `web/src/ui/BotonLlamar.tsx` | Button (secondary, lg) + Icon con glifo propio; href con `telLink()`. Lo usan la cabecera (`Frame`) y el hero | creada |
+| FranjaConfianza | `web/src/ui/FranjaConfianza.tsx` | Section (muted) + VStack/HStack (`ul`/`li`) + Text + IconoCompromiso de art.tsx; hueco del icono con la clase `franja-confianza-icono` (var(--spacing-10)) | creada |
+
+Notas de implementación:
+
+- Sin compilador StyleX no se puede usar `xstyle`. Las composiciones que necesitan un token que ninguna prop
+  expone (el crema de la cinta, el ancho del icono) usan una clase de `web/src/app/globals.css` declarada sin
+  capa, que gana a `@layer astryx-base` y solo contiene `var(--…)`.
+- `Button size="lg"` toma su alto de `--size-element-lg` (36 px en Astryx). globals.css lo fija en
+  `var(--spacing-12)` (48 px) para que «Manda la foto por WhatsApp» y «Llamar» midan ≥ 44 px.
+- `Icon` de Astryx es componente cliente: un glifo pasado como función solo funciona desde un fichero
+  `'use client'` (por eso BotonWhatsApp y BotonLlamar lo son, y Frame sigue siendo de servidor).
+- `Grid` con `columns` pinta `style="--x-gridTemplateColumns…"`: para listas se usa VStack/HStack.
 
 Previstas por `brain/design.md` (las construye la funcionalidad que las usa): DeslizadorAntesDespues,
 PasosTrabajo, TablaRepararCambiar, TarjetaServicio, BotonFlotanteWhatsApp, CabeceraContacto, PrecioDesde,

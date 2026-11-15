@@ -24,8 +24,9 @@ export interface PortadaProps {
 }
 
 /**
- * Portada `/` (brain/design.md § Portada): hero con cinta, H1 de beneficio, subtítulo, plato partido, la
- * acción principal (WhatsApp) + «Llamar» y la retención de la foto; debajo, la franja de confianza. Todos los
+ * Portada `/` (brain/design.md § Portada): hero con cinta, H1 de beneficio, subtítulo, la acción principal
+ * (WhatsApp) + «Llamar» con la retención de la foto junto al botón, y el plato partido; debajo, la franja de
+ * confianza. Los botones van antes de la ilustración para que en 360 × 740 se vean sin scroll. Todos los
  * plazos y cifras salen de textos.ts con el contenido que recibe por props (los tests inyectan el suyo).
  */
 export function Portada({ negocio, config, modo }: PortadaProps) {
@@ -41,9 +42,6 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
         <Text type="large" as="p">
           {DESCRIPTION}
         </Text>
-        <Card padding={0}>
-          <PlatoPartido />
-        </Card>
         <HStack gap={2} wrap="wrap" vAlign="center">
           {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_WHATSAPP} etiqueta="Manda la foto por WhatsApp" /> : null}
           {telefono ? <BotonLlamar href={telLink(telefono)} etiqueta="Llamar" /> : null}
@@ -51,6 +49,9 @@ export function Portada({ negocio, config, modo }: PortadaProps) {
         <Text type="supporting" as="p">
           {`Tu foto solo la vemos nosotros y se borra a los ${config.retencion_dias} días`}
         </Text>
+        <Card padding={0}>
+          <PlatoPartido />
+        </Card>
       </VStack>
       <FranjaConfianza
         compromisos={[
