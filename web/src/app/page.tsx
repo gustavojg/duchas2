@@ -56,13 +56,13 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
       </Heading>
       <DeslizadorAntesDespues par={principal} />
       {resto.length > 0 ? (
-        <VStack gap={4} as="ul" aria-label="Más trabajos">
+        <HStack gap={2} as="ul" aria-label="Más trabajos">
           {resto.slice(0, 3).map((par) => (
-            <VStack as="li" key={par.alt_despues}>
-              <HuecoFoto par={par} lado="despues" />
+            <VStack as="li" key={par.alt_despues} className="portada-miniatura">
+              <HuecoFoto par={par} lado="despues" compacta />
             </VStack>
           ))}
-        </VStack>
+        </HStack>
       ) : null}
       <HStack gap={3} wrap="wrap" vAlign="center">
         <Link href="/antes-y-despues/">Ver todos los trabajos</Link>

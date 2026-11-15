@@ -137,10 +137,19 @@ describe('portada: antes/después, reseñas, FAQ resumida y JSON-LD', () => {
   });
 
   it('el antes/después muestra el deslizador y las ilustraciones rotuladas', () => {
-    expect(texto).toContain('Pronto, fotos reales de este trabajo');
+    expect(texto.split('Pronto, fotos reales de este trabajo')).toHaveLength(2);
     expect(html).toMatch(/role="slider"[^>]*aria-valuenow="50"/);
     expect(texto).toContain('ANTES');
     expect(texto).toContain('DESPUÉS');
+  });
+
+  it('las miniaturas van en fila y compactas', () => {
+    const seccion = /<section[^>]*aria-labelledby="portada-antes-despues-titulo"[\s\S]*?<\/section>/.exec(html)?.[0] ?? '';
+    expect(seccion).not.toBe('');
+    const fila = /<ul[^>]*data-direction="horizontal"[^>]*>([\s\S]*?)<\/ul>/.exec(seccion)?.[1] ?? '';
+    expect(fila.match(/<li[^>]*class="[^"]*portada-miniatura[^"]*"/g)).toHaveLength(3);
+    expect(fila.match(/ILUSTRACIÓN/g)).toHaveLength(3);
+    expect(fila).not.toContain('Pronto, fotos reales de este trabajo');
   });
 
   it('sin reseñas: ni bloque ni AggregateRating, pero sí LocalBusiness', () => {

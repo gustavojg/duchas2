@@ -98,6 +98,15 @@
   padding-inline: var(--spacing-4);
 }
 
+/*
+ * Antes/después de la portada (BloqueAntesDespues en src/app/page.tsx): las miniaturas reparten la fila a partes
+ * iguales y pueden encogerse por debajo de su contenido (sin scroll horizontal en 360).
+ */
+.portada-miniatura {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
 .franja-confianza-icono {
   display: block;
   flex: none;
