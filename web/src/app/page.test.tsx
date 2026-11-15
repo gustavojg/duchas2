@@ -53,6 +53,8 @@ const estilosEnLinea = (html: string) =>
           decl.split(';').every((d) => /^(--x-overflow[XY]:clip|overscroll-behavior-[xy]:auto)$/.test(d))
         ),
     )
+    // CheckboxInput de Astryx (casilla de privacidad del formulario): centrado del input en línea, no es nuestro.
+    .filter(([, decl]) => decl !== '--x-transform:translate(-50%, -50%)')
     .map((m) => m[0]);
 
 const h1 = (html: string) => /<h1[^>]*>((?:(?!<\/h1>).)*)<\/h1>/s.exec(html)?.[1].replace(/<[^>]+>/g, '') ?? '';
@@ -100,16 +102,32 @@ describe('portada con contenido sin confirmar (modo público)', () => {
     expect(texto).not.toMatch(/PENDIENTE|\{\{|\b0 años|años reparando/);
   });
 
-  it('un solo botón primario (WhatsApp) y la retención con el número de config', () => {
-    expect(html.match(/data-variant="primary"/g)).toHaveLength(1);
-    expect(html).toMatch(/data-variant="primary"[^>]*href="https:\/\/wa\.me\//);
+  it('dos primarios, excepción aceptada solo en la portada: WhatsApp del hero y el submit del formulario', () => {
+    // brain/design.md pide uno por pantalla; la spec acepta estos dos porque el formulario va al final y el
+    // botón flotante se oculta mientras se ve cualquiera de los dos.
+    const primarios = [...html.matchAll(/<(a|button)\b[^>]*data-variant="primary"[^>]*>/g)].map((m) => m[0]);
+    expect(primarios).toHaveLength(2);
+    expect(primarios[0]).toMatch(/href="https:\/\/wa\.me\//);
+    expect(primarios[1]).toMatch(/type="submit"/);
+    expect(primarios[1]).toContain('id="enviar-peticion"');
     expect(texto).toContain('Tu foto solo la vemos nosotros y se borra a los 90 días');
     const otra = textoPlano(pinta(negocio, { ...config, retencion_dias: 30 }));
     expect(otra).toContain('se borra a los 30 días');
   });
 
+  it('el formulario va al final, después del CTA del hero, con su H2', () => {
+    const cta = html.indexOf('Manda la foto por WhatsApp');
+    const form = html.indexOf('name="telefono"');
+    expect(cta).toBeGreaterThan(-1);
+    expect(form).toBeGreaterThan(cta);
+    expect(form).toBeGreaterThan(html.indexOf('Sin obras ni polvo'));
+    expect(html).toMatch(/<h2[^>]*>(?:(?!<\/h2>).)*Mándanos una foto(?:(?!<\/h2>).)*<\/h2>/s);
+    expect(texto).toContain('Guardamos tu foto 90 días');
+  });
+
   it('sin estilos sueltos ni hex', () => {
     expect(html).not.toContain('<style');
+    // El CheckboxInput de Astryx del formulario pinta su centrado en línea (StyleX); estilosEnLinea lo tolera.
     expect(estilosEnLinea(html)).toEqual([]);
     expect(html).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
@@ -172,7 +190,8 @@ describe('portada: módulos tras la franja de confianza', () => {
   const texto = textoPlano(html);
 
   it('los H2 van en el orden de design.md y después de la franja', () => {
-    expect(h2s(html)).toEqual(['¿Reparar o cambiar?', 'Cómo trabajamos', 'Servicios', 'Precios orientativos', 'Zonas']);
+    // Tras los módulos, el formulario de contacto cierra la portada (brain/design.md § Portada, 11).
+    expect(h2s(html)).toEqual(['¿Reparar o cambiar?', 'Cómo trabajamos', 'Servicios', 'Precios orientativos', 'Zonas', 'Mándanos una foto']);
     const franja = html.indexOf('aria-label="Nuestros compromisos"');
     expect(franja).toBeGreaterThan(0);
     expect(html.indexOf('>¿Reparar o cambiar?<')).toBeGreaterThan(franja);
@@ -234,8 +253,10 @@ describe('portada: módulos tras la franja de confianza', () => {
     expect(otro).not.toContain(s[1].nombre);
   });
 
-  it('sigue habiendo un solo primario y nada pendiente ni hex', () => {
-    expect(html.match(/data-variant="primary"/g)).toHaveLength(1);
+  it('sigue habiendo un solo primario (aparte del «Enviar petición» del formulario) y nada pendiente ni hex', () => {
+    const primarios = [...html.matchAll(/<(a|button)\b[^>]*data-variant="primary"[^>]*>/g)].map((m) => m[0]);
+    expect(primarios.filter((p) => !p.includes('id="enviar-peticion"'))).toHaveLength(1);
+    expect(primarios).toHaveLength(2);
     expect(texto).not.toMatch(/PENDIENTE|\{\{/);
     expect(html).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
@@ -351,6 +372,35 @@ describe('marco', () => {
   });
 });
 
+describe('botón flotante en globals.css', () => {
+  const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+  const regla = (sel: string) => new RegExp(`\\${sel}\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? '';
+  const decls = (r: string) => r.split(';').map((d) => d.trim()).filter(Boolean);
+
+  it('.boton-flotante: fijo abajo a la derecha, píldora y --shadow-1, solo con var(--…) o palabras clave', () => {
+    const r = regla('.boton-flotante');
+    expect(r).toMatch(/box-shadow:\s*var\(--shadow-1\)/);
+    expect(r).toMatch(/position:\s*fixed/);
+    expect(r).toMatch(/inset-block-end:\s*var\(--spacing-\d+\)/);
+    expect(r).toMatch(/inset-inline-end:\s*var\(--spacing-\d+\)/);
+    expect(r).toMatch(/border-radius:\s*var\(--radius-full\)/);
+    for (const d of decls(r)) expect(d).toMatch(/^[a-z-]+:\s*(var\(--[a-z0-9-]+\)|[a-z-]+)$/);
+  });
+
+  it('.boton-flotante-oculto lo esconde sin valores sueltos', () => {
+    const r = regla('.boton-flotante-oculto');
+    expect(r).toMatch(/visibility:\s*hidden/);
+    for (const d of decls(r)) expect(d).toMatch(/^[a-z-]+:\s*(var\(--[a-z0-9-]+\)|[a-z-]+)$/);
+  });
+});
+
+describe('hero', () => {
+  it('los botones del hero llevan id="cta-hero" (el flotante se oculta mientras se ven)', () => {
+    const html = renderToStaticMarkup(<Portada negocio={negocio} config={config} modo="publico" {...contenido} />);
+    expect(html).toMatch(/id="cta-hero"[^>]*>(?:(?!<\/section>).)*Manda la foto por WhatsApp/s);
+  });
+});
+
 describe('404', () => {
   it('explica el error y lleva a la portada', () => {
     const html = renderToStaticMarkup(<NotFound />);
@@ -364,6 +414,10 @@ describe('layout', () => {
   it('importa solo globals.css', () => {
     expect(src).toContain("import './globals.css'");
     expect(src).not.toMatch(/theme\.css|base\.css/);
+  });
+  it('monta el botón flotante de WhatsApp una sola vez', () => {
+    expect(src.match(/import \{ BotonFlotanteWhatsApp \} from '\.\.\/ui\/BotonFlotanteWhatsApp'/g)).toHaveLength(1);
+    expect(src.match(/<BotonFlotanteWhatsApp\b/g)).toHaveLength(1);
   });
   it('pasa a Frame el teléfono del contenido con telLink', () => {
     expect(src).toMatch(/telLink\(/);
