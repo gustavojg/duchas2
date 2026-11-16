@@ -306,7 +306,7 @@
 }
 
 /*
- * Galería de /antes-y-despues/ (FiltroGaleria en src/ui/, brain/design.md «filtro segmentado + rejilla»). La página
+ * Galería de /antes-y-despues/ (FiltroGaleria en src/ui/, brain/design.md «Selector + rejilla»). La página
  * es más ancha que `--measure` (texto largo) para que quepan dos columnas de pares. La lista es una rejilla: una
  * columna en móvil y dos desde escritorio (64rem). En cada par, «Antes» y «Después» se apilan en móvil y van lado a
  * lado desde 40rem (640 px), repartiéndose el ancho.
