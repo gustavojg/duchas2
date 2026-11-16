@@ -25,7 +25,7 @@ const CTA = 'Manda la foto del tuyo';
 
 /** Metadata propia con canonical de url_base, como el resto de páginas de PAGES. */
 export function generateMetadata(): Metadata {
-  return metadataPagina({ title: TITULO, description: DESCRIPCION, ruta: RUTA, urlBase: cargarNegocio().url_base });
+  return metadataPagina({ title: TITULO, description: DESCRIPCION, ruta: RUTA, urlBase: cargarNegocio().url_base, nombreSitio: APP_NAME });
 }
 
 export interface PaginaAntesYDespuesProps {

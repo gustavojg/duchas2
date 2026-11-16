@@ -18,6 +18,7 @@ import {
 import { type Modo, modoActual } from '../../lib/dato';
 import { parHueco } from '../../lib/galeria';
 import { jsonLdBreadcrumbList, jsonLdService, type MetadataPagina, metadataPagina, type Miga } from '../../lib/seo';
+import { APP_NAME } from '../../lib/site';
 import { garantia } from '../../lib/textos';
 import { esNumeroValido, mensajePorRuta, telLink } from '../../lib/whatsapp';
 import { AcordeonFaq } from '../../ui/AcordeonFaq';
@@ -48,7 +49,7 @@ function servicioEmpresas(servicios: readonly Servicio[]): Servicio {
 /** Metadatos: title y description del servicio `hoteles-y-comunidades` de servicios.json. */
 export function metadataHoteles(servicios: readonly Servicio[], urlBase: string): MetadataPagina {
   const s = servicioEmpresas(servicios);
-  return metadataPagina({ title: s.seo.title, description: s.seo.description, ruta: RUTA, urlBase });
+  return metadataPagina({ title: s.seo.title, description: s.seo.description, ruta: RUTA, urlBase, nombreSitio: APP_NAME });
 }
 
 export function generateMetadata(): Metadata {

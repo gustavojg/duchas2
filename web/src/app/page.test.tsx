@@ -22,6 +22,8 @@ import { DESCRIPTION, PAGES } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
+import { metadata as metadataDeAvisoLegal } from './aviso-legal/page';
+import { metadata as metadataDeCookies } from './cookies/page';
 import NotFound from './not-found';
 import { generateMetadata as metadataDeAntesYDespues } from './antes-y-despues/page';
 import { generateMetadata as metadataDeContacto } from './contacto/page';
@@ -30,6 +32,7 @@ import { generateMetadata as metadataDePortada, Portada, type PortadaProps } fro
 import { generateMetadata as metadataDePlatos } from './platos-de-ducha/page';
 import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
 import { generateMetadata as metadataDePrivacidad } from './privacidad/page';
+import { metadata as metadataDeQuienesSomos } from './quienes-somos/page';
 import { generateMetadata as metadataDeTarifas } from './tarifas/page';
 import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
@@ -446,6 +449,9 @@ describe('página /zonas/', () => {
       '/zonas/': metadataDeZonas(),
       '/preguntas-frecuentes/': metadataDeFaq(),
       '/contacto/': metadataDeContacto(),
+      '/quienes-somos/': metadataDeQuienesSomos,
+      '/aviso-legal/': metadataDeAvisoLegal,
+      '/cookies/': metadataDeCookies,
       '/antes-y-despues/': metadataDeAntesYDespues(),
       '/privacidad/': metadataDePrivacidad(),
       '/platos-de-ducha/': metadataDePlatos(),

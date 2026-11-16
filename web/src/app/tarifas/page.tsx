@@ -31,7 +31,7 @@ const NOTA = 'Precio orientativo; el presupuesto final depende del daño';
 
 /** Metadatos propios de /tarifas/ (distintos de los de /platos-de-ducha/) con canonical absoluto. */
 export function metadataTarifas(urlBase: string): MetadataPagina {
-  return metadataPagina({ title: TITLE, description: DESCRIPTION, ruta: RUTA, urlBase });
+  return metadataPagina({ title: TITLE, description: DESCRIPTION, ruta: RUTA, urlBase, nombreSitio: APP_NAME });
 }
 
 export function generateMetadata(): Metadata {

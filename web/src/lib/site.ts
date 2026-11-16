@@ -16,13 +16,16 @@ export const DESCRIPTION =
 /** Rutas públicas que se exportan como página y van al sitemap (con barra final: trailingSlash). */
 export const PAGES: readonly string[] = [
   '/',
+  '/quienes-somos/',
   '/platos-de-ducha/',
   '/tarifas/',
   '/zonas/',
   '/preguntas-frecuentes/',
   '/hoteles-y-comunidades/',
   '/antes-y-despues/',
+  '/aviso-legal/',
   '/privacidad/',
+  '/cookies/',
   '/contacto/',
 ];
 

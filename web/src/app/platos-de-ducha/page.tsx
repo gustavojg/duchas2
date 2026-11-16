@@ -25,6 +25,7 @@ import {
 import { confirmado, type Modo, modoActual, texto } from '../../lib/dato';
 import { respuestaFaq } from '../../lib/faq';
 import { jsonLdBreadcrumbList, jsonLdFaqPage, jsonLdService, type MetadataPagina, metadataPagina, type Miga } from '../../lib/seo';
+import { APP_NAME } from '../../lib/site';
 import { mensajePorRuta, telLink } from '../../lib/whatsapp';
 import { AcordeonFaq } from '../../ui/AcordeonFaq';
 import { IlustracionDano, PlatoPartido } from '../../ui/art';
@@ -54,7 +55,7 @@ const CTA_SECUNDARIO = 'Manda la foto del tuyo';
 export function metadataPlatosDeDucha(servicios: readonly Servicio[], urlBase: string): MetadataPagina {
   const plato = servicios.find((s) => s.slug === SLUG);
   if (!plato) throw new Error(`servicios.json: falta el servicio ${SLUG}`);
-  return metadataPagina({ title: plato.seo.title, description: plato.seo.description, ruta: RUTA, urlBase });
+  return metadataPagina({ title: plato.seo.title, description: plato.seo.description, ruta: RUTA, urlBase, nombreSitio: APP_NAME });
 }
 
 export function generateMetadata(): Metadata {

@@ -1,11 +1,80 @@
 /**
- * Datos estructurados (JSON-LD) y resumen de reseñas. El mismo resumen alimenta el bloque visible
- * (BloqueResenas) y AggregateRating; sin reseñas no hay ninguno de los dos (brain/CONTEXT.md).
- * Puro: sin React, Next, Astryx, node:* ni window.
+ * SEO del sitio, puro (sin React, Next, Astryx, node:* ni window):
+ * - Metadatos por página (ADR 0005): title, description, canonical y Open Graph únicos por ruta, y robots
+ *   según el modo borrador. Devuelve objetos con forma compatible con `Metadata` sin importar de 'next'.
+ * - Datos estructurados (JSON-LD) y resumen de reseñas. El mismo resumen alimenta el bloque visible
+ *   (BloqueResenas) y AggregateRating; sin reseñas no hay ninguno de los dos (brain/CONTEXT.md).
  */
 import type { Negocio, Resena } from './content.ts';
 import { APP_NAME, DESCRIPTION } from './site.ts';
 import { telLink } from './whatsapp.ts';
+
+export interface DatosPagina {
+  /** Ruta con barra inicial y final (`/privacidad/`). */
+  ruta: string;
+  titulo: string;
+  descripcion: string;
+  /** URL base del sitio (negocio.json › url_base); se le quitan las barras finales. */
+  baseUrl: string;
+  nombreSitio: string;
+}
+
+/** Metadatos de una página con Open Graph (forma de DatosPagina). */
+export interface MetadataPaginaOG extends MetadataPagina {
+  openGraph: {
+    title: string;
+    description: string;
+    url: string;
+    siteName: string;
+    locale: 'es_ES';
+    type: 'website';
+  };
+}
+
+/** Forma corta (title y description tal cual, solo canonical): la de las páginas de servicio, tarifas, etc. */
+export interface DatosPaginaSimple {
+  title: string;
+  description: string;
+  ruta: string;
+  urlBase: string;
+  /** Si se pasa, añade Open Graph (og:title = title tal cual); sin él, solo title, description y canonical. */
+  nombreSitio?: string;
+}
+
+/**
+ * Metadatos de cada página con canonical absoluto sobre `url_base` de negocio.json. Dos formas:
+ * - DatosPagina (`titulo`, `descripcion`, `baseUrl`, `nombreSitio`): title «Título · Sitio» y Open Graph
+ *   (legales, Quiénes somos, portada, zonas, FAQ, contacto).
+ * - DatosPaginaSimple (`title`, `description`, `urlBase`): title y description tal cual, sin Open Graph
+ *   salvo que lleve `nombreSitio` (/platos-de-ducha/, /tarifas/, servicios, hoteles y antes y después lo pasan
+ *   para que todas las páginas exportadas tengan Open Graph, que comprueba tests/build/out.test.ts).
+ */
+export function metadataPagina(datos: DatosPagina): MetadataPaginaOG;
+export function metadataPagina(datos: DatosPaginaSimple & { nombreSitio: string }): MetadataPaginaOG;
+export function metadataPagina(datos: DatosPaginaSimple): MetadataPagina;
+export function metadataPagina(datos: DatosPagina | DatosPaginaSimple): MetadataPagina | MetadataPaginaOG {
+  if ('urlBase' in datos) {
+    const { title, description, ruta, urlBase, nombreSitio } = datos;
+    const url = urlAbsoluta(urlBase, ruta);
+    const meta = { title, description, alternates: { canonical: url } };
+    if (nombreSitio === undefined) return meta;
+    return { ...meta, openGraph: { title, description, url, siteName: nombreSitio, locale: 'es_ES', type: 'website' } };
+  }
+  const { ruta, titulo, descripcion, baseUrl, nombreSitio } = datos;
+  const title = `${titulo} · ${nombreSitio}`;
+  const url = urlAbsoluta(baseUrl, ruta);
+  return {
+    title,
+    description: descripcion,
+    alternates: { canonical: url },
+    openGraph: { title, description: descripcion, url, siteName: nombreSitio, locale: 'es_ES', type: 'website' },
+  };
+}
+
+/** En borrador, ni indexar ni seguir enlaces (meta robots, no robots.txt: ADR 0005). */
+export function robotsMeta(borrador: boolean): { index: boolean; follow: boolean } {
+  return borrador ? { index: false, follow: false } : { index: true, follow: true };
+}
 
 export interface ResumenResenas {
   media: number;
@@ -117,25 +186,6 @@ export interface MetadataPagina {
   title: string;
   description: string;
   alternates: { canonical: string };
-}
-
-/**
- * Metadatos de cada página: title y description tal cual y canonical absoluto con `url_base` de negocio.json.
- * La usan /platos-de-ducha/ y /tarifas/ desde `generateMetadata()`, y la reutilizan las entregas
- * servicios-hoteles-galeria y legales-seo-borrador para el resto de páginas.
- */
-export function metadataPagina({
-  title,
-  description,
-  ruta,
-  urlBase,
-}: {
-  title: string;
-  description: string;
-  ruta: string;
-  urlBase: string;
-}): MetadataPagina {
-  return { title, description, alternates: { canonical: urlAbsoluta(urlBase, ruta) } };
 }
 
 /**
