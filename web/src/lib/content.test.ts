@@ -181,6 +181,18 @@ describe('galería, FAQ y reseñas', () => {
     expect(() => cargarGaleria()).toThrow(/galeria\.json.*antes/s);
   });
 
+  it('negocio.json lleva url_base de localhost y una nota que pide el dominio de producción', () => {
+    const n = cargarNegocio();
+    expect(n.url_base).toBe('http://localhost:3000');
+    expect(n.url_base_nota).toMatch(/producción/);
+  });
+
+  it('url_base_nota es opcional', () => {
+    const { url_base_nota: _, ...sinNota } = original();
+    conFichero('negocio.json', sinNota);
+    expect(cargarNegocio().url_base_nota).toBeUndefined();
+  });
+
   it('resenas.json con nota 6 lanza', () => {
     conFichero('resenas.json', [{ autor: 'Ana', nota: 6, texto: 'Muy bien', fecha: '2026-01-10', fuente: 'Google' }]);
     expect(() => cargarResenas()).toThrow(/resenas\.json.*nota/s);
