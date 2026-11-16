@@ -46,6 +46,22 @@ function Seccion({ id, titulo, children }: { id: string; titulo: string; childre
   );
 }
 
+/** Pasos de `como` en lista ordenada, con «PASO N» en la cinta (como PasosTrabajo). También en /hoteles-y-comunidades/. */
+export function PasosServicio({ pasos, etiqueta }: { pasos: readonly string[]; etiqueta: string }) {
+  return (
+    <VStack as="ol" gap={4} aria-label={etiqueta}>
+      {pasos.map((paso, i) => (
+        <VStack as="li" key={paso} gap={2}>
+          <Text as="p" type="code" weight="bold" color="inherit" className="paso-numero">
+            {`PASO ${i + 1}`}
+          </Text>
+          <Text as="p">{paso}</Text>
+        </VStack>
+      ))}
+    </VStack>
+  );
+}
+
 /**
  * Página de un servicio `/servicios/<slug>/` (brain/design.md § Servicio (plantilla)): migas → hero (cinta,
  * H1 «<servicio> en Madrid», resumen y CTA en `#cta-hero`) → problema → cómo (pasos con «PASO N» en cinta) →
@@ -97,16 +113,7 @@ export function PlantillaServicio({ servicio, servicios, negocio, modo, galeria 
       </Seccion>
 
       <Seccion id="servicio-como" titulo="Cómo lo hacemos">
-        <VStack as="ol" gap={4} aria-label={`Pasos de ${nombre}`}>
-          {servicio.como.map((paso, i) => (
-            <VStack as="li" key={paso} gap={2}>
-              <Text as="p" type="code" weight="bold" color="inherit" className="paso-numero">
-                {`PASO ${i + 1}`}
-              </Text>
-              <Text as="p">{paso}</Text>
-            </VStack>
-          ))}
-        </VStack>
+        <PasosServicio pasos={servicio.como} etiqueta={`Pasos de ${nombre}`} />
       </Seccion>
 
       <Seccion id="servicio-precio" titulo="¿Cuánto cuesta?">

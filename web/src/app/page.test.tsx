@@ -24,6 +24,7 @@ import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
 import { generateMetadata as metadataDeContacto } from './contacto/page';
+import { generateMetadata as metadataDeHoteles } from './hoteles-y-comunidades/page';
 import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
 import { generateMetadata as metadataDePlatos } from './platos-de-ducha/page';
 import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
@@ -445,9 +446,10 @@ describe('página /zonas/', () => {
       '/contacto/': metadataDeContacto(),
       '/platos-de-ducha/': metadataDePlatos(),
       '/tarifas/': metadataDeTarifas(),
+      '/hoteles-y-comunidades/': metadataDeHoteles(),
     };
     // Páginas de PAGES que aún no existen en esta rama (se quitan de aquí al crearlas).
-    const sinPagina = new Set(['/hoteles-y-comunidades/', '/antes-y-despues/']);
+    const sinPagina = new Set(['/antes-y-despues/']);
     const rutas = PAGES.filter((r) => !sinPagina.has(r));
     const canonicals = new Set<unknown>();
     for (const ruta of rutas) {
