@@ -100,6 +100,30 @@
   padding-inline: var(--spacing-4);
 }
 
+/*
+ * Antes/después de la portada (BloqueAntesDespues en src/app/page.tsx): las miniaturas reparten la fila a partes
+ * iguales y pueden encogerse por debajo de su contenido (sin scroll horizontal en 360).
+ */
+.portada-miniatura {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+/*
+ * Cintas «ANTES»/«DESPUÉS» del deslizador (DeslizadorAntesDespues en src/ui/): el contenido de Overlay es una
+ * columna flex con align-items: flex-start, así que la fila se encogería al contenido y justify="between" no
+ * separaría las cintas. A todo el ancho, «DESPUÉS» queda arriba a la derecha, sobre la capa «después».
+ */
+.deslizador-cintas {
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+/* CTA secundario del antes/después: ancho completo (Button width="100%" pintaría estilo en línea). */
+.portada-cta {
+  inline-size: 100%;
+}
+
 .franja-confianza-icono {
   display: block;
   flex: none;
@@ -162,7 +186,7 @@
   inline-size: var(--spacing-5);
 }
 
-/* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) encima, al doble. */
+/* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) al doble. */
 .tarjeta-servicio-icono {
   flex: none;
   inline-size: var(--spacing-12);
@@ -170,6 +194,15 @@
 
 .tarjeta-servicio-icono[data-tamano="grande"] {
   inline-size: calc(var(--spacing-12) * 2);
+}
+
+/*
+ * Texto de la tarjeta grande: ocupa lo que deja el icono y no baja de 5 × spacing-12. En escritorio cabe al lado
+ * del icono (sin hueco junto a él); en móvil no cabe y el HStack con wrap lo pasa debajo (columna).
+ */
+.tarjeta-servicio-textos[data-tamano="grande"] {
+  flex: 1 1 calc(var(--spacing-12) * 5);
+  min-inline-size: 0;
 }
 
 /* «PASO N» de PasosTrabajo: la cinta (firma), como cinta-etiqueta. */

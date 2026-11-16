@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME, PAGES } from '../../web/src/lib/site.js';
+import { APP_NAME, canonicalUrl, PAGES } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -123,6 +123,27 @@ describe('web/out servido por Hono', () => {
       vistos.add(canonicals[0]!);
     }
     expect(vistos.size).toBe(PAGES.length);
+  });
+
+  it('todas las páginas de PAGES llevan un único canonical', async () => {
+    const { url_base } = contenido('negocio.json') as { url_base: string };
+    for (const p of PAGES) {
+      const html = await (await app.request(p)).text();
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /\bhref="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, p).toEqual([canonicalUrl(url_base, p)]);
+    }
+  });
+
+  it('la portada lleva LocalBusiness sin AggregateRating, el antes/después y la FAQ resumida', () => {
+    const html = fs.readFileSync(path.join(webDir, 'index.html'), 'utf8');
+    expect(html).toContain('"@type":"LocalBusiness"');
+    expect(html).not.toContain('AggregateRating'); // web/content/resenas.json está vacío
+    // Sin <script>: el payload RSC lleva el catálogo i18n de Astryx, cuyas plantillas ICU usan «{{».
+    const visible = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+    expect(visible).toContain('Pronto, fotos reales de este trabajo');
+    expect(visible).toContain('href="/preguntas-frecuentes/"');
+    expect(visible).not.toContain('PENDIENTE');
+    expect(visible).not.toContain('{{');
   });
 
   it('/health sigue respondiendo JSON', async () => {

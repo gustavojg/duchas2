@@ -1,3 +1,5 @@
+import { Button } from '@astryxdesign/core/Button';
+import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Heading';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Link } from '@astryxdesign/core/Link';
@@ -7,19 +9,21 @@ import type { Metadata } from 'next';
 import { type ConfigFormulario, configFormulario } from '../../lib/config';
 import { cargarNegocio, type Negocio } from '../../lib/content';
 import { type Modo, modoActual } from '../../lib/dato';
-import { canonicalUrl } from '../../lib/seo';
-import { APP_NAME } from '../../lib/site';
+import { APP_NAME, canonicalUrl } from '../../lib/site';
 import { presupuesto, respuesta } from '../../lib/textos';
 import { mensajePorRuta, telLink } from '../../lib/whatsapp';
 import { BotonLlamar } from '../../ui/BotonLlamar';
 import { BotonWhatsApp } from '../../ui/BotonWhatsApp';
+import { CintaEtiqueta } from '../../ui/CintaEtiqueta';
 import { EnviarContacto } from '../../ui/EnviarContacto';
 
-export const metadata: Metadata = {
-  title: `Contacto · ${APP_NAME}`,
-  description: 'Mándanos una foto del daño por WhatsApp, llámanos o rellena el formulario y te decimos si tiene arreglo.',
-  alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/contacto/') },
-};
+export function generateMetadata(): Metadata {
+  return {
+    title: `Contacto · ${APP_NAME}`,
+    description: 'Mándanos una foto del daño por WhatsApp, llámanos o rellena el formulario y te decimos si tiene arreglo.',
+    alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/contacto/') },
+  };
+}
 
 export interface ContactoProps {
   negocio: Negocio;
@@ -30,8 +34,9 @@ export interface ContactoProps {
 const conPunto = (t: string) => (/[.!?]$/.test(t) ? t : `${t}.`);
 
 /**
- * Contacto `/contacto/` (brain/design.md § Soporte): H1, las tres vías (teléfono, WhatsApp y email, más el
- * horario; cada dato solo si tiene valor), el formulario, «Qué pasa después» y la retención de la foto. El único
+ * Contacto `/contacto/` (brain/design.md § Soporte): cinta (eyebrow), H1, las vías en tarjetas Card (WhatsApp y
+ * Llamar solo si tienen dato; Formulario siempre, con ancla a la sección del formulario), email y horario debajo
+ * (solo si tienen valor), el formulario, «Qué pasa después» y la retención de la foto. El único
  * primario es «Enviar petición»: WhatsApp y Llamar van como secundarios. Plazos de textos.ts, retención de
  * configFormulario(); los tests inyectan su contenido por props.
  */
@@ -45,16 +50,52 @@ export function Contacto({ negocio, config, modo }: ContactoProps) {
   return (
     <VStack gap={6} className="portada">
       <VStack gap={4} as="section" aria-labelledby="contacto-titulo">
+        <CintaEtiqueta>Contacto · Madrid</CintaEtiqueta>
         <Heading level={1} id="contacto-titulo">
           Mándanos una foto y te decimos si tiene arreglo
         </Heading>
-        <Text type="large" as="p">
+        <Text type="body" as="p">
           Llámanos, escríbenos por WhatsApp o rellena el formulario.
         </Text>
-        <HStack gap={2} wrap="wrap" vAlign="center">
-          {telefono ? <BotonLlamar href={telLink(telefono)} etiqueta="Llamar" /> : null}
-          {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={mensaje} etiqueta="WhatsApp" variante="secondary" /> : null}
-        </HStack>
+        <VStack gap={3} as="ul">
+          {whatsapp ? (
+            <VStack as="li">
+              <Card>
+                <VStack gap={2}>
+                  <Heading level={2}>WhatsApp</Heading>
+                  <Text as="p">Manda la foto del daño</Text>
+                  <HStack>
+                    <BotonWhatsApp numero={whatsapp} mensaje={mensaje} etiqueta="WhatsApp" variante="secondary" />
+                  </HStack>
+                </VStack>
+              </Card>
+            </VStack>
+          ) : null}
+          {telefono ? (
+            <VStack as="li">
+              <Card>
+                <VStack gap={2}>
+                  <Heading level={2}>Llamar</Heading>
+                  <Text as="p">Lo vemos contigo por teléfono</Text>
+                  <HStack>
+                    <BotonLlamar href={telLink(telefono)} etiqueta="Llamar" />
+                  </HStack>
+                </VStack>
+              </Card>
+            </VStack>
+          ) : null}
+          <VStack as="li">
+            <Card>
+              <VStack gap={2}>
+                <Heading level={2}>Formulario</Heading>
+                <Text as="p">Cuéntanos qué le pasa</Text>
+                <HStack>
+                  <Button variant="secondary" size="lg" label="Rellenar el formulario" href="#contacto-formulario" />
+                </HStack>
+              </VStack>
+            </Card>
+          </VStack>
+        </VStack>
         {email ? (
           <Text as="p">
             {'Email: '}

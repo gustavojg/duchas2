@@ -119,6 +119,45 @@ describe('content.ts', () => {
       conServicios(data);
       expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
     });
+
+    const rutasMalas = ['//evil.com/', 'javascript:x', 'javascript:alert(1)//', 'http://evil.com/', '/\\evil.com/'];
+
+    it.each(rutasMalas)('la ruta %s falla con fichero y campo', (ruta) => {
+      const data = leer('servicios.json');
+      data[4].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
+    });
+
+    // El tipo 'empresas' no tiene ruta fija: aquí solo rutaSchema protege contra «//» y esquemas.
+    it.each(rutasMalas)('la ruta %s falla también en el servicio de empresas', (ruta) => {
+      const data = leer('servicios.json');
+      data[9].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*9\.ruta/s);
+    });
+
+    it('el servicio principal fuera de /platos-de-ducha/ falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/otra-ruta/';
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*0\.ruta/s);
+    });
+
+    it('el servicio principal en /platos-de-ducha/ valida', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/platos-de-ducha/';
+      conServicios(data);
+      expect(cargarServicios()[0].ruta).toBe('/platos-de-ducha/');
+    });
+
+    it('una ruta válida sigue validando', () => {
+      const data = leer('servicios.json');
+      data[4].ruta = '/servicios/azulejos/';
+      data[9].ruta = '/hoteles-y-comunidades/';
+      conServicios(data);
+      expect(() => cargarServicios()).not.toThrow();
+    });
   });
 });
 
@@ -139,11 +178,11 @@ describe('galería, FAQ y reseñas', () => {
     for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
   });
 
-  it('el contenido real valida: reseñas vacías, ≥ 15 preguntas y entre 4 y 6 en portada', () => {
+  it('el contenido real valida: reseñas vacías, ≥ 17 preguntas y entre 4 y 6 en portada', () => {
     expect(cargarResenas()).toEqual([]);
     const faq = cargarFaq();
     const preguntas = faq.temas.flatMap((t) => t.preguntas);
-    expect(preguntas.length).toBeGreaterThanOrEqual(15);
+    expect(preguntas.length).toBeGreaterThanOrEqual(17);
     const enPortada = preguntas.filter((p) => p.en_portada).length;
     expect(enPortada).toBeGreaterThanOrEqual(4);
     expect(enPortada).toBeLessThanOrEqual(6);
