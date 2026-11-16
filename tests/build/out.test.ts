@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME } from '../../web/src/lib/site.js';
+import { APP_NAME, PAGES } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -123,6 +123,20 @@ describe('web/out servido por Hono', () => {
     expect(visible).toContain('href="/preguntas-frecuentes/"');
     expect(visible).not.toContain('PENDIENTE');
     expect(visible).not.toContain('{{');
+  });
+
+  const urlBase = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
+  /** HTML exportado de una ruta de PAGES: web/out/index.html para '/', web/out/<ruta>/index.html para el resto. */
+  const htmlDe = (ruta: string) => fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
+  const canonicalDe = (ruta: string) => /<link rel="canonical" href="([^"]*)"\/?>/.exec(htmlDe(ruta))?.[1];
+
+  it('cada página de PAGES lleva su canonical absoluto con url_base y barra final', () => {
+    expect(htmlDe('/zonas/')).toContain(`<link rel="canonical" href="${urlBase}/zonas/"/>`);
+    for (const ruta of PAGES) expect(canonicalDe(ruta), ruta).toBe(`${urlBase}${ruta}`);
+  });
+
+  it('la página 404 no lleva canonical (no inventa una ruta fuera de PAGES)', () => {
+    expect(fs.readFileSync(path.join(webDir, '404.html'), 'utf8')).not.toContain('rel="canonical"');
   });
 
   it('/health sigue respondiendo JSON', async () => {
