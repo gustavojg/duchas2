@@ -31,7 +31,10 @@ export const negocioSchema = z
     anios: entero,
     garantia: z.object({ anios: entero, condiciones: texto }).strict(),
     plazos: z.object({ presupuesto: texto, respuesta: texto, reparacion: texto, uso_ducha: texto }).strict(),
+    /** Única base del canonical, sitemap.xml y robots.txt (ADR 0005). Dominio de producción antes de publicar. */
     url_base: z.string().url(),
+    /** Recordatorio para quien edita el JSON (no admite comentarios); no se publica. */
+    url_base_nota: z.string().optional(),
     analitica: z.object({ ga4_id: z.string().min(1).nullable() }).strict(),
   })
   .strict();
