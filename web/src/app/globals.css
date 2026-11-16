@@ -216,3 +216,14 @@
   inline-size: 100%;
   max-inline-size: calc(var(--spacing-12) * 6);
 }
+
+/* Párrafos de texto largo (página del plato de ducha, legales): medida de lectura de --measure. */
+.texto-largo {
+  max-inline-size: var(--measure);
+}
+
+/* Ilustración de cada daño en la rejilla de /platos-de-ducha/: al lado del enlace, sin encogerse. */
+.plato-dano-icono {
+  flex: none;
+  inline-size: var(--spacing-12);
+}
