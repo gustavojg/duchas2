@@ -9,6 +9,7 @@ import { APP_NAME } from '../../config';
 import { serviciosOrdenados } from '../../lib/catalogo';
 import { cargarNegocio, cargarServicios, type Negocio, type Servicio } from '../../lib/content';
 import { type Modo, modoActual } from '../../lib/dato';
+import { rutaGenerada } from '../../lib/paginas';
 import { jsonLdBreadcrumbList, type MetadataPagina, metadataPagina, type Miga } from '../../lib/seo';
 import { BotonWhatsApp } from '../../ui/BotonWhatsApp';
 import { JsonLd } from '../../ui/JsonLd';
@@ -48,7 +49,8 @@ export interface PaginaTarifasProps {
  * Tarifas `/tarifas/` (brain/design.md § Soporte, PRD F4): migas, H1, WhatsApp primario en la cabecera de la
  * tabla (contenedor `cta-hero`, para que el flotante se oculte mientras se ve), Table de Astryx con 3 columnas
  * (Trabajo / Desde / Incluye) y una fila por servicio en su `orden`, la nota del precio orientativo y el cierre
- * con WhatsApp secundario y enlace al plato de ducha. «Desde» sale de PrecioDesde (nunca «0»); «Incluye» es el
+ * con WhatsApp secundario y enlace al plato de ducha. El nombre de cada trabajo enlaza a su ficha solo si el build
+ * genera esa página (rutaGenerada); si no, va como texto.«Desde» sale de PrecioDesde (nunca «0»); «Incluye» es el
  * `resumen` del servicio (servicios.json no tiene campo «incluye»). JSON-LD solo BreadcrumbList.
  */
 export function PaginaTarifas({ negocio, servicios, modo }: PaginaTarifasProps) {
@@ -84,7 +86,7 @@ export function PaginaTarifas({ negocio, servicios, modo }: PaginaTarifasProps) 
             {serviciosOrdenados(servicios).map((s) => (
               <TableRow key={s.slug}>
                 <TableCell className="tabla-tarifas-trabajo">
-                  <Link href={s.ruta}>{s.nombre}</Link>
+                  {rutaGenerada(s.ruta) ? <Link href={s.ruta}>{s.nombre}</Link> : <Text>{s.nombre}</Text>}
                 </TableCell>
                 <TableCell className="tabla-tarifas-desde">
                   <PrecioDesde dato={s.precio_desde} modo={modo} />
