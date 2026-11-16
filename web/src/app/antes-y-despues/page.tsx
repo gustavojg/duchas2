@@ -35,20 +35,21 @@ export interface PaginaAntesYDespuesProps {
 }
 
 /**
- * Antes y después `/antes-y-despues/` (brain/design.md § Soporte): migas → H1 → galería filtrable por servicio
+ * Antes y después `/antes-y-despues/` (brain/design.md § Soporte): H1 → migas → galería filtrable por servicio
  * (GaleriaFiltrable, CTA cada 6 pares) → cierre con el WhatsApp primario en `#cta-hero`. JSON-LD BreadcrumbList.
- * Contenedor `portada portada-galeria` (más ancho que el de texto, para la rejilla de pares).
+ * Contenedor `portada portada-galeria` (más ancho que el de texto, para la rejilla de pares). El H1 abre el
+ * contenedor, como en /zonas/ y /contacto/, para que su margen superior sea el mismo (tests/e2e/margen-h1.spec.ts).
  */
 export function PaginaAntesYDespues({ negocio, servicios, galeria }: PaginaAntesYDespuesProps) {
   const whatsapp = negocio.whatsapp.valor && esNumeroValido(negocio.whatsapp.valor) ? negocio.whatsapp.valor : null;
   const mensaje = mensajePorRuta(RUTA, servicios);
   return (
     <VStack gap={8} className="portada portada-galeria">
-      <MigasDePan migas={MIGAS} />
       <VStack gap={4} as="section" aria-labelledby="galeria-titulo">
         <Heading level={1} id="galeria-titulo">
           Antes y después de nuestros trabajos
         </Heading>
+        <MigasDePan migas={MIGAS} />
         <Text type="large" as="p">
           Así quedan los platos de ducha y las bañeras que reparamos en casa. Elige un servicio para ver solo esos trabajos.
         </Text>

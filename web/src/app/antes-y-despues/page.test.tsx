@@ -150,6 +150,14 @@ describe('/antes-y-despues/ (PaginaAntesYDespues)', () => {
     expect(htmlPagina).not.toContain('{{');
   });
 
+  it('el H1 abre la página (mismo margen superior que /zonas/): las migas van debajo', () => {
+    const contenedor = /<div[^>]*\bportada portada-galeria\b[^>]*>(<[^>]+>)/.exec(htmlPagina);
+    expect(contenedor?.[1]).toMatch(/^<section\b/);
+    const seccion = /<section[^>]*aria-labelledby="galeria-titulo"[^>]*>(<[^>]+>)/.exec(htmlPagina);
+    expect(seccion?.[1]).toMatch(/^<h1\b/);
+    expect(htmlPagina.indexOf('<h1')).toBeLessThan(htmlPagina.indexOf('aria-label="Migas de pan"'));
+  });
+
   it('sin número de WhatsApp no pinta el botón', () => {
     const sin: Negocio = { ...negocio, whatsapp: { valor: null, confirmado: false } };
     expect(pinta({ negocio: sin })).not.toContain('wa.me');
