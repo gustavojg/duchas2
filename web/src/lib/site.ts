@@ -20,6 +20,8 @@ export const PAGES: readonly string[] = [
   '/tarifas/',
   '/zonas/',
   '/preguntas-frecuentes/',
+  '/antes-y-despues/',
+  '/privacidad/',
   '/contacto/',
 ];
 
