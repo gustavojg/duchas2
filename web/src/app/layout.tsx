@@ -4,7 +4,7 @@ import './globals.css';
 import { APP_NAME, LEGALES, NAV } from '../config';
 import { esBorrador } from '../lib/borrador';
 import { configFormulario } from '../lib/config';
-import { cargarNegocio, cargarServicios } from '../lib/content';
+import { cargarNegocio } from '../lib/content';
 import { modoActual } from '../lib/dato';
 import { robotsMeta } from '../lib/seo';
 import { DESCRIPTION } from '../lib/site';
@@ -41,12 +41,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               config={configFormulario()}
               modo={modoActual()}
               legales={LEGALES}
-              servicios={cargarServicios()}
+              // Solo servicios con página; aún no hay ninguna. Volver a cargarServicios() al crear las páginas de servicio.
+              servicios={[]}
             />
           }
         >
           {children}
-          {/* Una sola vez para todo el sitio. Cuando exista web/content/servicios.json, pasarle `servicios`. */}
+          {/* Una sola vez para todo el sitio. */}
           {whatsapp ? <BotonFlotanteWhatsApp numero={whatsapp} /> : null}
         </Frame>
       </body>
