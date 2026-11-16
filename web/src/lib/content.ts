@@ -93,12 +93,19 @@ export const IMAGENES_TARJETA = [
 ] as const;
 
 const cadena = z.string().min(1);
-/** Ruta interna del sitio: nunca «//» (relativa al protocolo), esquema («:») ni «\» (algunos navegadores la leen como «/»). */
+/**
+ * Ruta interna del sitio: nunca «//» (relativa al protocolo), esquema («:») ni «\» (algunos navegadores la leen como «/»).
+ * Tampoco segmentos «.» o «..» (postbuild hace path.join con ella) ni caracteres XML, de control o espacios
+ * (sitemapXml no escapa nada).
+ */
 const rutaSchema = cadena
   .refine((r) => r.startsWith('/') && r.endsWith('/'), 'la ruta empieza y acaba en /')
   .refine((r) => !r.startsWith('//'), 'la ruta no puede empezar por //')
   .refine((r) => !r.includes(':'), 'la ruta no puede llevar esquema (ningún «:»)')
-  .refine((r) => !r.includes('\\'), 'la ruta no puede llevar barras invertidas (\\)');
+  .refine((r) => !r.includes('\\'), 'la ruta no puede llevar barras invertidas (\\)')
+  .refine((r) => !r.split('/').some((s) => s === '.' || s === '..'), 'la ruta no puede llevar segmentos «.» ni «..»')
+  // eslint-disable-next-line no-control-regex
+  .refine((r) => !/[<>&"'\u0000-\u001f\s]/.test(r), 'la ruta no puede llevar caracteres XML (<>&"\'), de control ni espacios');
 
 export const servicioSchema = z
   .object({
@@ -111,7 +118,7 @@ export const servicioSchema = z
     problema: cadena,
     como: z.array(cadena).min(1),
     precio_desde: entero,
-    faqs: z.array(z.object({ p: cadena, r: cadena }).strict()),
+    faqs: z.array(z.object({ p: cadena, r: cadena }).strict()).min(2).max(4),
     relacionados: z.array(cadena),
     whatsapp_mensaje: cadena,
     seo: z.object({ title: cadena, description: cadena }).strict(),
@@ -187,7 +194,9 @@ export const zonasSchema = z.object({ madrid_capital: z.array(cadena).min(1), mu
 
 export type Zonas = z.infer<typeof zonasSchema>;
 
+/** Catálogo de servicios (web/content/servicios.json); sin fichero, ningún servicio (lo usan el pie y el sitemap). */
 export function cargarServicios(): Servicio[] {
+  if (!existsSync(join(contentDir(), 'servicios.json'))) return [];
   return leerContenido('servicios.json', serviciosSchema);
 }
 
@@ -353,4 +362,13 @@ export type Resena = z.infer<typeof resenasSchema>[number];
 
 export function cargarResenas(): Resena[] {
   return leerContenido('resenas.json', resenasSchema);
+}
+
+/** Referencias reales de hoteles y comunidades (referencias.json). Vacío ⇒ la sección no aparece; nunca se inventan. */
+export const referenciasSchema = z.array(z.object({ nombre: cadena, tipo: cadena, texto: cadena }).strict());
+
+export type Referencia = z.infer<typeof referenciasSchema>[number];
+
+export function cargarReferencias(): Referencia[] {
+  return leerContenido('referencias.json', referenciasSchema);
 }

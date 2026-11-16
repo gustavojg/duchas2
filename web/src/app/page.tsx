@@ -29,8 +29,8 @@ import {
 } from '../lib/content';
 import { type Modo, modoActual } from '../lib/dato';
 import { preguntasResueltas } from '../lib/faq';
-import { jsonLdLocalBusiness } from '../lib/seo';
-import { canonicalUrl, DESCRIPTION } from '../lib/site';
+import { jsonLdLocalBusiness, metadataPagina } from '../lib/seo';
+import { APP_NAME, DESCRIPTION } from '../lib/site';
 import { compromisosFranja, respuesta, titularPortada } from '../lib/textos';
 import { MENSAJE_PORTADA, telLink, waLink } from '../lib/whatsapp';
 import { AcordeonFaq } from '../ui/AcordeonFaq';
@@ -50,10 +50,20 @@ import { PrecioDesde } from '../ui/PrecioDesde';
 import { TablaRepararCambiar } from '../ui/TablaRepararCambiar';
 import { TarjetaServicio } from '../ui/TarjetaServicio';
 
-/** Canonical de la portada; title y description los hereda del layout (el layout no declara canonical). */
+/**
+ * Metadatos de la portada (title, description, canonical y Open Graph) con metadataPagina; el canonical coincide
+ * con canonicalUrl(url_base, '/').
+ */
 export function generateMetadata(): Metadata {
-  return { alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/') } };
+  return metadataPagina({
+    ruta: '/',
+    titulo: 'Reparación y esmaltado de platos de ducha en Madrid',
+    descripcion: DESCRIPTION,
+    baseUrl: cargarNegocio().url_base,
+    nombreSitio: APP_NAME,
+  });
 }
+
 
 const MENSAJE_PRECIO = 'Hola, quiero saber cuánto costaría arreglar mi baño. Os mando una foto.';
 const MENSAJE_ZONA = 'Hola, vivo en… ¿venís a mi zona?';

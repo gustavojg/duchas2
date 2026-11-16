@@ -9,11 +9,13 @@ import {
   cargarNegocio,
   cargarPasos,
   cargarPlatoDucha,
+  cargarReferencias,
   cargarResenas,
   cargarServicios,
   cargarZonas,
   contentDir,
   platoDuchaSchema,
+  serviciosSchema,
 } from './content.ts';
 import { respuestaFaq } from './faq.ts';
 
@@ -312,5 +314,62 @@ describe('plato-ducha.json', () => {
     const plato = cargarPlatoDucha();
     expect(plato.materiales.map((m) => m.nombre)).toEqual(['Resina', 'Carga mineral', 'Acrílico', 'Porcelana']);
     for (const m of plato.materiales) expect(m.reparable).toEqual({ valor: null, confirmado: false });
+  });
+});
+
+describe('referencias y FAQ de servicios', () => {
+  const dirs: string[] = [];
+  const real = (f: string) => JSON.parse(readFileSync(join(contentDir(), f), 'utf8'));
+  afterEach(() => {
+    delete process.env.CONTENT_DIR;
+    for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
+  });
+  const conFichero = (f: string, data: unknown) => {
+    const dir = mkdtempSync(join(tmpdir(), 'contenido-'));
+    dirs.push(dir);
+    writeFileSync(join(dir, 'negocio.json'), JSON.stringify(real('negocio.json')));
+    writeFileSync(join(dir, f), JSON.stringify(data));
+    process.env.CONTENT_DIR = dir;
+  };
+
+  it('referencias.json por defecto es una lista vacía', () => {
+    expect(cargarReferencias()).toEqual([]);
+  });
+
+  it('una referencia sin nombre lanza un error que cita referencias.json', () => {
+    conFichero('referencias.json', [{ tipo: 'Hotel', texto: 'Renovamos 40 bañeras.' }]);
+    expect(() => cargarReferencias()).toThrow(/referencias\.json.*nombre/s);
+  });
+
+  it('una referencia completa valida y un campo extra o vacío falla', () => {
+    const ref = { nombre: 'Hotel Ejemplo', tipo: 'Hotel', texto: 'Renovamos sus bañeras.' };
+    conFichero('referencias.json', [ref]);
+    expect(cargarReferencias()).toEqual([ref]);
+    conFichero('referencias.json', [{ ...ref, extra: 'x' }]);
+    expect(() => cargarReferencias()).toThrow(/referencias\.json/);
+    conFichero('referencias.json', [{ ...ref, texto: '' }]);
+    expect(() => cargarReferencias()).toThrow(/referencias\.json.*texto/s);
+  });
+
+  it('un servicio con 1 o 5 FAQ falla en serviciosSchema; con 2 y 4 valida', () => {
+    const data = real('servicios.json');
+    const faq = { p: '¿Pregunta?', r: 'Respuesta.' };
+    const con = (n: number) => {
+      const copia = structuredClone(data);
+      copia[1].faqs = Array.from({ length: n }, (_, i) => ({ ...faq, p: `¿Pregunta ${i}?` }));
+      return serviciosSchema.safeParse(copia).success;
+    };
+    expect(con(1)).toBe(false);
+    expect(con(5)).toBe(false);
+    expect(con(2)).toBe(true);
+    expect(con(4)).toBe(true);
+  });
+
+  it('el servicios.json real sigue validando con 2-4 FAQ por servicio', () => {
+    expect(serviciosSchema.safeParse(real('servicios.json')).success).toBe(true);
+    for (const s of cargarServicios()) {
+      expect(s.faqs.length).toBeGreaterThanOrEqual(2);
+      expect(s.faqs.length).toBeLessThanOrEqual(4);
+    }
   });
 });
