@@ -78,4 +78,14 @@ describe('cargarServicios()', () => {
     directorio([servicio('plato-de-ducha', 'P', true), { ...servicio('x', 'X'), slug: 'a<b' }]);
     expect(() => cargarServicios()).toThrow();
   });
+
+  it('una ruta de empresas con segmento .. hace fallar la carga', () => {
+    directorio([servicio('plato-de-ducha', 'P', true), { ...servicio('x', 'X'), tipo: 'empresas', ruta: '/servicios/../x/' }]);
+    expect(() => cargarServicios()).toThrow(/\.\./);
+  });
+
+  it('una ruta de empresas con caracteres XML hace fallar la carga', () => {
+    directorio([servicio('plato-de-ducha', 'P', true), { ...servicio('x', 'X'), tipo: 'empresas', ruta: '/a<b/' }]);
+    expect(() => cargarServicios()).toThrow(/caracteres/);
+  });
 });

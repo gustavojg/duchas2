@@ -90,12 +90,19 @@ export const IMAGENES_TARJETA = [
 ] as const;
 
 const cadena = z.string().min(1);
-/** Ruta interna del sitio: nunca «//» (relativa al protocolo), esquema («:») ni «\» (algunos navegadores la leen como «/»). */
+/**
+ * Ruta interna del sitio: nunca «//» (relativa al protocolo), esquema («:») ni «\» (algunos navegadores la leen como «/»).
+ * Tampoco segmentos «.» o «..» (postbuild hace path.join con ella) ni caracteres XML, de control o espacios
+ * (sitemapXml no escapa nada).
+ */
 const rutaSchema = cadena
   .refine((r) => r.startsWith('/') && r.endsWith('/'), 'la ruta empieza y acaba en /')
   .refine((r) => !r.startsWith('//'), 'la ruta no puede empezar por //')
   .refine((r) => !r.includes(':'), 'la ruta no puede llevar esquema (ningún «:»)')
-  .refine((r) => !r.includes('\\'), 'la ruta no puede llevar barras invertidas (\\)');
+  .refine((r) => !r.includes('\\'), 'la ruta no puede llevar barras invertidas (\\)')
+  .refine((r) => !r.split('/').some((s) => s === '.' || s === '..'), 'la ruta no puede llevar segmentos «.» ni «..»')
+  // eslint-disable-next-line no-control-regex
+  .refine((r) => !/[<>&"'\u0000-\u001f\s]/.test(r), 'la ruta no puede llevar caracteres XML (<>&"\'), de control ni espacios');
 
 export const servicioSchema = z
   .object({
