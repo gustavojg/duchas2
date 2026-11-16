@@ -5,13 +5,16 @@ import { VStack } from '@astryxdesign/core/VStack';
 import type { Metadata } from 'next';
 import { configFormulario } from '../../lib/config';
 import { cargarNegocio, type Negocio } from '../../lib/content';
-import { APP_NAME } from '../../lib/site';
+import { APP_NAME, canonicalUrl } from '../../lib/site';
 import { telLink } from '../../lib/whatsapp';
 
-export const metadata: Metadata = {
-  title: `Política de privacidad · ${APP_NAME}`,
-  description: 'Qué datos recogemos cuando nos escribes, para qué los usamos y cuándo los borramos.',
-};
+export function generateMetadata(): Metadata {
+  return {
+    title: `Política de privacidad · ${APP_NAME}`,
+    description: 'Qué datos recogemos cuando nos escribes, para qué los usamos y cuándo los borramos.',
+    alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/privacidad/') },
+  };
+}
 
 export interface PaginaPrivacidadProps {
   negocio: Negocio;

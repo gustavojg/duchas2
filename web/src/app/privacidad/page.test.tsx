@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { cargarNegocio } from '../../lib/content';
-import { APP_NAME } from '../../lib/site';
-import { metadata, PaginaPrivacidad } from './page';
+import { APP_NAME, canonicalUrl } from '../../lib/site';
+import { generateMetadata, PaginaPrivacidad } from './page';
 
 const negocio = cargarNegocio();
 const html = renderToStaticMarkup(<PaginaPrivacidad negocio={negocio} retencion_dias={45} />);
@@ -39,6 +39,10 @@ describe('/privacidad/', () => {
   });
 
   it('metadata con el título de la página', () => {
-    expect(metadata.title).toBe(`Política de privacidad · ${APP_NAME}`);
+    expect(generateMetadata().title).toBe(`Política de privacidad · ${APP_NAME}`);
+  });
+
+  it('metadata lleva su canonical: url_base + /privacidad/', () => {
+    expect(generateMetadata().alternates?.canonical).toBe(canonicalUrl(cargarNegocio().url_base, '/privacidad/'));
   });
 });

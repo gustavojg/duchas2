@@ -27,6 +27,7 @@ import { generateMetadata as metadataDeAntesYDespues } from './antes-y-despues/p
 import { generateMetadata as metadataDeContacto } from './contacto/page';
 import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
 import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
+import { generateMetadata as metadataDePrivacidad } from './privacidad/page';
 import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
@@ -443,6 +444,7 @@ describe('página /zonas/', () => {
       '/preguntas-frecuentes/': metadataDeFaq(),
       '/contacto/': metadataDeContacto(),
       '/antes-y-despues/': metadataDeAntesYDespues(),
+      '/privacidad/': metadataDePrivacidad(),
     };
     const canonicals = new Set<unknown>();
     for (const ruta of PAGES) {
