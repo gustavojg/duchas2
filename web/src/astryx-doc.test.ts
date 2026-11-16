@@ -64,4 +64,16 @@ describe('docs/astryx-componentes.md (D0)', () => {
     expect(md).toContain('## Composiciones registradas');
     for (const c of ['CintaEtiqueta', 'BotonWhatsApp', 'FranjaConfianza']) expect(md).toContain(c);
   });
+
+  it('registra con su fila las composiciones de las páginas de servicio, Hoteles y galería', () => {
+    const tabla = filas(readFileSync(DOC, 'utf8'));
+    for (const c of ['PlantillaServicio', 'PasosServicio', 'GaleriaFiltrable']) {
+      const fila = tabla.find((f) => f[0] === c);
+      expect(fila, `falta la fila de ${c}`).toBeDefined();
+      expect(fila![1], `${c}: falta el fichero`).toMatch(/web\/src\/ui\/\w+\.tsx/);
+      expect(fila![2]?.length ?? 0, `${c}: faltan los componentes Astryx`).toBeGreaterThan(0);
+    }
+    const pasos = tabla.find((f) => f[0] === 'PasosServicio')!.join(' ');
+    expect(pasos).toContain('/hoteles-y-comunidades/');
+  });
 });
