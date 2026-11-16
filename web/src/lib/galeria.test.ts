@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { cargarGaleria, cargarServicios, galeriaSchema, type ParGaleria } from './content.ts';
-import { filtrarPares, GALERIA_VACIA, grupos, opcionesFiltro, parHueco, serviciosConPares } from './galeria.ts';
+import {
+  filtrarPares,
+  GALERIA_VACIA,
+  GALERIA_VACIA_DESCRIPCION,
+  GALERIA_VACIA_TITULO,
+  grupos, opcionesFiltro, parHueco, serviciosConPares } from './galeria.ts';
 
 const par = (servicio: string, n: number): ParGaleria => ({
   servicio,
@@ -25,6 +30,12 @@ describe('galeria.ts', () => {
 
   it('GALERIA_VACIA es el texto de brain/design.md', () => {
     expect(GALERIA_VACIA).toBe('Aún no hemos subido fotos de este trabajo. Mándanos la tuya y te decimos qué podemos hacer.');
+  });
+
+  it('GALERIA_VACIA se parte en título y descripción literales (EmptyState)', () => {
+    expect(GALERIA_VACIA_TITULO).toBe('Aún no hemos subido fotos de este trabajo.');
+    expect(GALERIA_VACIA_DESCRIPCION).toBe('Mándanos la tuya y te decimos qué podemos hacer.');
+    expect(GALERIA_VACIA).toBe(`${GALERIA_VACIA_TITULO} ${GALERIA_VACIA_DESCRIPCION}`);
   });
 
   it('opcionesFiltro empieza por «Todos», sigue el orden y no incluye el servicio de empresas', () => {

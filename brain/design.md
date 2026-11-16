@@ -83,7 +83,8 @@ materiales (solo confirmados) → galería del plato → ¿Reparar o cambiar? co
 (vacío ⇒ no aparece) → garantía → antes/después → «Cuéntanos cuántas bañeras y cuándo».
 
 **Soporte:** Tarifas (tabla trabajo/desde/incluye; WhatsApp en cabecera de tabla y cierre) · Antes y después
-(filtro segmentado + rejilla; CTA cada 6 pares) · FAQ (temas como anclas + acordeones) · Zonas (anillos SVG +
+(Selector + rejilla; CTA cada 6 pares; vacío con `EmptyState` de Astryx: título «Aún no hemos subido fotos de este
+trabajo.», descripción «Mándanos la tuya y te decimos qué podemos hacer.» y WhatsApp «Manda la foto del tuyo») · FAQ (temas como anclas + acordeones) · Zonas (anillos SVG +
 distritos + municipios) · Quiénes somos · Contacto (H1 «Mándanos una foto y te decimos si tiene arreglo», 3 vías,
 formulario, qué pasa después y retención) · Legales (`--measure`).
 
@@ -201,6 +202,7 @@ Logotipo: `{{MARCA}}` en Archivo 800 precedido del símbolo (plato `brand` con d
 - CTA: «Manda la foto por WhatsApp» · «Llamar» · «Manda la foto del tuyo» · «Enviar petición».
 - Ayudas: foto «Con una foto del daño te decimos si tiene arreglo. Máximo 10 MB.»; teléfono «Te llamamos o escribimos a este número».
 - Vacío de galería: «Aún no hemos subido fotos de este trabajo. Mándanos la tuya y te decimos qué podemos hacer.» + WhatsApp.
+  En /antes-y-despues/ va en `EmptyState`: la primera frase es el título y la segunda, la descripción.
 - Errores: «Falta tu teléfono.» · «El teléfono tiene que tener 9 cifras.» · «Marca la casilla de privacidad para
   enviar.» · «La foto pesa más de 10 MB; prueba con otra o envíala por WhatsApp» · «Solo se admiten fotos (JPG, PNG,
   WebP o HEIC)» · «Has enviado varias peticiones; llámanos o escríbenos por WhatsApp» · «No hemos podido enviar tu

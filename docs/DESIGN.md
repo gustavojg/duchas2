@@ -149,7 +149,7 @@ dos pantallas hay un CTA en línea.
 | Página | Módulos en orden (obj. · tipo · contenido) | CTA |
 |---|---|---|
 | Tarifas | 1 H1 «Precios orientativos de reparación y esmaltado» + nota (informar · texto); 2 tabla trabajo / «desde» / qué incluye (informar · tabla; sin confirmar ⇒ «Pide presupuesto gratuito»); 3 qué sube o baja el precio (posicionar · lista); 4 «¿Reparar o cambiar?» (convencer · tabla); 5 cierre | WhatsApp en la cabecera de la tabla y en el cierre |
-| Antes y después | 1 H1; 2 filtro por servicio (orientar · botones segmentados); 3 rejilla de pares (resultados · visual; hueco ⇒ ilustración rotulada); 4 cierre | «Manda la foto del tuyo» |
+| Antes y después | 1 H1; 2 filtro por servicio (orientar · Selector); 3 rejilla de pares (resultados · visual; hueco ⇒ ilustración rotulada; vacío ⇒ `EmptyState` de Astryx con título «Aún no hemos subido fotos de este trabajo.», descripción «Mándanos la tuya y te decimos qué podemos hacer.» y WhatsApp); 4 cierre | «Manda la foto del tuyo» |
 | Preguntas frecuentes | 1 H1; 2 temas como anclas; 3 acordeones por tema (posicionar); 4 «¿No está tu pregunta?» | WhatsApp |
 | Zonas | 1 H1 «Zonas donde trabajamos en Madrid»; 2 esquema de anillos SVG; 3 distritos; 4 municipios; 5 cierre | «¿No ves tu zona? Pregúntanos» |
 | Quiénes somos | 1 H1; 2 forma de trabajar (confianza · texto + foto del equipo o ilustración de herramientas); 3 garantía (confianza); 4 años (solo si confirmados); 5 cierre | WhatsApp + Llamar |
@@ -553,8 +553,9 @@ franja diagonal de cinta. En cabecera, 32 px de alto; en favicon, solo el símbo
 - **CTA:** «Manda la foto por WhatsApp» · «Llamar» · «Manda la foto del tuyo» · «Enviar petición».
 - **Ayuda de campos:** foto «Con una foto del daño te decimos si tiene arreglo. Máximo 10 MB.»; teléfono
   «Te llamamos o escribimos a este número».
-- **Vacíos:** sin reseñas → el bloque no aparece; galería filtrada sin fotos → «Aún no hemos subido fotos de
-  este trabajo. Mándanos la tuya y te decimos qué podemos hacer.» + WhatsApp.
+- **Vacíos:** sin reseñas → el bloque no aparece; galería filtrada sin fotos → `EmptyState` de Astryx con título
+  «Aún no hemos subido fotos de este trabajo.», descripción «Mándanos la tuya y te decimos qué podemos hacer.» y
+  WhatsApp en actions.
 - **Errores:** «Falta tu teléfono.» · «El teléfono tiene que tener 9 cifras.» · «Marca la casilla de
   privacidad para enviar.» · «La foto pesa más de 10 MB; prueba con otra o envíala por WhatsApp» · «Solo se
   admiten fotos (JPG, PNG, WebP o HEIC)» · «Has enviado varias peticiones; llámanos o escríbenos por

@@ -8,6 +8,8 @@ import {
   AntesYDespues,
   DESCRIPCION,
   generateMetadata,
+  INTRO_FOTOS,
+  INTRO_ILUSTRACIONES,
   PaginaAntesYDespues,
   type PaginaAntesYDespuesProps,
   TITULO,
@@ -54,6 +56,23 @@ describe('/antes-y-despues/', () => {
     expect(textoPlano).toContain('Pronto, fotos reales de este trabajo');
     if (negocio.whatsapp.valor) expect(textoPlano).toContain('Manda la foto del tuyo');
     expect(html).not.toContain('<img');
+  });
+
+  it('con el contenido actual (sin fotos) la intro dice que son ilustraciones, no trabajos reales', () => {
+    expect(INTRO_ILUSTRACIONES).toBe(
+      'Estas ilustraciones enseñan qué se repara en cada servicio; no son trabajos reales. Elige un servicio para verlas.',
+    );
+    expect(textoPlano).toContain(INTRO_ILUSTRACIONES);
+    expect(textoPlano).not.toContain('Así quedan');
+    expect(textoPlano).not.toContain('que reparamos');
+    expect(textoPlano).not.toContain(INTRO_FOTOS);
+  });
+
+  it('con un par con las dos fotos la intro es INTRO_FOTOS y no la de ilustraciones', () => {
+    expect(INTRO_FOTOS).toBe('Elige un servicio para ver solo esos trabajos.');
+    const t = plano(render([conFoto, ...pares]));
+    expect(t).toContain(INTRO_FOTOS);
+    expect(t).not.toContain(INTRO_ILUSTRACIONES);
   });
 
   it('lleva el filtro con «Todos» y el nombre de platos-de-ducha de servicios.json', () => {
@@ -148,6 +167,14 @@ describe('/antes-y-despues/ (PaginaAntesYDespues)', () => {
     expect(htmlPagina).toContain('"@type":"BreadcrumbList"');
     expect(htmlPagina).not.toContain('PENDIENTE');
     expect(htmlPagina).not.toContain('{{');
+  });
+
+  it('el H1 abre la página (mismo margen superior que /zonas/): las migas van debajo', () => {
+    const contenedor = /<div[^>]*\bportada portada-galeria\b[^>]*>(<[^>]+>)/.exec(htmlPagina);
+    expect(contenedor?.[1]).toMatch(/^<section\b/);
+    const seccion = /<section[^>]*aria-labelledby="galeria-titulo"[^>]*>(<[^>]+>)/.exec(htmlPagina);
+    expect(seccion?.[1]).toMatch(/^<h1\b/);
+    expect(htmlPagina.indexOf('<h1')).toBeLessThan(htmlPagina.indexOf('aria-label="Migas de pan"'));
   });
 
   it('sin número de WhatsApp no pinta el botón', () => {

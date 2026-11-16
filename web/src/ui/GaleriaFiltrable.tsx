@@ -1,12 +1,13 @@
 'use client';
 
 import { Card } from '@astryxdesign/core/Card';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import { Fragment, useState } from 'react';
 import type { ParGaleria, Servicio } from '../lib/content';
-import { filtrarPares, GALERIA_VACIA, grupos, opcionesFiltro, TODOS } from '../lib/galeria';
+import { filtrarPares, GALERIA_VACIA_DESCRIPCION, GALERIA_VACIA_TITULO, grupos, opcionesFiltro, TODOS } from '../lib/galeria';
 import { BotonWhatsApp } from './BotonWhatsApp';
 import { HuecoFoto } from './HuecoFoto';
 
@@ -27,7 +28,8 @@ export interface GaleriaFiltrableProps {
  * Galería antes/después filtrable (brain/design.md § Antes y después): SegmentedControl con «Todos» y los
  * servicios (opcionesFiltro) sobre una lista de pares. Cada par lleva encima el nombre de su servicio y dos
  * HuecoFoto (foto con alt o el hueco). Tras cada bloque de 6 pares que no sea el último, un WhatsApp secundario.
- * Si el filtro no deja pares, GALERIA_VACIA y WhatsApp. Cliente por el estado del filtro.
+ * Si el filtro no deja pares, EmptyState (h2, porque el H1 es de la página) con GALERIA_VACIA_TITULO,
+ * GALERIA_VACIA_DESCRIPCION y el WhatsApp en actions si hay número. Cliente por el estado del filtro.
  */
 export function GaleriaFiltrable({ servicios, pares, whatsapp, mensaje }: GaleriaFiltrableProps) {
   const [filtro, setFiltro] = useState(TODOS);
@@ -49,10 +51,13 @@ export function GaleriaFiltrable({ servicios, pares, whatsapp, mensaje }: Galeri
       </VStack>
 
       {visibles.length === 0 ? (
-        <VStack gap={3} hAlign="start" role="status">
-          <Text as="p">{GALERIA_VACIA}</Text>
-          {boton}
-        </VStack>
+        <EmptyState
+          role="status"
+          title={GALERIA_VACIA_TITULO}
+          description={GALERIA_VACIA_DESCRIPCION}
+          headingLevel={2}
+          actions={boton ?? undefined}
+        />
       ) : (
         <VStack gap={6} as="ul" aria-label="Trabajos antes y después">
           {bloques.map((bloque, b) => (

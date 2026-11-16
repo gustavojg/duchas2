@@ -132,8 +132,7 @@
 
 /*
  * Columna de texto largo (PaginaTexto en src/ui/PaginaTexto.tsx: legales y Quiénes somos): las mismas reglas que
- * `.portada`, con `--measure` para la lectura, más relleno vertical para separar el H1 de la cabecera y el último
- * párrafo del pie.
+ * `.portada`, con `--measure` para la lectura, más relleno inferior para separar el último párrafo del pie.
  */
 .texto-largo {
   box-sizing: border-box;
@@ -142,6 +141,15 @@
   margin-inline: auto;
   padding-inline: var(--spacing-4);
   padding-block: var(--spacing-6);
+}
+
+/*
+ * La columna de PaginaTexto (la que abre con el H1) no lleva relleno superior: el H1 queda a la misma distancia de
+ * la cabecera que en /zonas/ y /contacto/ (`.portada`, sin padding-block; tests/e2e/margen-h1.spec.ts). Solo
+ * afecta a la columna de PaginaTexto, no a los párrafos `Text className="texto-largo"` de otras páginas.
+ */
+.texto-largo:has(> h1:first-child) {
+  padding-block-start: 0;
 }
 
 /*
@@ -298,7 +306,7 @@
 }
 
 /*
- * Galería de /antes-y-despues/ (FiltroGaleria en src/ui/, brain/design.md «filtro segmentado + rejilla»). La página
+ * Galería de /antes-y-despues/ (FiltroGaleria en src/ui/, brain/design.md «Selector + rejilla»). La página
  * es más ancha que `--measure` (texto largo) para que quepan dos columnas de pares. La lista es una rejilla: una
  * columna en móvil y dos desde escritorio (64rem). En cada par, «Antes» y «Después» se apilan en móvil y van lado a
  * lado desde 40rem (640 px), repartiéndose el ancho.

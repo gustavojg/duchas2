@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { expect, type Page, test } from '@playwright/test';
 
-/** `pnpm e2e`: el filtro segmentado de /antes-y-despues/ con los pares de web/content/galeria.json. */
+/** `pnpm e2e`: el Selector de servicio de /antes-y-despues/ con los pares de web/content/galeria.json. */
 const galeria = JSON.parse(fs.readFileSync(path.resolve('web/content/galeria.json'), 'utf8')) as { servicio: string }[];
 const servicios = JSON.parse(fs.readFileSync(path.resolve('web/content/servicios.json'), 'utf8')) as { slug: string; nombre: string; tipo: string }[];
 const nombre = (slug: string) => servicios.find((s) => s.slug === slug)!.nombre;
