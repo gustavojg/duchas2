@@ -123,6 +123,17 @@ describe('FiltroGaleria', () => {
     expect(css).toMatch(/@media \(min-width: 40rem\)\s*\{\s*\.galeria-par-lados\s*\{[^}]*flex-direction:\s*row/);
   });
 
+  it('sin pares pinta el texto de galería vacía y ningún <li>', () => {
+    const html = renderToStaticMarkup(<FiltroGaleria pares={[]} servicios={[]} />);
+    expect(html).toContain('Aún no hemos subido fotos de este trabajo. Mándanos la tuya y te decimos qué podemos hacer.');
+    expect(html).not.toMatch(/<li[\s>]/);
+  });
+
+  it('con pares no pinta el texto de galería vacía', () => {
+    const html = renderToStaticMarkup(<FiltroGaleria pares={pares} servicios={servicios} />);
+    expect(html).not.toContain('Aún no hemos subido fotos');
+  });
+
   it('sin estilos sueltos', () => {
     const html = sinVariablesAstryx(renderToStaticMarkup(<FiltroGaleria pares={[...pares, conFoto]} servicios={servicios} />));
     expect(html).not.toContain('style=');
