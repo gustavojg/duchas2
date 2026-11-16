@@ -76,9 +76,6 @@ describe('TarjetaServicio', () => {
       const html = renderToStaticMarkup(<TarjetaServicio servicio={s} />);
       expect(html.includes(`href="${s.ruta}"`)).toBe(rutaGenerada(s.ruta));
     }
-    // Hoy existe /platos-de-ducha/ pero no /servicios/*: la de platos enlaza y la de azulejos no.
-    expect(renderToStaticMarkup(<TarjetaServicio servicio={plato} />)).toContain('href="/platos-de-ducha/"');
-    expect(renderToStaticMarkup(<TarjetaServicio servicio={azulejos} />)).not.toContain('href=');
   });
 
   it('la grande conserva data-tamano y la caja del icono, y el texto puede ir al lado sin dejar hueco', () => {
