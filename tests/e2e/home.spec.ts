@@ -105,11 +105,14 @@ for (const ancho of [360, 1280]) {
         }),
       );
       expect(medidas.map((m) => m.titulo)).toEqual([
+        'Antes y después',
         '¿Reparar o cambiar?',
         'Cómo trabajamos',
         'Servicios',
         'Precios orientativos',
+        'Preguntas frecuentes',
         'Zonas',
+        'Mándanos una foto',
       ]);
       for (const { titulo, h2, h3 } of medidas) {
         for (const t of h3) expect(h2, `${titulo}: H2 ${h2}px frente a H3 ${t}px`).toBeGreaterThan(t);
@@ -132,6 +135,24 @@ for (const ancho of [360, 1280]) {
         expect(icono - svg, `caja ${icono}px frente a SVG ${svg}px`).toBeLessThanOrEqual(1);
       });
     }
+  });
+}
+
+/** Legales y Quiénes somos (PaginaTexto): un único H1, sin errores de consola y el pie con los tres legales. */
+for (const ruta of ['/aviso-legal/', '/privacidad/', '/cookies/', '/quienes-somos/']) {
+  test(`${ruta} tiene un único H1, sin errores de consola, y el pie enlaza a los legales`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+    await page.goto(ruta);
+    const h1 = page.getByRole('heading', { level: 1 });
+    await expect(h1).toHaveCount(1);
+    await expect(h1).toBeVisible();
+    const legales = page.getByRole('navigation', { name: 'Legales' });
+    for (const href of ['/aviso-legal/', '/privacidad/', '/cookies/']) {
+      await expect(legales.locator(`a[href="${href}"]`)).toHaveCount(1);
+    }
+    await page.waitForLoadState('networkidle');
+    expect(errors).toEqual([]);
   });
 }
 

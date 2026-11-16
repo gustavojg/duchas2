@@ -7,6 +7,11 @@ import { e2eTarget } from './src/e2e-target.js';
  * `pnpm e2e`: Chromium contra `pnpm start` (requiere `pnpm build` y `pnpm exec playwright install chromium`).
  * `pnpm e2e:staging`: el mismo smoke contra un servidor ya levantado (E2E_BASE_URL, por defecto :8804), sin servidor propio.
  * E2E_CHROMIUM_PATH: ruta a un Chromium de la imagen en lugar del que descarga Playwright.
+ *
+ * Con servidor local hay un segundo servidor en :3101 que sirve web/out-fixture (negocio completo con ga4_id,
+ * tests/build/construir-fixture.ts; si falta, se construye antes de arrancar) y el project 'chromium-fixture', que
+ * ejecuta solo tests/e2e/cookies.spec.ts contra él. Si web/out-fixture ya existe se reutiliza: tras cambiar web/
+ * o web/content, bórralo (o ejecuta `pnpm test:build`, que lo reconstruye) para no probar un build viejo.
  */
 const { baseURL, usaServidorLocal } = e2eTarget(process.env);
 const executablePath = process.env.E2E_CHROMIUM_PATH;
@@ -32,28 +37,46 @@ export function dataDirE2E(valor = process.env.E2E_DATA_DIR): string {
 }
 
 const DATA_DIR = dataDirE2E();
-if (usaServidorLocal && process.env.TEST_WORKER_INDEX === undefined) fs.rmSync(DATA_DIR, { recursive: true, force: true });
+/** DATA_DIR del servidor de fixture (:3101): hermano del anterior, también dentro de ./data. */
+const DATA_DIR_FIXTURE = dataDirE2E(`${DATA_DIR}-fixture`);
+if (usaServidorLocal && process.env.TEST_WORKER_INDEX === undefined) {
+  fs.rmSync(DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(DATA_DIR_FIXTURE, { recursive: true, force: true });
+}
+
+const PUERTO_FIXTURE = '3101';
+const COOKIES = /cookies\.spec\.ts$/;
+// Nombres de src/config.ts. Sal y destino de prueba: no son secretos y solo valen para estos servidores locales.
+const ENV_SERVIDOR = { HOST: '127.0.0.1', MAIL_TRANSPORT: 'file', EMAIL_DESTINO: 'peticiones@e2e.test', IP_SALT: 'e2e-sal-de-prueba' };
 
 export default defineConfig({
   testDir: 'tests/e2e',
   use: { baseURL, ...(executablePath ? { launchOptions: { executablePath } } : {}) },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, testIgnore: COOKIES },
+    ...(usaServidorLocal
+      ? [{ name: 'chromium-fixture', use: { ...devices['Desktop Chrome'], baseURL: `http://127.0.0.1:${PUERTO_FIXTURE}` }, testMatch: COOKIES }]
+      : []),
+  ],
   ...(usaServidorLocal
     ? {
-        webServer: {
-          command: 'pnpm start',
-          url: `${baseURL}/health`,
-          env: {
-            PORT: new URL(baseURL).port,
-            HOST: '127.0.0.1',
-            DATA_DIR,
-            // Nombres de src/config.ts. Sal y destino de prueba: no son secretos y solo valen para este servidor local.
-            MAIL_TRANSPORT: 'file',
-            EMAIL_DESTINO: 'peticiones@e2e.test',
-            IP_SALT: 'e2e-sal-de-prueba',
+        webServer: [
+          {
+            command: 'pnpm start',
+            url: `${baseURL}/health`,
+            env: { ...ENV_SERVIDOR, PORT: new URL(baseURL).port, DATA_DIR },
+            reuseExistingServer: false,
           },
-          reuseExistingServer: false,
-        },
+          {
+            // Si el build de fixture falla, el servidor no arranca (en vez de servir un web/out-fixture vacío).
+            command: 'sh -c "(test -f web/out-fixture/index.html || pnpm exec tsx tests/build/construir-fixture.ts) && pnpm start"',
+            url: `http://127.0.0.1:${PUERTO_FIXTURE}/health`,
+            env: { ...ENV_SERVIDOR, PORT: PUERTO_FIXTURE, WEB_DIR: 'web/out-fixture', DATA_DIR: DATA_DIR_FIXTURE },
+            reuseExistingServer: false,
+            // Puede incluir un build completo de Next.
+            timeout: 600_000,
+          },
+        ],
       }
     : {}),
 });
