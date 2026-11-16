@@ -379,7 +379,7 @@ describe('portada: módulos tras la franja de confianza', () => {
     const otro = pinta(negocio, config, { servicios: [...servicios, nuevo] });
     expect(nombresTarjetas(otro)).toHaveLength(11);
     expect(nombresTarjetas(otro)).toContain('Reparación de lavabos');
-    expect(hrefsInternos(otro)).not.toContain('/servicios/lavabos/');
+    expect(hrefsInternos(otro).includes('/servicios/lavabos/')).toBe(rutaGenerada('/servicios/lavabos/'));
   });
 
   it('los pasos sin plazos confirmados usan los textos sin plazo; con plazos, los plazos', () => {
