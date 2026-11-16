@@ -35,6 +35,10 @@ describe('/antes-y-despues/', () => {
     expect(html).toContain(platos!.nombre);
   });
 
+  it('el contenedor es más ancho que el de texto para la rejilla de dos columnas', () => {
+    expect(html).toMatch(/class="[^"]*\bportada portada-galeria\b/);
+  });
+
   it('el botón de WhatsApp «Manda la foto del tuyo» si hay número', () => {
     if (negocio.whatsapp.valor) {
       expect(html).toContain('Manda la foto del tuyo');

@@ -87,6 +87,31 @@ describe('FiltroGaleria', () => {
     expect(html).not.toContain('<img');
   });
 
+  it('cada par lleva el nombre de su servicio (o el slug si no está en servicios)', () => {
+    const conHuerfano = [...pares, par('mamparas', 'Hueco mampara uno')];
+    const html = renderToStaticMarkup(<FiltroGaleria pares={conHuerfano} servicios={servicios} />);
+    const items = html.match(/<li[\s>][\s\S]*?<\/li>/g) ?? [];
+    expect(items).toHaveLength(conHuerfano.length);
+    conHuerfano.forEach((p, i) => {
+      const nombre = servicios.find((s) => s.slug === p.servicio)?.nombre ?? p.servicio;
+      expect(items[i]).toContain(p.hueco);
+      expect(items[i]).toContain(nombre);
+    });
+    const otro = (p: ParGaleria) => servicios.find((s) => s.slug !== p.servicio)!.nombre;
+    expect(items[0]).not.toContain(otro(conHuerfano[0]));
+  });
+
+  it('la lista es una rejilla (1 columna en móvil, 2 en escritorio) y cada par pone antes y después lado a lado desde 640 px', () => {
+    const html = renderToStaticMarkup(<FiltroGaleria pares={pares} servicios={servicios} />);
+    expect(html).toMatch(/<ul[^>]*class="[^"]*\bgaleria-pares\b/);
+    expect(html.match(/class="[^"]*\bgaleria-par-lados\b/g)).toHaveLength(pares.length);
+    expect(html.match(/class="[^"]*\bgaleria-par-lado\b/g)).toHaveLength(pares.length * 2);
+    const css = readFileSync(join(__dirname, '../app/globals.css'), 'utf8');
+    expect(css).toMatch(/\.galeria-pares\s*\{[^}]*display:\s*grid/);
+    expect(css).toMatch(/@media \(min-width: 64rem\)\s*\{\s*\.galeria-pares\s*\{[^}]*grid-template-columns:\s*repeat\(2,/);
+    expect(css).toMatch(/@media \(min-width: 40rem\)\s*\{\s*\.galeria-par-lados\s*\{[^}]*flex-direction:\s*row/);
+  });
+
   it('sin estilos sueltos', () => {
     const html = sinVariablesAstryx(renderToStaticMarkup(<FiltroGaleria pares={[...pares, conFoto]} servicios={servicios} />));
     expect(html).not.toContain('style=');

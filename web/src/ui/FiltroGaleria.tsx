@@ -27,6 +27,7 @@ export interface FiltroGaleriaVistaProps extends FiltroGaleriaProps {
  */
 export function FiltroGaleriaVista({ pares, servicios, elegido, onElegir }: FiltroGaleriaVistaProps) {
   const visibles = filtrarPares(pares, elegido);
+  const nombreServicio = (slug: string) => servicios.find((s) => s.slug === slug)?.nombre ?? slug;
   return (
     <VStack gap={5}>
       <SegmentedControl label="Filtrar por servicio" value={elegido} onChange={onElegir}>
@@ -35,20 +36,25 @@ export function FiltroGaleriaVista({ pares, servicios, elegido, onElegir }: Filt
           <SegmentedControlItem key={s.slug} value={s.slug} label={s.nombre} />
         ))}
       </SegmentedControl>
-      <VStack gap={6} as="ul" aria-label="Trabajos antes y después">
+      <VStack gap={6} as="ul" aria-label="Trabajos antes y después" className="galeria-pares">
         {visibles.map((par) => (
           <VStack gap={3} as="li" key={`${par.servicio}-${par.alt_antes}`}>
-            <VStack gap={2}>
-              <Text as="p" weight="bold">
-                Antes
-              </Text>
-              <HuecoFoto par={par} lado="antes" />
-            </VStack>
-            <VStack gap={2}>
-              <Text as="p" weight="bold">
-                Después
-              </Text>
-              <HuecoFoto par={par} lado="despues" />
+            <Text as="p" weight="bold" color="accent">
+              {nombreServicio(par.servicio)}
+            </Text>
+            <VStack gap={3} className="galeria-par-lados">
+              <VStack gap={2} className="galeria-par-lado">
+                <Text as="p" weight="bold">
+                  Antes
+                </Text>
+                <HuecoFoto par={par} lado="antes" />
+              </VStack>
+              <VStack gap={2} className="galeria-par-lado">
+                <Text as="p" weight="bold">
+                  Después
+                </Text>
+                <HuecoFoto par={par} lado="despues" />
+              </VStack>
             </VStack>
           </VStack>
         ))}

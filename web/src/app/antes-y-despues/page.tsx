@@ -28,7 +28,7 @@ export interface AntesYDespuesProps {
 export function AntesYDespues({ pares, servicios, negocio }: AntesYDespuesProps) {
   const whatsapp = negocio.whatsapp.valor;
   return (
-    <VStack gap={6} className="portada">
+    <VStack gap={6} className="portada portada-galeria">
       <VStack gap={3}>
         <Heading level={1}>Antes y después</Heading>
         <Text as="p" type="large">
