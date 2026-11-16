@@ -90,7 +90,12 @@ export const IMAGENES_TARJETA = [
 ] as const;
 
 const cadena = z.string().min(1);
-const rutaSchema = cadena.refine((r) => r.startsWith('/') && r.endsWith('/'), 'la ruta empieza y acaba en /');
+/** Ruta interna del sitio: nunca «//» (relativa al protocolo), esquema («:») ni «\» (algunos navegadores la leen como «/»). */
+const rutaSchema = cadena
+  .refine((r) => r.startsWith('/') && r.endsWith('/'), 'la ruta empieza y acaba en /')
+  .refine((r) => !r.startsWith('//'), 'la ruta no puede empezar por //')
+  .refine((r) => !r.includes(':'), 'la ruta no puede llevar esquema (ningún «:»)')
+  .refine((r) => !r.includes('\\'), 'la ruta no puede llevar barras invertidas (\\)');
 
 export const servicioSchema = z
   .object({
@@ -122,6 +127,8 @@ export const serviciosSchema = z
       slugs.add(s.slug);
       if (s.tipo === 'servicio' && s.ruta !== `/servicios/${s.slug}/`)
         ctx.addIssue({ code: 'custom', path: [i, 'ruta'], message: `un servicio va en /servicios/${s.slug}/` });
+      if (s.tipo === 'principal' && s.ruta !== '/platos-de-ducha/')
+        ctx.addIssue({ code: 'custom', path: [i, 'ruta'], message: 'el servicio principal va en /platos-de-ducha/' });
     });
     servicios.forEach((s, i) =>
       s.relacionados.forEach((r, j) => {
