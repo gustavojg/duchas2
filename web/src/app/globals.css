@@ -70,6 +70,8 @@
   --measure: 65ch;
   /* Botones de acción ≥ 44 px (brain/design.md: ≥ 48): Button size="lg" toma su alto de este token. */
   --size-element-lg: var(--spacing-12);
+  /* Capa del botón flotante de WhatsApp: por encima del contenido de la página. */
+  --z-flotante: 10;
 }
 
 /*
@@ -98,10 +100,90 @@
   padding-inline: var(--spacing-4);
 }
 
+/*
+ * Antes/después de la portada (BloqueAntesDespues en src/app/page.tsx): las miniaturas reparten la fila a partes
+ * iguales y pueden encogerse por debajo de su contenido (sin scroll horizontal en 360).
+ */
+.portada-miniatura {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+/*
+ * Cintas «ANTES»/«DESPUÉS» del deslizador (DeslizadorAntesDespues en src/ui/): el contenido de Overlay es una
+ * columna flex con align-items: flex-start, así que la fila se encogería al contenido y justify="between" no
+ * separaría las cintas. A todo el ancho, «DESPUÉS» queda arriba a la derecha, sobre la capa «después».
+ */
+.deslizador-cintas {
+  inline-size: 100%;
+  box-sizing: border-box;
+}
+
+/* CTA secundario del antes/después: ancho completo (Button width="100%" pintaría estilo en línea). */
+.portada-cta {
+  inline-size: 100%;
+}
+
 .franja-confianza-icono {
   display: block;
   flex: none;
   inline-size: var(--spacing-10);
+}
+
+/*
+ * BotonFlotanteWhatsApp (src/ui/BotonFlotanteWhatsApp.tsx): píldora de marca fija abajo a la derecha con la única
+ * sombra del producto. Alto ≥ 48 px por Button size="lg" (--size-element-lg). Se oculta sin desmontarse mientras
+ * se ve el CTA del hero o el «Enviar petición» (IDS_SIN_FLOTANTE en src/lib/whatsapp.ts).
+ */
+.boton-flotante {
+  position: fixed;
+  inset-block-end: var(--spacing-4);
+  inset-inline-end: var(--spacing-4);
+  z-index: var(--z-flotante);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-1);
+}
+
+.boton-flotante-oculto {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/*
+ * FormularioContacto y CampoFoto (src/ui/): inputs nativos que no se ven. `campo-foto-input` es el <input
+ * type="file"> que abre el botón «Añadir foto del daño»; `campo-trampa` es el honeypot `web` (aria-hidden y
+ * tabindex -1). Ocultos sin display:none, fuera del flujo y recortados.
+ */
+.campo-foto-input,
+.campo-trampa {
+  position: absolute;
+  inline-size: var(--spacing-0-5);
+  block-size: var(--spacing-0-5);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * SegmentedControl de pieza: Astryx (hug) recorta las etiquetas cuando no caben («Ba…» a 360 px) y no tiene prop
+ * para envolver. Aquí las opciones saltan de línea y cada fila se reparte el ancho. El lens del seleccionado se
+ * coloca con las cajas medidas (left/top), así que funciona en varias filas.
+ */
+.campo-pieza-opciones .astryx-segmented-control {
+  flex-wrap: wrap;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.campo-pieza-opciones .astryx-segmented-control-item {
+  flex: 1 1 auto;
+}
+
+/* Icono de cada pieza en el SegmentedControl del formulario. */
+.campo-pieza-icono {
+  display: block;
+  flex: none;
+  inline-size: var(--spacing-5);
 }
 
 /* Icono de TarjetaServicio: compacto al lado del texto; grande (el plato) al doble. */

@@ -55,6 +55,17 @@ describe('preguntasResueltas', () => {
     }
   });
 
+  it('el tema «Tu foto y el contacto» tiene 3 preguntas, entre ellas la de zonas, sin marcadores', () => {
+    const temas = preguntasResueltas(cargarFaq(), ctx);
+    const tema = temas.find((t) => t.tema === 'Tu foto y el contacto');
+    expect(tema, 'falta el tema').toBeDefined();
+    expect(tema!.preguntas).toHaveLength(3);
+    const zonas = tema!.preguntas.find((p) => p.p === '¿Venís a mi barrio o mi municipio?');
+    expect(zonas, 'falta la pregunta de zonas').toBeDefined();
+    expect(zonas!.r).not.toContain('{');
+    expect(zonas!.r).not.toContain('PENDIENTE');
+  });
+
   it('anclaTema hace un slug ASCII sin tildes', () => {
     expect(anclaTema('Plazos, presupuesto y garantía')).toBe('plazos-presupuesto-y-garantia');
     expect(anclaTema('Tu foto y el contacto')).toBe('tu-foto-y-el-contacto');
