@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { canonicalUrl, normalizarBase, PAGES, robotsTxt, sitemapXml } from './site.js';
+import { canonicalUrl, normalizarBase, PAGES, paginasDelSitio, robotsTxt, sitemapXml } from './site.js';
 
 // Lo ejecuta el vitest de la raíz (lógica pura de web/src/lib), no el de web/.
 describe('site', () => {
@@ -13,6 +13,12 @@ describe('site', () => {
   it('PAGES incluye /contacto/ y el sitemap lo lista', () => {
     expect(PAGES).toContain('/contacto/');
     expect(sitemapXml('https://ejemplo.test')).toContain('<loc>https://ejemplo.test/contacto/</loc>');
+  });
+
+  it('el sitemap lista /privacidad/ y /antes-y-despues/', () => {
+    const xml = sitemapXml('https://ejemplo.test');
+    expect(xml).toContain('<loc>https://ejemplo.test/privacidad/</loc>');
+    expect(xml).toContain('<loc>https://ejemplo.test/antes-y-despues/</loc>');
   });
 
   it('la navegación (NAV de web/src/config.ts) enlaza /contacto/', () => {
@@ -84,5 +90,45 @@ describe('site', () => {
   it('cada <loc> del sitemap es el canonicalUrl de su página', () => {
     const xml = sitemapXml('https://ejemplo.test/');
     for (const p of PAGES) expect(xml).toContain(`<loc>${canonicalUrl('https://ejemplo.test', p)}</loc>`);
+  });
+
+  describe('paginasDelSitio', () => {
+    const fixture = [
+      { ruta: '/platos-de-ducha/', tipo: 'principal' },
+      { ruta: '/servicios/uno/', tipo: 'servicio' },
+      { ruta: '/servicios/dos/', tipo: 'servicio' },
+      { ruta: '/hoteles-y-comunidades/', tipo: 'empresas' },
+    ];
+
+    it('añade una ruta por servicio de tipo servicio, con / primero y /contacto/ al final, sin repetir', () => {
+      const p = paginasDelSitio(fixture);
+      expect(p).toContain('/servicios/uno/');
+      expect(p).toContain('/servicios/dos/');
+      expect(p.filter((r) => r.startsWith('/servicios/'))).toHaveLength(2);
+      expect(p[0]).toBe('/');
+      expect(p.at(-1)).toBe('/contacto/');
+      expect(new Set(p).size).toBe(p.length);
+      for (const r of PAGES) expect(p).toContain(r);
+    });
+
+    it('un servicio nuevo en el fixture trae su ruta, y conserva el orden', () => {
+      const p = paginasDelSitio([...fixture, { ruta: '/servicios/tres/', tipo: 'servicio' }]);
+      expect(p).toContain('/servicios/tres/');
+      expect(p.indexOf('/servicios/uno/')).toBeLessThan(p.indexOf('/servicios/tres/'));
+      expect(p.indexOf('/servicios/tres/')).toBeLessThan(p.indexOf('/contacto/'));
+    });
+
+    it('no duplica rutas repetidas ni muta PAGES', () => {
+      const antes = [...PAGES];
+      const p = paginasDelSitio([...fixture, { ruta: '/servicios/uno/', tipo: 'servicio' }]);
+      expect(p.filter((r) => r === '/servicios/uno/')).toHaveLength(1);
+      expect(PAGES).toEqual(antes);
+    });
+  });
+
+  it('PAGES incluye /hoteles-y-comunidades/ y /antes-y-despues/ antes de /contacto/', () => {
+    expect(PAGES).toContain('/hoteles-y-comunidades/');
+    expect(PAGES).toContain('/antes-y-despues/');
+    expect(PAGES.at(-1)).toBe('/contacto/');
   });
 });

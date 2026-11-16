@@ -20,8 +20,23 @@ export const PAGES: readonly string[] = [
   '/tarifas/',
   '/zonas/',
   '/preguntas-frecuentes/',
+  '/hoteles-y-comunidades/',
+  '/antes-y-despues/',
+  '/privacidad/',
   '/contacto/',
 ];
+
+/**
+ * Páginas del sitio para el sitemap y los tests de build: PAGES con la ruta de cada servicio de tipo
+ * 'servicio' (servicios.json) antes de '/contacto/', sin duplicados y en orden. No muta PAGES.
+ */
+export function paginasDelSitio(servicios: readonly { ruta: string; tipo: string }[]): string[] {
+  const rutas = servicios.filter((s) => s.tipo === 'servicio').map((s) => s.ruta);
+  const fin = PAGES.indexOf('/contacto/');
+  const antes = fin === -1 ? [...PAGES] : PAGES.slice(0, fin);
+  const despues = fin === -1 ? [] : PAGES.slice(fin);
+  return [...new Set([...antes, ...rutas, ...despues])];
+}
 
 /**
  * Base de las URL absolutas del SEO (canonical, sitemap y robots) sin barras finales. La base es `url_base` de
