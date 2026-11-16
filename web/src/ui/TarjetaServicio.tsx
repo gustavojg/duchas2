@@ -16,8 +16,10 @@ export interface TarjetaServicioProps {
 /**
  * Tarjeta de servicio (brain/design.md § Portada, 6): ClickableCard de Astryx que enlaza a `servicio.ruta`,
  * con el icono de `imagen_tarjeta`, el nombre en H3 y el resumen. La del plato es grande (icono y texto
- * mayores, en columna) y las demás compactas (icono al lado). No muestra precio. Composición registrada en
- * docs/astryx-componentes.md; el ancho del icono sale de la clase `tarjeta-servicio-icono` de globals.css.
+ * mayores) y las demás compactas (icono al lado). La grande es un HStack con `wrap`: si el texto cabe con su
+ * ancho mínimo (`tarjeta-servicio-textos`) va al lado del icono (escritorio, sin hueco junto a él); si no, baja
+ * debajo (móvil, en columna). No muestra precio. Composición registrada en docs/astryx-componentes.md; los
+ * anchos salen de las clases `tarjeta-servicio-icono` y `tarjeta-servicio-textos` de globals.css.
  */
 export function TarjetaServicio({ servicio, grande = servicio.tipo === 'principal' }: TarjetaServicioProps) {
   const tamano = grande ? 'grande' : 'compacta';
@@ -27,7 +29,11 @@ export function TarjetaServicio({ servicio, grande = servicio.tipo === 'principa
     </VStack>
   );
   const textos = (
-    <VStack gap={grande ? 2 : 1}>
+    <VStack
+      gap={grande ? 2 : 1}
+      className={grande ? 'tarjeta-servicio-textos' : undefined}
+      data-tamano={grande ? tamano : undefined}
+    >
       <Heading level={3} type={grande ? 'display-3' : undefined} weight="bold">
         {servicio.nombre}
       </Heading>
@@ -39,10 +45,10 @@ export function TarjetaServicio({ servicio, grande = servicio.tipo === 'principa
   return (
     <ClickableCard label={servicio.nombre} href={servicio.ruta} padding={grande ? 6 : 4}>
       {grande ? (
-        <VStack gap={4} data-tamano={tamano}>
+        <HStack gap={4} wrap="wrap" vAlign="start" data-tamano={tamano}>
           {icono}
           {textos}
-        </VStack>
+        </HStack>
       ) : (
         <HStack gap={3} vAlign="start" data-tamano={tamano}>
           {icono}

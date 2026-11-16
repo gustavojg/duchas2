@@ -17,7 +17,9 @@ const ALTO = 75;
 const ASA = 'var(--color-background-card)';
 const ASA_BORDE = 'var(--color-text-primary)';
 /** Opacidad de la capa de abajo cuando es la misma ilustración: se distingue de la recortada. */
-const VELO = 0.35;
+export const VELO = 0.6;
+/** Altura del asa: tercio superior, para no tapar el desagüe de PlatoPartido (hacia y≈45 de 75). */
+export const ASA_CY = ALTO / 3;
 
 export interface DeslizadorAntesDespuesProps {
   par: ParGaleria;
@@ -86,7 +88,7 @@ export function DeslizadorAntesDespues({ par }: DeslizadorAntesDespuesProps) {
               </g>
               <g aria-hidden="true">
                 <line x1={posicion} y1={0} x2={posicion} y2={ALTO} stroke={ASA} strokeWidth={1} />
-                <circle cx={posicion} cy={ALTO / 2} r={4} fill={ASA} stroke={ASA_BORDE} strokeWidth={0.5} />
+                <circle cx={posicion} cy={ASA_CY} r={4} fill={ASA} stroke={ASA_BORDE} strokeWidth={0.5} />
               </g>
             </svg>
           </AspectRatio>
