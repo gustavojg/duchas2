@@ -4,6 +4,7 @@ node_modules/
 # Build del frontend
 web/.next/
 web/out/
+web/out-fixture/
 web/next-env.d.ts
 *.tsbuildinfo
 # Playwright
