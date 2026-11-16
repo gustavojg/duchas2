@@ -1,4 +1,4 @@
-import { copyFileSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -21,11 +21,26 @@ describe('rutas', () => {
     expect(new Set(rutas).size).toBe(rutas.length);
     for (const r of rutas) expect(r).toMatch(/^\/(.*\/)?$/);
   });
+
+  it('si el servicio trae `ruta` (servicios.json), se usa esa', () => {
+    expect(rutasCanonicas([{ slug: 'platos-de-ducha', ruta: '/platos-de-ducha/' }])).toContain('/platos-de-ducha/');
+    expect(rutasCanonicas([{ slug: 'platos-de-ducha', ruta: '/platos-de-ducha/' }])).not.toContain('/servicios/platos-de-ducha/');
+  });
 });
 
 describe('cargarServicios()', () => {
   const previo = process.env.CONTENT_DIR;
   const dirs: string[] = [];
+  /** Servicio válido para el schema estricto de content.ts: una entrada real del catálogo con otro slug y ruta. */
+  const real = JSON.parse(readFileSync(join(contentDir(), 'servicios.json'), 'utf8')) as Record<string, unknown>[];
+  const servicio = (slug: string, nombre: string, principal = false) => ({
+    ...real[principal ? 0 : 1],
+    slug,
+    nombre,
+    tipo: principal ? 'principal' : 'servicio',
+    ruta: principal ? '/platos-de-ducha/' : `/servicios/${slug}/`,
+    relacionados: [],
+  });
   /** Directorio de contenido temporal con el negocio.json real y, si se pasa, un servicios.json. */
   const directorio = (servicios?: unknown) => {
     const base = contentDir();
@@ -43,8 +58,8 @@ describe('cargarServicios()', () => {
 
   it('lee los slugs de servicios.json', () => {
     directorio([
-      { slug: 'plato-de-ducha', nombre: 'Plato de ducha', extra: 1 },
-      { slug: 'banera', nombre: 'Bañera' },
+      servicio('plato-de-ducha', 'Plato de ducha', true),
+      servicio('banera', 'Bañera'),
     ]);
     expect(cargarServicios().map((s) => s.slug)).toEqual(['plato-de-ducha', 'banera']);
   });
@@ -55,12 +70,12 @@ describe('cargarServicios()', () => {
   });
 
   it('un slug con ../ o con / hace fallar la carga', () => {
-    directorio([{ slug: '../x', nombre: 'X' }]);
+    directorio([servicio('plato-de-ducha', 'P', true), { ...servicio('x', 'X'), slug: '../x' }]);
     expect(() => cargarServicios()).toThrow();
   });
 
   it('un slug con caracteres XML hace fallar la carga', () => {
-    directorio([{ slug: 'a<b', nombre: 'X' }]);
+    directorio([servicio('plato-de-ducha', 'P', true), { ...servicio('x', 'X'), slug: 'a<b' }]);
     expect(() => cargarServicios()).toThrow();
   });
 });

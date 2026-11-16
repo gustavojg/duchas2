@@ -5,8 +5,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
 import { configFormulario } from '../../web/src/lib/config.js';
 import { cargarNegocio, cargarServicios } from '../../web/src/lib/content.js';
-import { rutasCanonicas } from '../../web/src/lib/rutas.js';
-import { APP_NAME } from '../../web/src/lib/site.js';
+import { rutaDeServicio, rutasCanonicas } from '../../web/src/lib/rutas.js';
+import { APP_NAME, canonicalUrl, PAGES } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -69,6 +69,41 @@ describe('web/out servido por Hono', () => {
     expect(await (await app.request('/robots.txt')).text()).toContain('Sitemap:');
   });
 
+  const contenido = (f: string) => JSON.parse(fs.readFileSync(path.resolve('web/content', f), 'utf8'));
+  /** HTML visible: sin <script> (el payload RSC repite textos y lleva plantillas ICU con «{{»). */
+  const visible = (html: string) => html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+  const sinEntidades = (html: string) => html.replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+
+  it('/zonas/ sirve HTML con un H1 y todos los distritos y municipios de zonas.json', async () => {
+    const res = await app.request('/zonas/');
+    expect(res.status).toBe(200);
+    const html = sinEntidades(visible(await res.text()));
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    const zonas = contenido('zonas.json') as { madrid_capital: string[]; municipios: string[] };
+    for (const z of [...zonas.madrid_capital, ...zonas.municipios]) expect(html).toContain(z);
+    expect(html).not.toContain('PENDIENTE');
+    expect(html).not.toContain('{{');
+  });
+
+  it('la portada lleva los servicios de servicios.json y las secciones nuevas, sin pendientes', () => {
+    const html = sinEntidades(visible(fs.readFileSync(path.join(webDir, 'index.html'), 'utf8')));
+    const servicios = contenido('servicios.json') as { nombre: string }[];
+    expect(servicios).toHaveLength(10);
+    for (const s of servicios) expect(html).toContain(s.nombre);
+    for (const h of ['¿Reparar o cambiar?', 'Cómo trabajamos', 'Precios orientativos']) expect(html).toContain(h);
+    // La cifra sin confirmar de comparativa.json no se publica.
+    const comparativa = contenido('comparativa.json') as { filas: { id: string; cambiar: { valor: string | null; confirmado: boolean } }[] };
+    const coste = comparativa.filas.find((f) => f.id === 'coste')!;
+    if (!coste.cambiar.confirmado && coste.cambiar.valor) expect(html).not.toContain(coste.cambiar.valor);
+    expect(html).not.toContain('PENDIENTE');
+    expect(html).not.toContain('{{');
+    expect(html).not.toMatch(/\b0 años/);
+  });
+
+  it('el sitemap incluye /zonas/', async () => {
+    expect(await (await app.request('/sitemap.xml')).text()).toMatch(/<loc>[^<]*\/zonas\/<\/loc>/);
+  });
+
   it('/preguntas-frecuentes/ se exporta con su FAQPage, sin pendientes y en el sitemap', async () => {
     expect(fs.existsSync(path.join(webDir, 'preguntas-frecuentes', 'index.html'))).toBe(true);
     const res = await app.request('/preguntas-frecuentes/');
@@ -76,10 +111,43 @@ describe('web/out servido por Hono', () => {
     const html = await res.text();
     expect(html).toContain('"@type":"FAQPage"');
     expect(html).toMatch(/<h1[^>]*>(?:(?!<\/h1>).)*Preguntas frecuentes/s);
+    const sinScripts = visible(html);
+    expect(sinScripts).not.toContain('PENDIENTE');
+    expect(sinScripts).not.toContain('{{');
+    expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
+  });
+
+  it('todas las páginas de PAGES llevan un único canonical = url_base + ruta', () => {
+    const base = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
+    const vistos = new Set<string>();
+    for (const ruta of PAGES) {
+      const html = fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /href="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, `canonical en ${ruta}`).toEqual([`${base}${ruta}`]);
+      vistos.add(canonicals[0]!);
+    }
+    expect(vistos.size).toBe(PAGES.length);
+  });
+
+  it('todas las páginas de PAGES llevan un único canonical', async () => {
+    const { url_base } = contenido('negocio.json') as { url_base: string };
+    for (const p of PAGES) {
+      const html = await (await app.request(p)).text();
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /\bhref="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, p).toEqual([canonicalUrl(url_base, p)]);
+    }
+  });
+
+  it('la portada lleva LocalBusiness sin AggregateRating, el antes/después y la FAQ resumida', () => {
+    const html = fs.readFileSync(path.join(webDir, 'index.html'), 'utf8');
+    expect(html).toContain('"@type":"LocalBusiness"');
+    expect(html).not.toContain('AggregateRating'); // web/content/resenas.json está vacío
+    // Sin <script>: el payload RSC lleva el catálogo i18n de Astryx, cuyas plantillas ICU usan «{{».
     const visible = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+    expect(visible).toContain('Pronto, fotos reales de este trabajo');
+    expect(visible).toContain('href="/preguntas-frecuentes/"');
     expect(visible).not.toContain('PENDIENTE');
     expect(visible).not.toContain('{{');
-    expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
   });
 
   it('/health sigue respondiendo JSON', async () => {
@@ -92,7 +160,8 @@ describe('web/out: rutas, SEO y modo borrador', () => {
   const { app } = testApp({ webDir });
   const negocio = cargarNegocio();
   const base = negocio.url_base.replace(/\/+$/, '');
-  const rutas = rutasCanonicas(cargarServicios());
+  // Como postbuild: los servicios de servicios.json sin página construida todavía no cuentan como ruta canónica.
+  const rutas = rutasCanonicas(cargarServicios().filter((s) => fs.existsSync(path.join(webDir, rutaDeServicio(s), 'index.html'))));
   const fichero = (ruta: string) => path.join(webDir, ruta, 'index.html');
   // Sin <script>: el payload RSC repite metadatos y lleva plantillas ICU con «{{».
   const sinScripts = (h: string) => h.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');

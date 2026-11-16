@@ -3,8 +3,8 @@ import path from 'node:path';
 import { loadConfig } from '../src/config.js';
 import { avisoBorrador, datosFaltantes } from '../web/src/lib/borrador.js';
 import { cargarNegocio, cargarServicios } from '../web/src/lib/content.js';
-import { rutasCanonicas } from '../web/src/lib/rutas.js';
-import { robotsTxt, sitemapXml } from '../web/src/lib/site.js';
+import { rutaDeServicio, rutasCanonicas } from '../web/src/lib/rutas.js';
+import { PAGES, robotsTxt, sitemapXml } from '../web/src/lib/site.js';
 
 /**
  * Hook tras `next build` (lo llama `pnpm build`): escribe en WEB_DIR lo que el export de Next no genera.
@@ -17,11 +17,17 @@ import { robotsTxt, sitemapXml } from '../web/src/lib/site.js';
 const { webDir } = loadConfig({ ...process.env, BASE_URL: undefined });
 const negocio = cargarNegocio();
 const base = negocio.url_base.replace(/\/+$/, '');
-const rutas = rutasCanonicas(cargarServicios());
+const tieneHtml = (ruta: string) => fs.existsSync(path.join(webDir, ruta, 'index.html'));
 
-for (const ruta of rutas) {
-  if (!fs.existsSync(path.join(webDir, ruta, 'index.html'))) throw new Error(`postbuild: falta el HTML de ${ruta}`);
+for (const ruta of PAGES) {
+  if (!tieneHtml(ruta)) throw new Error(`postbuild: falta el HTML de ${ruta}`);
 }
+// servicios.json existe antes que las páginas de cada servicio: hasta que se construyan, no van al sitemap.
+const servicios = cargarServicios();
+const sinPagina = servicios.filter((s) => !tieneHtml(rutaDeServicio(s)));
+if (sinPagina.length > 0)
+  console.warn(`postbuild: servicios sin página todavía, fuera del sitemap: ${sinPagina.map(rutaDeServicio).join(', ')}`);
+const rutas = rutasCanonicas(servicios.filter((s) => !sinPagina.includes(s)));
 fs.writeFileSync(path.join(webDir, 'sitemap.xml'), sitemapXml(base, rutas));
 fs.writeFileSync(path.join(webDir, 'robots.txt'), robotsTxt(base));
 

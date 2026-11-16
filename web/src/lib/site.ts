@@ -17,14 +17,24 @@ export const DESCRIPTION =
 export const PAGES: readonly string[] = [
   '/',
   '/quienes-somos/',
+  '/zonas/',
   '/preguntas-frecuentes/',
+  '/contacto/',
   '/aviso-legal/',
   '/privacidad/',
   '/cookies/',
 ];
 
+/**
+ * URL absoluta de una página: `urlBase` sin barra final + `ruta` (con barra inicial y final, por trailingSlash).
+ * Es la misma que el `<loc>` de sitemapXml, que la usa; el canonical de cada página sale de aquí.
+ */
+export function canonicalUrl(urlBase: string, ruta: string): string {
+  return `${urlBase.replace(/\/+$/, '')}${ruta}`;
+}
+
 export function sitemapXml(baseUrl: string, pages: readonly string[] = PAGES): string {
-  const urls = pages.map((p) => `  <url><loc>${baseUrl}${p}</loc></url>`).join('\n');
+  const urls = pages.map((p) => `  <url><loc>${canonicalUrl(baseUrl, p)}</loc></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 

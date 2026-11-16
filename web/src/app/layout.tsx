@@ -9,6 +9,7 @@ import { modoActual } from '../lib/dato';
 import { robotsMeta } from '../lib/seo';
 import { DESCRIPTION } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
+import { BotonFlotanteWhatsApp } from '../ui/BotonFlotanteWhatsApp';
 import { Frame } from '../ui/Frame';
 import { PieSitio } from '../ui/PieSitio';
 
@@ -25,6 +26,7 @@ export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const telefono = negocio.telefono.valor;
+  const whatsapp = negocio.whatsapp.valor;
   const llamar = telefono ? { href: telLink(telefono), etiqueta: 'Llamar' } : undefined;
   return (
     <html lang="es">
@@ -44,6 +46,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }
         >
           {children}
+          {/* Una sola vez para todo el sitio. Cuando exista web/content/servicios.json, pasarle `servicios`. */}
+          {whatsapp ? <BotonFlotanteWhatsApp numero={whatsapp} /> : null}
         </Frame>
       </body>
     </html>

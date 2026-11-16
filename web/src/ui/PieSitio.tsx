@@ -6,7 +6,7 @@ import { VStack } from '@astryxdesign/core/VStack';
 import type { ConfigFormulario } from '../lib/config';
 import type { Negocio } from '../lib/content';
 import { type Modo, texto } from '../lib/dato';
-import { rutaServicio } from '../lib/rutas';
+import { rutaDeServicio } from '../lib/rutas';
 import { APP_NAME } from '../lib/site';
 import { telLink, waLink } from '../lib/whatsapp';
 import type { NavItem } from './Nav';
@@ -18,7 +18,7 @@ export interface PieSitioProps {
   config: ConfigFormulario;
   modo: Modo;
   legales: NavItem[];
-  servicios: { slug: string; nombre: string }[];
+  servicios: { slug: string; nombre: string; ruta?: string }[];
 }
 
 /**
@@ -55,7 +55,7 @@ export function PieSitio({ negocio, config, modo, legales, servicios }: PieSitio
           <VStack gap={2} as="nav" aria-label="Servicios">
             <Heading level={2}>Servicios</Heading>
             {servicios.map((s) => (
-              <Link key={s.slug} href={rutaServicio(s.slug)} isStandalone>
+              <Link key={s.slug} href={rutaDeServicio(s)} isStandalone>
                 {s.nombre}
               </Link>
             ))}

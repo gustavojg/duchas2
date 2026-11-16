@@ -104,6 +104,15 @@ export function jsonLdFaqPage(preguntas: { p: string; r: string }[]): object {
   };
 }
 
+/**
+ * URL canónica de una página: url_base (negocio.json) sin barras finales + la ruta con barra inicial y final
+ * (trailingSlash). `canonicalUrl('https://x.es/', '/')` → `https://x.es/`.
+ */
+export function canonicalUrl(baseUrl: string, ruta: string): string {
+  const limpia = ruta.replace(/^\/+|\/+$/g, '');
+  return `${baseUrl.replace(/\/+$/, '')}/${limpia ? `${limpia}/` : ''}`;
+}
+
 /** JSON para incrustar en <script type="application/ld+json">: «<» escapado para que nada cierre el script. */
 export function jsonLdScript(data: object): string {
   return JSON.stringify(data).replace(/</g, '\\u003c');
