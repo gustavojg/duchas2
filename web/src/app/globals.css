@@ -226,6 +226,51 @@
   max-inline-size: calc(var(--spacing-12) * 6);
 }
 
+/*
+ * Galería de /antes-y-despues/ (FiltroGaleria en src/ui/, brain/design.md «filtro segmentado + rejilla»). La página
+ * es más ancha que `--measure` (texto largo) para que quepan dos columnas de pares. La lista es una rejilla: una
+ * columna en móvil y dos desde escritorio (64rem). En cada par, «Antes» y «Después» se apilan en móvil y van lado a
+ * lado desde 40rem (640 px), repartiéndose el ancho.
+ */
+.portada-galeria {
+  max-inline-size: calc(var(--measure) * 2);
+}
+
+/*
+ * Selector «Filtrar por servicio»: ancho de móvil completo y tope en escritorio. El valor elegido (renderValue) salta
+ * de línea en vez de recortarse con puntos suspensivos, para que el nombre del servicio se lea entero a 320 px.
+ */
+.galeria-filtro {
+  inline-size: 100%;
+  max-inline-size: calc(var(--spacing-12) * 8);
+}
+
+.galeria-filtro-valor {
+  overflow-wrap: anywhere;
+}
+
+.galeria-pares {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 64rem) {
+  .galeria-pares {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 40rem) {
+  .galeria-par-lados {
+    flex-direction: row;
+  }
+}
+
+.galeria-par-lado {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
 /* Párrafos de texto largo (página del plato de ducha, legales): medida de lectura de --measure. */
 .texto-largo {
   max-inline-size: var(--measure);

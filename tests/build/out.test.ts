@@ -146,6 +146,21 @@ describe('web/out servido por Hono', () => {
     expect(visible).not.toContain('{{');
   });
 
+  it('«Ver todos los trabajos» de la portada lleva a /antes-y-despues/ generada y en el sitemap', async () => {
+    const portada = fs.readFileSync(path.join(webDir, 'index.html'), 'utf8');
+    const href = /<a\b[^>]*href="([^"]*)"[^>]*>(?:(?!<\/a>).)*Ver todos los trabajos/s.exec(portada)?.[1];
+    expect(href, 'falta el enlace «Ver todos los trabajos»').toBe('/antes-y-despues/');
+    expect(fs.existsSync(path.join(webDir, 'antes-y-despues', 'index.html'))).toBe(true);
+    const res = await app.request('/antes-y-despues/');
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toMatch(/<h1[^>]*>(?:(?!<\/h1>).)*Antes y después/s);
+    const sinScripts = visible(html);
+    expect(sinScripts).not.toContain('PENDIENTE');
+    expect(sinScripts).not.toContain('{{');
+    expect(await (await app.request('/sitemap.xml')).text()).toMatch(/<loc>[^<]*\/antes-y-despues\/<\/loc>/);
+  });
+
   const ldTipos = (html: string) =>
     [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
       (m) => (JSON.parse(m[1]) as { '@type': string })['@type'],

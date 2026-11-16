@@ -1,56 +1,53 @@
 import { Heading } from '@astryxdesign/core/Heading';
-import { HStack } from '@astryxdesign/core/HStack';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import type { Metadata } from 'next';
-import { cargarGaleria, cargarNegocio, type Negocio, type ParGaleria } from '../../lib/content';
+import { cargarGaleria, cargarNegocio, cargarServicios, type Negocio, type ParGaleria, type Servicio } from '../../lib/content';
+import { serviciosConPares } from '../../lib/galeria';
 import { APP_NAME, canonicalUrl } from '../../lib/site';
 import { MENSAJE_PORTADA } from '../../lib/whatsapp';
 import { BotonWhatsApp } from '../../ui/BotonWhatsApp';
-import { HuecoFoto } from '../../ui/HuecoFoto';
+import { FiltroGaleria } from '../../ui/FiltroGaleria';
 
+/** Título de main (exacto) y canonical de url_base, como el resto de páginas de PAGES. */
 export function generateMetadata(): Metadata {
   return {
     title: `Antes y después · ${APP_NAME}`,
-    description: 'Trabajos reales de reparación de platos de ducha, bañeras y azulejos, antes y después.',
+    description:
+      'Mira cómo quedan los platos de ducha y las bañeras antes y después de repararlos en casa, sin obras. Filtra por servicio.',
     alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/antes-y-despues/') },
   };
 }
 
 export interface AntesYDespuesProps {
-  galeria: ParGaleria[];
+  pares: ParGaleria[];
+  servicios: Pick<Servicio, 'slug' | 'nombre'>[];
   negocio: Negocio;
 }
 
 /**
- * Antes y después `/antes-y-despues/` (enlace «Ver todos los trabajos» de la portada). Página mínima, sin filtros:
- * solo los pares de galeria.json con las dos fotos reales, cada lado con HuecoFoto. Si aún no hay ninguno, el
- * mismo aviso que la portada y «Manda la foto del tuyo» por WhatsApp (si hay número); nunca ilustraciones que
- * parezcan trabajos.
+ * Página /antes-y-despues/: los pares de galeria.json con filtro por servicio (FiltroGaleria) y, al final, la
+ * foto por WhatsApp como único botón primario. Dentro del contenedor `portada` (margen lateral y ancho máximo).
  */
-export function AntesYDespues({ galeria, negocio }: AntesYDespuesProps) {
-  const conFotos = galeria.filter((par) => par.antes && par.despues);
+export function AntesYDespues({ pares, servicios, negocio }: AntesYDespuesProps) {
   const whatsapp = negocio.whatsapp.valor;
   return (
-    <VStack gap={6} className="portada">
-      <Heading level={1}>Antes y después</Heading>
-      {conFotos.length > 0 ? (
-        <VStack gap={6} as="ul" aria-label="Trabajos">
-          {conFotos.map((par) => (
-            <HStack as="li" gap={3} wrap="wrap" key={`${par.antes}|${par.despues}`}>
-              <HuecoFoto par={par} lado="antes" />
-              <HuecoFoto par={par} lado="despues" />
-            </HStack>
-          ))}
-        </VStack>
-      ) : (
-        <Text as="p">Pronto, fotos reales de este trabajo</Text>
-      )}
-      {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_PORTADA} etiqueta="Manda la foto del tuyo" /> : null}
+    <VStack gap={6} className="portada portada-galeria">
+      <VStack gap={3}>
+        <Heading level={1}>Antes y después</Heading>
+        <Text as="p" type="large">
+          Así quedan los platos de ducha y las bañeras que reparamos en casa. Elige un servicio para ver solo esos trabajos.
+        </Text>
+      </VStack>
+      <FiltroGaleria pares={pares} servicios={serviciosConPares(pares, servicios)} />
+      <VStack gap={3} hAlign="start">
+        <Text as="p">¿El tuyo tiene arreglo? Mándanos una foto por WhatsApp</Text>
+        {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_PORTADA} etiqueta="Manda la foto del tuyo" /> : null}
+      </VStack>
     </VStack>
   );
 }
 
-export default function PaginaAntesYDespues() {
-  return <AntesYDespues galeria={cargarGaleria()} negocio={cargarNegocio()} />;
+export default function AntesYDespuesPage() {
+  return <AntesYDespues pares={cargarGaleria()} servicios={cargarServicios()} negocio={cargarNegocio()} />;
 }
