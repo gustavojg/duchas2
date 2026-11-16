@@ -41,6 +41,7 @@ const app = createApp({
   db,
   mailer: createMailer(config),
   now: () => new Date(),
+  commit: config.commit,
   clientIp: (c) => resolverIp(getConnInfo(c).remote.address, c.req.header('x-forwarded-for') ?? null, config.trustProxy),
   config,
   dataDir,

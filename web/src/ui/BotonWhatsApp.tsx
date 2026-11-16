@@ -6,7 +6,7 @@ import type { SVGProps } from 'react';
 import { esNumeroValido, waLink } from '../lib/whatsapp';
 
 /** Glifo propio de WhatsApp (bocadillo con auricular), en currentColor: blanco sobre el botón de marca. */
-function GlifoWhatsApp(props: SVGProps<SVGSVGElement>) {
+export function GlifoWhatsApp(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden {...props}>
       <path d="M4 20 l1.3 -3.9 A8 8 0 1 1 8 18.8 z" />
@@ -22,7 +22,7 @@ export interface BotonWhatsAppProps {
   mensaje: string;
   /** Texto del botón (p. ej. «Manda la foto por WhatsApp»). */
   etiqueta: string;
-  /** primary solo en la acción principal de la pantalla (hero); el resto de botones de WhatsApp, secondary. */
+  /** Primario por defecto, solo en la acción principal de la pantalla (hero); el resto, secondary (p. ej. junto a «Enviar petición»). */
   variante?: 'primary' | 'secondary';
 }
 
