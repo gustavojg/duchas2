@@ -222,6 +222,48 @@
   max-inline-size: var(--measure);
 }
 
+/*
+ * Tabla de /tarifas/ (src/app/tarifas/page.tsx): nunca parte palabras a mitad. «Trabajo» con ancho mínimo para
+ * que quepa el nombre más largo; «Desde» estrecha y con la cabecera en una línea. En móvil (≤ 40em) no caben
+ * 3 columnas: se oculta «Incluye» y su resumen sale como segunda línea de «Trabajo» (solo en móvil).
+ */
+.tabla-tarifas,
+.tabla-tarifas th,
+.tabla-tarifas td,
+.tabla-tarifas p,
+.tabla-tarifas a {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}
+
+.tabla-tarifas .tabla-tarifas-trabajo {
+  min-inline-size: calc(var(--spacing-12) * 3);
+}
+
+.tabla-tarifas .tabla-tarifas-desde {
+  inline-size: calc(var(--spacing-12) * 2);
+}
+
+.tabla-tarifas th.tabla-tarifas-desde {
+  white-space: nowrap;
+}
+
+.tabla-tarifas .tabla-tarifas-resumen-movil {
+  display: none;
+}
+
+@media (max-width: 40em) {
+  .tabla-tarifas .tabla-tarifas-incluye {
+    display: none;
+  }
+
+  .tabla-tarifas .tabla-tarifas-resumen-movil {
+    display: block;
+    margin-block-start: var(--spacing-1);
+  }
+}
+
 /* Ilustración de cada daño en la rejilla de /platos-de-ducha/: al lado del enlace, sin encogerse. */
 .plato-dano-icono {
   flex: none;

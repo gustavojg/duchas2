@@ -70,24 +70,29 @@ export function PaginaTarifas({ negocio, servicios, modo }: PaginaTarifasProps) 
         <HStack gap={2} wrap="wrap" vAlign="center" id="cta-hero">
           {whatsapp ? <BotonWhatsApp numero={whatsapp} mensaje={MENSAJE_TARIFAS} etiqueta="Pide precio por WhatsApp" /> : null}
         </HStack>
-        <Table dividers="rows" verticalAlign="top">
+        {/* Clases tabla-tarifas* (globals.css): sin partir palabras; en móvil se oculta «Incluye» y el resumen
+            pasa a segunda línea de «Trabajo» (tabla-tarifas-resumen-movil, oculto en escritorio). */}
+        <Table dividers="rows" verticalAlign="top" className="tabla-tarifas">
           <TableHeader>
             <TableRow>
-              <TableHeaderCell>Trabajo</TableHeaderCell>
-              <TableHeaderCell>Desde</TableHeaderCell>
-              <TableHeaderCell>Incluye</TableHeaderCell>
+              <TableHeaderCell className="tabla-tarifas-trabajo">Trabajo</TableHeaderCell>
+              <TableHeaderCell className="tabla-tarifas-desde">Desde</TableHeaderCell>
+              <TableHeaderCell className="tabla-tarifas-incluye">Incluye</TableHeaderCell>
             </TableRow>
           </TableHeader>
           <TableBody>
             {serviciosOrdenados(servicios).map((s) => (
               <TableRow key={s.slug}>
-                <TableCell>
+                <TableCell className="tabla-tarifas-trabajo">
                   <Link href={s.ruta}>{s.nombre}</Link>
+                  <Text as="p" type="supporting" className="tabla-tarifas-resumen-movil">
+                    {s.resumen}
+                  </Text>
                 </TableCell>
-                <TableCell>
+                <TableCell className="tabla-tarifas-desde">
                   <PrecioDesde dato={s.precio_desde} modo={modo} />
                 </TableCell>
-                <TableCell>
+                <TableCell className="tabla-tarifas-incluye">
                   <Text>{s.resumen}</Text>
                 </TableCell>
               </TableRow>

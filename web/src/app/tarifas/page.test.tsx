@@ -37,6 +37,24 @@ describe('/tarifas/', () => {
     }
   });
 
+  it('tabla legible en móvil: clase tabla-tarifas, columnas marcadas y resumen como segunda línea solo en móvil', () => {
+    expect(html).toMatch(/<table[^>]*class="(?:[^"]* )?tabla-tarifas[ "]/);
+    const th = [...html.matchAll(/<th\b[^>]*class="([^"]*)"/g)].map((m) => m[1]);
+    expect(th[0]).toMatch(/\btabla-tarifas-trabajo\b/);
+    expect(th[1]).toMatch(/\btabla-tarifas-desde\b/);
+    expect(th[2]).toMatch(/\btabla-tarifas-incluye\b/);
+    const filas = servicios.length;
+    expect(html.match(/<td\b[^>]*class="[^"]*\btabla-tarifas-incluye\b/g)).toHaveLength(filas);
+    const moviles = [...html.matchAll(/<p\b[^>]*class="[^"]*\btabla-tarifas-resumen-movil\b[^"]*"[^>]*>([^<]*)<\/p>/g)].map((m) => m[1]);
+    expect(moviles).toHaveLength(filas);
+    // Cada resumen-móvil va dentro de la celda Trabajo, no en Incluye.
+    const celdasTrabajo = [...html.matchAll(/<td\b[^>]*class="[^"]*\btabla-tarifas-trabajo\b[^>]*>([\s\S]*?)<\/td>/g)].map((m) => m[1]);
+    expect(celdasTrabajo).toHaveLength(filas);
+    for (const c of celdasTrabajo) expect(c).toContain('tabla-tarifas-resumen-movil');
+    // Sin style= propio: los únicos estilos en línea son los que pinta Astryx en sus propios elementos.
+    for (const m of sinScripts(html).matchAll(/<[a-z]+\b([^>]*)\sstyle="[^"]*"/g)) expect(m[1]).toMatch(/class="astryx-/);
+  });
+
   it('precio confirmado: «Desde 80 €»; sin confirmar: «Pide presupuesto gratuito»; nunca 0', () => {
     const t = textoPlano(pinta(conPrecio()));
     expect(t).toContain('Desde 80 €');
