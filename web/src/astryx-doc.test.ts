@@ -76,4 +76,12 @@ describe('docs/astryx-componentes.md (D0)', () => {
     const pasos = tabla.find((f) => f[0] === 'PasosServicio')!.join(' ');
     expect(pasos).toContain('/hoteles-y-comunidades/');
   });
+
+  it('la nota de GaleriaFiltrable describe el filtro que salta de línea, no uno que recorta etiquetas', () => {
+    const galeria = filas(readFileSync(DOC, 'utf8'))
+      .find((f) => f[0] === 'GaleriaFiltrable')!
+      .join(' ');
+    expect(galeria).not.toMatch(/recorta/i);
+    expect(galeria).toContain('filtro-galeria');
+  });
 });
