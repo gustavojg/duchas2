@@ -41,7 +41,7 @@ export function GaleriaFiltrable({ servicios, pares, whatsapp, mensaje }: Galeri
     <VStack gap={6}>
       {/* .filtro-galeria (globals.css): las opciones saltan de línea y una etiqueta larga se parte, sin recortes ni scroll horizontal. */}
       <VStack className="filtro-galeria">
-        <SegmentedControl label="Filtrar por trabajo" value={filtro} onChange={setFiltro}>
+        <SegmentedControl label="Filtrar por servicio" value={filtro} onChange={setFiltro}>
           {opciones.map((o) => (
             <SegmentedControlItem key={o.valor} value={o.valor} label={o.etiqueta} />
           ))}

@@ -15,6 +15,12 @@ describe('site', () => {
     expect(sitemapXml('https://ejemplo.test')).toContain('<loc>https://ejemplo.test/contacto/</loc>');
   });
 
+  it('el sitemap lista /privacidad/ y /antes-y-despues/', () => {
+    const xml = sitemapXml('https://ejemplo.test');
+    expect(xml).toContain('<loc>https://ejemplo.test/privacidad/</loc>');
+    expect(xml).toContain('<loc>https://ejemplo.test/antes-y-despues/</loc>');
+  });
+
   it('la navegación (NAV de web/src/config.ts) enlaza /contacto/', () => {
     // Se lee como texto: config.ts importa de web/src/ui, que el tsconfig de la raíz no compila.
     const src = readFileSync(fileURLToPath(new URL('../config.ts', import.meta.url)), 'utf8');

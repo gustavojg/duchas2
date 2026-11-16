@@ -23,12 +23,13 @@ import { telLink } from '../lib/whatsapp';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
-import { generateMetadata as metadataDeGaleria } from './antes-y-despues/page';
+import { generateMetadata as metadataDeAntesYDespues } from './antes-y-despues/page';
 import { generateMetadata as metadataDeContacto } from './contacto/page';
 import { generateMetadata as metadataDeHoteles } from './hoteles-y-comunidades/page';
 import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
 import { generateMetadata as metadataDePlatos } from './platos-de-ducha/page';
 import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
+import { generateMetadata as metadataDePrivacidad } from './privacidad/page';
 import { generateMetadata as metadataDeTarifas } from './tarifas/page';
 import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
@@ -445,10 +446,11 @@ describe('página /zonas/', () => {
       '/zonas/': metadataDeZonas(),
       '/preguntas-frecuentes/': metadataDeFaq(),
       '/contacto/': metadataDeContacto(),
+      '/antes-y-despues/': metadataDeAntesYDespues(),
+      '/privacidad/': metadataDePrivacidad(),
       '/platos-de-ducha/': metadataDePlatos(),
       '/tarifas/': metadataDeTarifas(),
       '/hoteles-y-comunidades/': metadataDeHoteles(),
-      '/antes-y-despues/': metadataDeGaleria(),
     };
     const rutas = PAGES;
     const canonicals = new Set<unknown>();

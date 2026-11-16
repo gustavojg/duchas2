@@ -22,6 +22,7 @@ export const PAGES: readonly string[] = [
   '/preguntas-frecuentes/',
   '/hoteles-y-comunidades/',
   '/antes-y-despues/',
+  '/privacidad/',
   '/contacto/',
 ];
 
