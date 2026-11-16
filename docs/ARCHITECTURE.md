@@ -279,6 +279,9 @@ confirmación con plazo de respuesta (tabla) y botón de WhatsApp.
 - Title, description y canonical únicos por página; JSON-LD parseable en cada página que lo declara.
 - Sin `ga4_id` no hay script de GA ni banner.
 
+`pnpm e2e:staging` ejecuta el mismo smoke contra un servidor ya levantado (`E2E_BASE_URL`, por defecto
+`http://127.0.0.1:8804`), sin `webServer` propio; el destino lo decide `src/e2e-target.ts`.
+
 `pnpm e2e` (Playwright, Chromium, contra `pnpm start` con `MAIL_TRANSPORT=file`):
 - Móvil 360×740: titular, «Llamar» y «WhatsApp» visibles sin scroll y ≥ 44×44 px; `href` `tel:` y
   `https://wa.me/`.

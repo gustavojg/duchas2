@@ -53,6 +53,19 @@ describe('/preguntas-frecuentes/', () => {
     for (const q of todas) expect(sinScripts).toContain(esc(q.r));
   });
 
+  it('el JSON-LD FAQPage y el HTML incluyen la pregunta de zonas', () => {
+    const json = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)?.[1];
+    expect(json, 'falta el JSON-LD').toBeDefined();
+    const ld = JSON.parse(json!) as { mainEntity: { name: string; acceptedAnswer: { text: string } }[] };
+    expect(ld.mainEntity).toHaveLength(todas.length);
+    const pregunta = '¿Venís a mi barrio o mi municipio?';
+    const zonas = ld.mainEntity.find((q) => q.name === pregunta);
+    expect(zonas, 'falta la pregunta de zonas en el FAQPage').toBeDefined();
+    expect(zonas!.acceptedAnswer.text).toContain('Madrid');
+    expect(zonas!.acceptedAnswer.text).toContain('WhatsApp');
+    expect(sinScripts).toContain(esc(pregunta));
+  });
+
   it('el texto público no deja pendientes, marcadores ni plazos literales', () => {
     expect(textoPlano).not.toContain('PENDIENTE');
     expect(textoPlano).not.toContain('{');

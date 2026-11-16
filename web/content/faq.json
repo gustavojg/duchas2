@@ -97,6 +97,11 @@
           "p": "¿Cuándo me respondéis?",
           "r": "{respuesta}. Te contestamos por WhatsApp o por teléfono.",
           "en_portada": false
+        },
+        {
+          "p": "¿Venís a mi barrio o mi municipio?",
+          "r": "Trabajamos en Madrid capital y en el área metropolitana. Si tienes dudas con tu zona, mándanos la foto con tu zona por WhatsApp y te lo decimos.",
+          "en_portada": false
         }
       ]
     }

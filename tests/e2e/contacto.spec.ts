@@ -192,6 +192,32 @@ test.describe('botón flotante de WhatsApp', () => {
       }
     });
 
+    test('las tarjetas de las tres vías no se recortan en /contacto/', async ({ page }) => {
+      await page.goto('/contacto/');
+      const tarjetas = page.locator('ul li').filter({ has: page.getByRole('heading', { name: /^(WhatsApp|Llamar|Formulario)$/ }) });
+      await expect(tarjetas).toHaveCount(3);
+      for (let i = 0; i < 3; i++) {
+        const tarjeta = tarjetas.nth(i);
+        await tarjeta.scrollIntoViewIfNeeded();
+        const caja = (await tarjeta.boundingBox())!;
+        expect(caja.x, `tarjeta ${i}`).toBeGreaterThanOrEqual(0);
+        expect(caja.x + caja.width, `tarjeta ${i}`).toBeLessThanOrEqual(360);
+        const recortes = await tarjeta.evaluate((el) =>
+          [el, ...Array.from(el.querySelectorAll('*'))]
+            .filter((n) => n.scrollWidth > n.clientWidth && n.clientWidth > 0)
+            .map((n) => `${n.tagName}.${n.className} ${n.scrollWidth}>${n.clientWidth}`),
+        );
+        expect(recortes, `tarjeta ${i}`).toEqual([]);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+      const cinta = page.locator('.cinta-etiqueta');
+      await cinta.scrollIntoViewIfNeeded();
+      await expect(cinta).toBeVisible();
+      const cajaCinta = (await cinta.boundingBox())!;
+      expect(cajaCinta.x).toBeGreaterThanOrEqual(0);
+      expect(cajaCinta.x + cajaCinta.width).toBeLessThanOrEqual(360);
+    });
+
     test('en la portada se oculta mientras se ve el CTA del hero', async ({ page }) => {
       await page.goto('/');
       await expect(page.locator('#cta-hero')).toBeInViewport();

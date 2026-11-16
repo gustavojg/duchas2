@@ -122,6 +122,18 @@ describe('web/out servido por Hono', () => {
     }
   });
 
+  it('la portada lleva LocalBusiness sin AggregateRating, el antes/después y la FAQ resumida', () => {
+    const html = fs.readFileSync(path.join(webDir, 'index.html'), 'utf8');
+    expect(html).toContain('"@type":"LocalBusiness"');
+    expect(html).not.toContain('AggregateRating'); // web/content/resenas.json está vacío
+    // Sin <script>: el payload RSC lleva el catálogo i18n de Astryx, cuyas plantillas ICU usan «{{».
+    const visible = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+    expect(visible).toContain('Pronto, fotos reales de este trabajo');
+    expect(visible).toContain('href="/preguntas-frecuentes/"');
+    expect(visible).not.toContain('PENDIENTE');
+    expect(visible).not.toContain('{{');
+  });
+
   it('/health sigue respondiendo JSON', async () => {
     expect(await (await app.request('/health')).json()).toMatchObject({ ok: true });
   });
