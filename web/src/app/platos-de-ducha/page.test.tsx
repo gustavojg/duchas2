@@ -13,6 +13,7 @@ import {
   type PlatoDucha,
 } from '../../lib/content';
 import type { Modo } from '../../lib/dato';
+import { rutaGenerada } from '../../lib/paginas';
 import { mensajePorRuta } from '../../lib/whatsapp';
 import { generateMetadata, metadataPlatosDeDucha, PaginaPlatosDeDucha, type PaginaPlatosDeDuchaProps } from './page';
 
@@ -184,7 +185,9 @@ describe('/platos-de-ducha/', () => {
     const plato = servicios.find((s) => s.slug === 'platos-de-ducha')!;
     for (const slug of plato.relacionados) {
       const s = servicios.find((x) => x.slug === slug)!;
-      expect(html).toContain(`href="${s.ruta}"`);
+      expect(textoPlano(html)).toContain(s.nombre);
+      // La tarjeta solo enlaza si el build genera la página de la ruta (TarjetaServicio + rutaGenerada).
+      expect(html.includes(`href="${s.ruta}"`), s.ruta).toBe(rutaGenerada(s.ruta));
     }
   });
 

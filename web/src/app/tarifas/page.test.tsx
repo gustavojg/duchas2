@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { APP_NAME } from '../../config';
 import { serviciosOrdenados } from '../../lib/catalogo';
 import { cargarNegocio, cargarServicios, type Servicio } from '../../lib/content';
+import { rutaGenerada } from '../../lib/paginas';
 import { metadataPlatosDeDucha } from '../platos-de-ducha/page';
 import { generateMetadata, MENSAJE_TARIFAS, metadataTarifas, PaginaTarifas } from './page';
 
@@ -92,6 +93,18 @@ describe('/tarifas/', () => {
     expect(t).not.toContain(' 0 €');
     const cero = servicios.map((s) => ({ ...s, precio_desde: { valor: 0, confirmado: true } }));
     expect(textoPlano(pinta(cero))).not.toMatch(/Desde 0|\b0 €/);
+  });
+
+  it('cada trabajo enlaza a su ficha solo si el build genera esa página; si no, el nombre va sin enlace', () => {
+    const trabajo = [...html.matchAll(/<td\b[^>]*class="[^"]*\btabla-tarifas-trabajo\b[^>]*>([\s\S]*?)<\/td>/g)].map((m) => m[1]);
+    const orden = serviciosOrdenados(servicios);
+    expect(trabajo).toHaveLength(orden.length);
+    orden.forEach((s, i) => {
+      expect(textoPlano(trabajo[i])).toContain(s.nombre);
+      expect(trabajo[i].includes(`href="${s.ruta}"`)).toBe(rutaGenerada(s.ruta));
+      if (!rutaGenerada(s.ruta)) expect(trabajo[i]).not.toContain('<a');
+    });
+    for (const m of html.matchAll(/href="(\/[^"#?]*)/g)) expect(rutaGenerada(m[1]), `enlace roto: ${m[1]}`).toBe(true);
   });
 
   it('lleva la nota del precio orientativo', () => {
