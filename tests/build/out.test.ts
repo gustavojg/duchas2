@@ -139,6 +139,15 @@ describe('web/out servido por Hono', () => {
     expect(fs.readFileSync(path.join(webDir, '404.html'), 'utf8')).not.toContain('rel="canonical"');
   });
 
+  it('sitemap.xml y robots.txt usan url_base de negocio.json, no BASE_URL del servidor', async () => {
+    const xml = await (await app.request('/sitemap.xml')).text();
+    const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+    expect(locs.length).toBeGreaterThan(0);
+    for (const loc of locs) expect(loc.startsWith(`${urlBase}/`), loc).toBe(true);
+    const robots = await (await app.request('/robots.txt')).text();
+    expect(robots).toContain(`Sitemap: ${urlBase}/sitemap.xml`);
+  });
+
   it('/health sigue respondiendo JSON', async () => {
     expect(await (await app.request('/health')).json()).toMatchObject({ ok: true });
   });
