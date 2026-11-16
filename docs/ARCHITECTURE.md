@@ -99,7 +99,7 @@ type Dato<T> = { valor: T | null; confirmado: boolean };
 
 | Fichero | Contenido |
 |---|---|
-| `negocio.json` | `marca: Dato<string>`, `telefono: Dato<string>` (E.164, uno solo), `whatsapp: Dato<string>`, `email: Dato<string>`, `email_destino` (a quién llegan las peticiones), `horario: Dato<string>`, `legal: { razon_social, nif, domicilio: Dato<string> }`, `anios: Dato<number>`, `garantia: { anios: Dato<number>, condiciones: Dato<string> }`, `plazos: { presupuesto, respuesta, reparacion, uso_ducha: Dato<string> }`, `url_base`, `analitica: { ga4_id: string \| null }` |
+| `negocio.json` | `marca: Dato<string>`, `telefono: Dato<string>` (E.164, uno solo), `whatsapp: Dato<string>`, `email: Dato<string>`, `email_destino` (a quién llegan las peticiones), `horario: Dato<string>`, `legal: { razon_social, nif, domicilio: Dato<string> }`, `anios: Dato<number>`, `garantia: { anios: Dato<number>, condiciones: Dato<string> }`, `plazos: { presupuesto, respuesta, reparacion, uso_ducha: Dato<string> }`, `url_base` (única base de canonical, sitemap y robots; hoy `http://localhost:3000`, poner el dominio de producción antes de publicar), `url_base_nota` (opcional, recordatorio para quien edita), `analitica: { ga4_id: string \| null }` |
 | `config.json` | `formulario: { retencion_dias: 90, foto_max_mb: 10, limite_envios: 5, ventana_min: 60 }` |
 | `servicios.json` | lista ordenada: `slug, nombre, ruta, tipo: 'principal'\|'servicio'\|'empresas', orden, resumen, problema, como (pasos), precio_desde: Dato<number>, faqs: [{p, r}], relacionados: [slug], whatsapp_mensaje, seo: {title, description}, imagen_tarjeta` |
 | `plato-ducha.json` | contenido extra de F2: `h1, danos: [{id, titulo, texto}]` (grieta, golpe, desconchón, perforación, manchas, pérdida de brillo), `antideslizante, cambio_color, materiales: [{nombre, reparable: Dato<boolean>}], proceso, faqs` (≥5) |
@@ -223,9 +223,15 @@ confirmación con plazo de respuesta (tabla) y botón de WhatsApp.
   garantía (plazo). Si la lista no está vacía, el layout raíz emite `robots: noindex, nofollow` en todas
   las páginas y `scripts/seo-build.ts` imprime `⚠ MODO BORRADOR: faltan …`. Con todo completo, ni
   `noindex` ni aviso.
-- `sitemap.xml` (todas las rutas de `rutas.ts`, con `url_base`) y `robots.txt` (`Allow: /` + `Sitemap:`)
-  se generan en postbuild; no se usa la ruta dinámica `sitemap.ts` de Next.
-- Un H1 por página; canonical absoluto con `url_base`; Open Graph por página.
+- `url_base` de `negocio.json` es la **única** base de las URL absolutas del SEO: canonical, `sitemap.xml` y
+  `robots.txt`. `BASE_URL` del servidor ya no interviene. Hoy vale `http://localhost:3000`; antes de publicar
+  hay que poner el dominio de producción (`https://…`).
+- `sitemap.xml` (todas las rutas de `PAGES`, con `url_base`) y `robots.txt` (`Allow: /` + `Sitemap:`)
+  se generan en postbuild (`scripts/postbuild.ts`); no se usa la ruta dinámica `sitemap.ts` de Next.
+- Un H1 por página; canonical absoluto con `url_base` (`canonicalUrl` de `web/src/lib/site.ts`; el layout raíz
+  lo emite con `metadataBase` + `alternates.canonical: './'`, con barra final); Open Graph por página.
+- `tests/build/out.test.ts` comprueba que el canonical de cada página, los `<loc>` del sitemap y la línea
+  `Sitemap:` de robots comparten la base de `url_base`, y que cada `<loc>` es el canonical de su página.
 
 ### 6.6 Cookies
 - Sin `ga4_id` ⇒ no hay banner ni script. Con `ga4_id` ⇒ `BannerCookies` con «Aceptar» y «Rechazar» del
@@ -278,6 +284,9 @@ confirmación con plazo de respuesta (tabla) y botón de WhatsApp.
   `negocio.json` completo de fixture (build con `CONTENT_DIR` de fixture), ninguna.
 - Title, description y canonical únicos por página; JSON-LD parseable en cada página que lo declara.
 - Sin `ga4_id` no hay script de GA ni banner.
+
+`pnpm e2e:staging` ejecuta el mismo smoke contra un servidor ya levantado (`E2E_BASE_URL`, por defecto
+`http://127.0.0.1:8804`), sin `webServer` propio; el destino lo decide `src/e2e-target.ts`.
 
 `pnpm e2e` (Playwright, Chromium, contra `pnpm start` con `MAIL_TRANSPORT=file`):
 - Móvil 360×740: titular, «Llamar» y «WhatsApp» visibles sin scroll y ≥ 44×44 px; `href` `tel:` y

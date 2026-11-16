@@ -5,6 +5,7 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { Link } from '@astryxdesign/core/Link';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { filasComparativa, resolverPasos, serviciosConPrecio, serviciosOrdenados } from '../lib/catalogo';
 import { type ConfigFormulario, configFormulario } from '../lib/config';
@@ -29,7 +30,7 @@ import {
 import { type Modo, modoActual } from '../lib/dato';
 import { preguntasResueltas } from '../lib/faq';
 import { jsonLdLocalBusiness } from '../lib/seo';
-import { DESCRIPTION } from '../lib/site';
+import { canonicalUrl, DESCRIPTION } from '../lib/site';
 import { compromisosFranja, respuesta, titularPortada } from '../lib/textos';
 import { MENSAJE_PORTADA, telLink, waLink } from '../lib/whatsapp';
 import { AcordeonFaq } from '../ui/AcordeonFaq';
@@ -48,6 +49,11 @@ import { PasosTrabajo } from '../ui/PasosTrabajo';
 import { PrecioDesde } from '../ui/PrecioDesde';
 import { TablaRepararCambiar } from '../ui/TablaRepararCambiar';
 import { TarjetaServicio } from '../ui/TarjetaServicio';
+
+/** Canonical de la portada; title y description los hereda del layout (el layout no declara canonical). */
+export function generateMetadata(): Metadata {
+  return { alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/') } };
+}
 
 const MENSAJE_PRECIO = 'Hola, quiero saber cuánto costaría arreglar mi baño. Os mando una foto.';
 const MENSAJE_ZONA = 'Hola, vivo en… ¿venís a mi zona?';
@@ -78,7 +84,7 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
   const hayIlustraciones = miniaturas.some((par) => !par.despues);
   return (
     <VStack gap={4} as="section" aria-labelledby="portada-antes-despues-titulo">
-      <Heading level={2} id="portada-antes-despues-titulo">
+      <Heading level={2} type="display-2" weight="bold" id="portada-antes-despues-titulo">
         Antes y después
       </Heading>
       <DeslizadorAntesDespues par={principal} />
@@ -116,7 +122,7 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
 function FaqResumida({ preguntas }: { preguntas: { p: string; r: string }[] }) {
   return (
     <VStack gap={4} as="section" aria-labelledby="portada-faq-titulo">
-      <Heading level={2} id="portada-faq-titulo">
+      <Heading level={2} type="display-2" weight="bold" id="portada-faq-titulo">
         Preguntas frecuentes
       </Heading>
       <AcordeonFaq preguntas={preguntas} idBase="portada-faq" />
@@ -129,7 +135,7 @@ function FaqResumida({ preguntas }: { preguntas: { p: string; r: string }[] }) {
 function Seccion({ id, titulo, children }: { id: string; titulo: string; children: ReactNode }) {
   return (
     <VStack gap={4} as="section" aria-labelledby={id}>
-      <Heading level={2} id={id}>
+      <Heading level={2} type="display-2" weight="bold" id={id}>
         {titulo}
       </Heading>
       {children}
@@ -228,7 +234,7 @@ export function Portada({ negocio, config, modo, servicios, pasos, comparativa, 
        * es el segundo primario de la portada; el flotante se oculta mientras se ve este o el del hero.
        */}
       <VStack gap={4} as="section" aria-labelledby="portada-formulario">
-        <Heading level={2} id="portada-formulario">
+        <Heading level={2} type="display-2" weight="bold" id="portada-formulario">
           Mándanos una foto
         </Heading>
         <EnviarContacto

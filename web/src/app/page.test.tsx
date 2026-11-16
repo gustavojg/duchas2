@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { Metadata } from 'next';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { APP_NAME, NAV } from '../config';
@@ -22,8 +23,10 @@ import { telLink } from '../lib/whatsapp';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
-import { Portada, type PortadaProps } from './page';
-import { metadata as metadataZonas, Zonas } from './zonas/page';
+import { generateMetadata as metadataDeContacto } from './contacto/page';
+import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
+import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
+import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
 const config = configFormulario({});
@@ -318,6 +321,21 @@ describe('portada: módulos tras la franja de confianza', () => {
     expect(html.indexOf('>¿Reparar o cambiar?<')).toBeGreaterThan(franja);
   });
 
+  it('los H2 de sección llevan type display-2, mayor que el display-3 del H3 del plato', () => {
+    const etiquetas = [...html.matchAll(/<h2[^>]*>((?:(?!<\/h2>).)*)<\/h2>/gs)];
+    expect(etiquetas.map((m) => m[1].replace(/<[^>]+>/g, ''))).toEqual([
+      'Antes y después',
+      '¿Reparar o cambiar?',
+      'Cómo trabajamos',
+      'Servicios',
+      'Precios orientativos',
+      'Preguntas frecuentes',
+      'Zonas',
+      'Mándanos una foto',
+    ]);
+    for (const [h2] of etiquetas) expect(h2).toMatch(/^<h2[^>]*\bdata-type="display-2"/);
+  });
+
   it('una tarjeta por servicio, el plato primero y Hoteles al final, cada una a su ruta', () => {
     const t = tarjetas(html);
     expect(t).toHaveLength(servicios.length);
@@ -410,9 +428,28 @@ describe('página /zonas/', () => {
   it('va dentro del contenedor `portada` y tiene metadatos propios sin plazos', () => {
     const vista = renderToStaticMarkup(<Zonas negocio={negocio} zonas={zonas} />);
     expect(vista).toMatch(/^<[a-z]+ [^>]*class="[^"]*\bportada\b[^"]*"/);
+    const metadataZonas = metadataDeZonas();
     expect(String(metadataZonas.title)).toMatch(/[Zz]onas/);
     expect(String(metadataZonas.description)).toMatch(/Madrid/);
     expect(`${metadataZonas.title} ${metadataZonas.description}`).not.toMatch(/\d+\s*(h|horas|días|años)\b|en el día|en unas horas|PENDIENTE/);
+  });
+
+  it('cada página lleva su propio canonical: url_base + ruta', () => {
+    const base = negocio.url_base.replace(/\/+$/, '');
+    const porRuta: Record<string, Metadata> = {
+      '/': metadataDePortada(),
+      '/zonas/': metadataDeZonas(),
+      '/preguntas-frecuentes/': metadataDeFaq(),
+      '/contacto/': metadataDeContacto(),
+    };
+    const canonicals = new Set<unknown>();
+    for (const ruta of PAGES) {
+      const meta = porRuta[ruta];
+      expect(meta, `falta metadata para ${ruta}`).toBeDefined();
+      expect(meta!.alternates?.canonical, `canonical en ${ruta}`).toBe(`${base}${ruta}`);
+      canonicals.add(meta!.alternates?.canonical);
+    }
+    expect(canonicals.size).toBe(PAGES.length);
   });
 
   it('está en la navegación y en las páginas públicas', () => {

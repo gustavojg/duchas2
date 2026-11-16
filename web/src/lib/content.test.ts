@@ -119,6 +119,45 @@ describe('content.ts', () => {
       conServicios(data);
       expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
     });
+
+    const rutasMalas = ['//evil.com/', 'javascript:x', 'javascript:alert(1)//', 'http://evil.com/', '/\\evil.com/'];
+
+    it.each(rutasMalas)('la ruta %s falla con fichero y campo', (ruta) => {
+      const data = leer('servicios.json');
+      data[4].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
+    });
+
+    // El tipo 'empresas' no tiene ruta fija: aquí solo rutaSchema protege contra «//» y esquemas.
+    it.each(rutasMalas)('la ruta %s falla también en el servicio de empresas', (ruta) => {
+      const data = leer('servicios.json');
+      data[9].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*9\.ruta/s);
+    });
+
+    it('el servicio principal fuera de /platos-de-ducha/ falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/otra-ruta/';
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*0\.ruta/s);
+    });
+
+    it('el servicio principal en /platos-de-ducha/ valida', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/platos-de-ducha/';
+      conServicios(data);
+      expect(cargarServicios()[0].ruta).toBe('/platos-de-ducha/');
+    });
+
+    it('una ruta válida sigue validando', () => {
+      const data = leer('servicios.json');
+      data[4].ruta = '/servicios/azulejos/';
+      data[9].ruta = '/hoteles-y-comunidades/';
+      conServicios(data);
+      expect(() => cargarServicios()).not.toThrow();
+    });
   });
 });
 
@@ -179,6 +218,18 @@ describe('galería, FAQ y reseñas', () => {
     g2[0].despues = '/fotos/despues.webp';
     conFichero('galeria.json', g2);
     expect(() => cargarGaleria()).toThrow(/galeria\.json.*antes/s);
+  });
+
+  it('negocio.json lleva url_base de localhost y una nota que pide el dominio de producción', () => {
+    const n = cargarNegocio();
+    expect(n.url_base).toBe('http://localhost:3000');
+    expect(n.url_base_nota).toMatch(/producción/);
+  });
+
+  it('url_base_nota es opcional', () => {
+    const { url_base_nota: _, ...sinNota } = original();
+    conFichero('negocio.json', sinNota);
+    expect(cargarNegocio().url_base_nota).toBeUndefined();
   });
 
   it('resenas.json con nota 6 lanza', () => {
