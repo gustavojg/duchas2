@@ -22,6 +22,11 @@ const MIGAS: Miga[] = [
   { nombre: 'Antes y después', ruta: RUTA },
 ];
 const CTA = 'Manda la foto del tuyo';
+/** Intro mientras ningún par tiene antes y después: no presenta las ilustraciones como trabajos reales. */
+export const INTRO_ILUSTRACIONES =
+  'Estas ilustraciones enseñan qué se repara en cada servicio; no son trabajos reales. Elige un servicio para verlas.';
+/** Intro en cuanto algún par tiene las dos fotos. */
+export const INTRO_FOTOS = 'Elige un servicio para ver solo esos trabajos.';
 
 /** Metadata propia con canonical de url_base, como el resto de páginas de PAGES. */
 export function generateMetadata(): Metadata {
@@ -43,6 +48,7 @@ export interface PaginaAntesYDespuesProps {
 export function PaginaAntesYDespues({ negocio, servicios, galeria }: PaginaAntesYDespuesProps) {
   const whatsapp = negocio.whatsapp.valor && esNumeroValido(negocio.whatsapp.valor) ? negocio.whatsapp.valor : null;
   const mensaje = mensajePorRuta(RUTA, servicios);
+  const hayFotos = galeria.some((p) => p.antes && p.despues);
   return (
     <VStack gap={8} className="portada portada-galeria">
       <VStack gap={4} as="section" aria-labelledby="galeria-titulo">
@@ -51,7 +57,7 @@ export function PaginaAntesYDespues({ negocio, servicios, galeria }: PaginaAntes
         </Heading>
         <MigasDePan migas={MIGAS} />
         <Text type="large" as="p">
-          Así quedan los platos de ducha y las bañeras que reparamos en casa. Elige un servicio para ver solo esos trabajos.
+          {hayFotos ? INTRO_FOTOS : INTRO_ILUSTRACIONES}
         </Text>
         <GaleriaFiltrable servicios={servicios} pares={galeria} whatsapp={whatsapp} mensaje={mensaje} />
       </VStack>
