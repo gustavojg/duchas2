@@ -227,6 +227,19 @@
   max-inline-size: calc(var(--measure) * 2);
 }
 
+/*
+ * Selector «Filtrar por servicio»: ancho de móvil completo y tope en escritorio. El valor elegido (renderValue) salta
+ * de línea en vez de recortarse con puntos suspensivos, para que el nombre del servicio se lea entero a 320 px.
+ */
+.galeria-filtro {
+  inline-size: 100%;
+  max-inline-size: calc(var(--spacing-12) * 8);
+}
+
+.galeria-filtro-valor {
+  overflow-wrap: anywhere;
+}
+
 .galeria-pares {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

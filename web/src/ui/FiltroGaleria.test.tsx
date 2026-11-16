@@ -54,6 +54,8 @@ describe('FiltroGaleria', () => {
     expect(html).toContain('Filtrar por servicio');
     expect(html).toContain('Todos');
     for (const s of servicios) expect(html).toContain(s.nombre);
+    expect(html).not.toContain('astryx-segmented-control');
+    expect(html).toContain('astryx-selector');
     expect(html).toContain('Antes');
     expect(html).toContain('Después');
     expect(html).toMatch(/<ul[\s>]/);
@@ -66,13 +68,22 @@ describe('FiltroGaleria', () => {
     expect(html).not.toContain('Hueco ducha dos');
   });
 
-  it('el SegmentedControl avisa del servicio elegido', () => {
+  it('el selector ofrece «Todos» y cada servicio con su nombre entero, y avisa del servicio elegido', () => {
     const onElegir = vi.fn();
     const arbol = FiltroGaleriaVista({ pares, servicios, elegido: 'todos', onElegir });
     const control = buscar(arbol, (e) => (e.props as { label?: unknown }).label === 'Filtrar por servicio');
-    expect(control, 'falta el SegmentedControl').toBeDefined();
-    (control!.props as { onChange: (v: string) => void }).onChange('azulejos');
+    expect(control, 'falta el control «Filtrar por servicio»').toBeDefined();
+    const props = control!.props as { options?: { value: string; label: string }[]; value: string; onChange: (v: string | null) => void };
+    expect(props.options).toEqual([{ value: 'todos', label: 'Todos' }, ...servicios.map((s) => ({ value: s.slug, label: s.nombre }))]);
+    expect(props.value).toBe('todos');
+    props.onChange('azulejos');
     expect(onElegir).toHaveBeenCalledWith('azulejos');
+  });
+
+  it('el valor elegido se pinta entero (sin recorte de una línea) en el disparador', () => {
+    const largo = [{ slug: 'platos-de-ducha', nombre: 'Reparación y esmaltado de platos de ducha' }];
+    const html = renderToStaticMarkup(<FiltroGaleriaVista pares={pares} servicios={largo} elegido="platos-de-ducha" onElegir={() => {}} />);
+    expect(html).toMatch(/class="[^"]*\bgaleria-filtro-valor\b[^"]*"[^>]*>Reparación y esmaltado de platos de ducha</);
   });
 
   it('un par con foto real pinta <img> con su alt_antes y alt_despues', () => {

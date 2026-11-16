@@ -1,6 +1,6 @@
 'use client';
 
-import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
+import { Selector } from '@astryxdesign/core/Selector';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import { useState } from 'react';
@@ -21,21 +21,29 @@ export interface FiltroGaleriaVistaProps extends FiltroGaleriaProps {
 }
 
 /**
- * Vista sin estado del filtro: SegmentedControl «Todos» + un segmento por servicio, y debajo la lista de pares
- * filtrados. Cada par, dos HuecoFoto (antes y después): la foto real con su alt o, sin foto, la ilustración con la
+ * Vista sin estado del filtro: Selector «Todos» + una opción por servicio (el nombre entero, que un SegmentedControl
+ * recortaba a 360 px), y debajo la rejilla de pares filtrados con el nombre de su servicio. Cada par, dos HuecoFoto (antes y después): la foto real con su alt o, sin foto, la ilustración con la
  * cinta, el aviso y el texto `hueco` de galeria.json.
  */
 export function FiltroGaleriaVista({ pares, servicios, elegido, onElegir }: FiltroGaleriaVistaProps) {
   const visibles = filtrarPares(pares, elegido);
+  const opciones = [{ value: TODOS, label: 'Todos' }, ...servicios.map((s) => ({ value: s.slug, label: s.nombre }))];
   const nombreServicio = (slug: string) => servicios.find((s) => s.slug === slug)?.nombre ?? slug;
   return (
     <VStack gap={5}>
-      <SegmentedControl label="Filtrar por servicio" value={elegido} onChange={onElegir}>
-        <SegmentedControlItem value={TODOS} label="Todos" />
-        {servicios.map((s) => (
-          <SegmentedControlItem key={s.slug} value={s.slug} label={s.nombre} />
-        ))}
-      </SegmentedControl>
+      <Selector
+        label="Filtrar por servicio"
+        options={opciones}
+        value={elegido}
+        onChange={(v: string | null) => onElegir(v ?? TODOS)}
+        presentation="adaptive"
+        containerClassName="galeria-filtro"
+        renderValue={(o) => (
+          <Text type="inherit" className="galeria-filtro-valor">
+            {o.label}
+          </Text>
+        )}
+      />
       <VStack gap={6} as="ul" aria-label="Trabajos antes y después" className="galeria-pares">
         {visibles.map((par) => (
           <VStack gap={3} as="li" key={`${par.servicio}-${par.alt_antes}`}>
