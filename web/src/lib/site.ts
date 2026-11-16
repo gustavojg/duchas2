@@ -16,11 +16,26 @@ export const DESCRIPTION =
 /** Rutas públicas que se exportan como página y van al sitemap (con barra final: trailingSlash). */
 export const PAGES: readonly string[] = ['/', '/zonas/', '/preguntas-frecuentes/', '/contacto/'];
 
+/**
+ * Base de las URL absolutas del SEO (canonical, sitemap y robots) sin barras finales. La base es `url_base` de
+ * web/content/negocio.json: `http://x/` y `http://x` dan lo mismo.
+ */
+export function normalizarBase(urlBase: string): string {
+  return urlBase.replace(/\/+$/, '');
+}
+
+/** URL absoluta de una página: base normalizada + ruta con barra inicial y final (trailingSlash, como PAGES). */
+export function canonicalUrl(urlBase: string, ruta: string): string {
+  const conInicial = ruta.startsWith('/') ? ruta : `/${ruta}`;
+  const conFinal = conInicial.endsWith('/') ? conInicial : `${conInicial}/`;
+  return `${normalizarBase(urlBase)}${conFinal}`;
+}
+
 export function sitemapXml(baseUrl: string, pages: readonly string[] = PAGES): string {
-  const urls = pages.map((p) => `  <url><loc>${baseUrl}${p}</loc></url>`).join('\n');
+  const urls = pages.map((p) => `  <url><loc>${canonicalUrl(baseUrl, p)}</loc></url>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
 export function robotsTxt(baseUrl: string): string {
-  return `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${baseUrl}/sitemap.xml\n`;
+  return `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${normalizarBase(baseUrl)}/sitemap.xml\n`;
 }

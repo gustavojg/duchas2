@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { PAGES, robotsTxt, sitemapXml } from './site.js';
+import { PAGES, canonicalUrl, normalizarBase, robotsTxt, sitemapXml } from './site.js';
 
 // Lo ejecuta el vitest de la raíz (lógica pura de web/src/lib), no el de web/.
 describe('site', () => {
@@ -26,5 +26,32 @@ describe('site', () => {
     const txt = robotsTxt('https://ejemplo.test');
     expect(txt).toContain('Sitemap: https://ejemplo.test/sitemap.xml');
     expect(txt).toContain('Disallow: /api/');
+  });
+
+  it('normalizarBase quita las barras finales', () => {
+    expect(normalizarBase('https://ejemplo.test/')).toBe('https://ejemplo.test');
+    expect(normalizarBase('https://ejemplo.test//')).toBe('https://ejemplo.test');
+    expect(normalizarBase('https://ejemplo.test')).toBe('https://ejemplo.test');
+  });
+
+  it('canonicalUrl une la base normalizada y la ruta con barra final', () => {
+    expect(canonicalUrl('https://ejemplo.test/', '/zonas/')).toBe('https://ejemplo.test/zonas/');
+    expect(canonicalUrl('https://ejemplo.test', '/')).toBe('https://ejemplo.test/');
+    expect(canonicalUrl('https://ejemplo.test', '/zonas')).toBe('https://ejemplo.test/zonas/');
+  });
+
+  it('sitemap y robots dan lo mismo con y sin barra final en la base', () => {
+    const xml = sitemapXml('https://ejemplo.test/');
+    expect(xml).toContain('<loc>https://ejemplo.test/zonas/</loc>');
+    expect(xml).not.toContain('//zonas');
+    expect(xml).toBe(sitemapXml('https://ejemplo.test'));
+    const txt = robotsTxt('https://ejemplo.test/');
+    expect(txt).toContain('Sitemap: https://ejemplo.test/sitemap.xml');
+    expect(txt).toBe(robotsTxt('https://ejemplo.test'));
+  });
+
+  it('cada <loc> del sitemap es el canonicalUrl de su página', () => {
+    const xml = sitemapXml('https://ejemplo.test/');
+    for (const p of PAGES) expect(xml).toContain(`<loc>${canonicalUrl('https://ejemplo.test', p)}</loc>`);
   });
 });
