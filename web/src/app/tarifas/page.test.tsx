@@ -1,6 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { APP_NAME } from '../../config';
+import { serviciosOrdenados } from '../../lib/catalogo';
 import { cargarNegocio, cargarServicios, type Servicio } from '../../lib/content';
 import { metadataPlatosDeDucha } from '../platos-de-ducha/page';
 import { generateMetadata, MENSAJE_TARIFAS, metadataTarifas, PaginaTarifas } from './page';
@@ -19,7 +22,15 @@ const conPrecio = (): Servicio[] =>
   servicios.map((s, i) => ({ ...s, precio_desde: i === 0 ? { valor: 80, confirmado: true } : { valor: null, confirmado: false } }));
 
 const html = pinta();
+const serviciosOrdenadosResumen = () => serviciosOrdenados(servicios).map((s) => s.resumen);
 
+/** Reglas de globals.css cuyo selector menciona `tabla-tarifas` (incluidas las de dentro de @media). */
+const cssTarifas = () => {
+  const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8');
+  const ini = css.indexOf('.tabla-tarifas');
+  const fin = css.indexOf('\n/*', ini);
+  return css.slice(ini, fin);
+};
 describe('/tarifas/', () => {
   it('tiene un solo H1', () => {
     expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
@@ -37,22 +48,40 @@ describe('/tarifas/', () => {
     }
   });
 
-  it('tabla legible en móvil: clase tabla-tarifas, columnas marcadas y resumen como segunda línea solo en móvil', () => {
+  it('tabla legible: clase tabla-tarifas, 3 columnas marcadas y cada resumen una sola vez (en «Incluye»)', () => {
     expect(html).toMatch(/<table[^>]*class="(?:[^"]* )?tabla-tarifas[ "]/);
     const th = [...html.matchAll(/<th\b[^>]*class="([^"]*)"/g)].map((m) => m[1]);
+    expect(th).toHaveLength(3);
     expect(th[0]).toMatch(/\btabla-tarifas-trabajo\b/);
     expect(th[1]).toMatch(/\btabla-tarifas-desde\b/);
     expect(th[2]).toMatch(/\btabla-tarifas-incluye\b/);
     const filas = servicios.length;
-    expect(html.match(/<td\b[^>]*class="[^"]*\btabla-tarifas-incluye\b/g)).toHaveLength(filas);
-    const moviles = [...html.matchAll(/<p\b[^>]*class="[^"]*\btabla-tarifas-resumen-movil\b[^"]*"[^>]*>([^<]*)<\/p>/g)].map((m) => m[1]);
-    expect(moviles).toHaveLength(filas);
-    // Cada resumen-móvil va dentro de la celda Trabajo, no en Incluye.
-    const celdasTrabajo = [...html.matchAll(/<td\b[^>]*class="[^"]*\btabla-tarifas-trabajo\b[^>]*>([\s\S]*?)<\/td>/g)].map((m) => m[1]);
-    expect(celdasTrabajo).toHaveLength(filas);
-    for (const c of celdasTrabajo) expect(c).toContain('tabla-tarifas-resumen-movil');
+    for (const c of ['trabajo', 'desde', 'incluye'])
+      expect(html.match(new RegExp(`<td\\b[^>]*class="[^"]*\\btabla-tarifas-${c}\\b`, 'g'))).toHaveLength(filas);
+    // En móvil las filas se apilan por CSS: ya no hay resumen duplicado en «Trabajo».
+    expect(html).not.toContain('tabla-tarifas-resumen-movil');
+    const t = textoPlano(html);
+    for (const s of servicios) expect(t.split(s.resumen)).toHaveLength(2);
+    const incluye = [...html.matchAll(/<td\b[^>]*class="[^"]*\btabla-tarifas-incluye\b[^>]*>([\s\S]*?)<\/td>/g)].map((m) => m[1]);
+    serviciosOrdenadosResumen().forEach((r, i) => expect(incluye[i]).toContain(r));
     // Sin style= propio: los únicos estilos en línea son los que pinta Astryx en sus propios elementos.
     for (const m of sinScripts(html).matchAll(/<[a-z]+\b([^>]*)\sstyle="[^"]*"/g)) expect(m[1]).toMatch(/class="astryx-/);
+  });
+
+  it('CSS de la tabla: ocupa el contenedor, anula el recorte de Astryx y apila filas en móvil', () => {
+    const css = cssTarifas();
+    expect(css).toMatch(/\.tabla-tarifas\s*\{[^}]*inline-size:\s*100%/);
+    // «Desde» nunca con ancho fijo (recortaba «Pide presupuesto gratuito»): solo mínimo.
+    expect(css).not.toMatch(/\.tabla-tarifas-desde\s*\{[^}]*(?<![-a-z])inline-size:/);
+    expect(css).toMatch(/\.tabla-tarifas-desde\s*\{[^}]*min-inline-size:/);
+    // Astryx pone en th/td max-width:0, overflow:hidden, text-overflow:ellipsis y nowrap: se anulan.
+    for (const d of [/max-inline-size:\s*none/, /overflow:\s*visible/, /text-overflow:\s*clip/, /white-space:\s*normal/])
+      expect(css).toMatch(d);
+    const movil = css.slice(css.indexOf('@media (max-width: 40em)'));
+    expect(movil).toMatch(/\.tabla-tarifas thead\s*\{[^}]*display:\s*none/);
+    expect(movil).toMatch(/\.tabla-tarifas tr,\s*\.tabla-tarifas td\s*\{[^}]*display:\s*block/);
+    expect(css).not.toMatch(/resumen-movil/);
+    expect(css).not.toMatch(/\d(px|rem)\b|#[0-9a-f]{3,8}\b/i);
   });
 
   it('precio confirmado: «Desde 80 €»; sin confirmar: «Pide presupuesto gratuito»; nunca 0', () => {
