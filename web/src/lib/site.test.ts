@@ -22,6 +22,26 @@ describe('site', () => {
     expect(nav).toMatch(/\{\s*href:\s*'\/contacto\/',\s*label:\s*'Contacto'\s*\}/);
   });
 
+  it('PAGES y el sitemap incluyen /platos-de-ducha/ y /tarifas/, con / primero y /contacto/ al final', () => {
+    const xml = sitemapXml('https://ejemplo.test');
+    for (const p of ['/platos-de-ducha/', '/tarifas/']) {
+      expect(PAGES).toContain(p);
+      expect(xml).toContain(`<loc>https://ejemplo.test${p}</loc>`);
+    }
+    expect(PAGES[0]).toBe('/');
+    expect(PAGES.at(-1)).toBe('/contacto/');
+  });
+
+  it('la navegación enlaza /platos-de-ducha/ y /tarifas/, con Inicio primero y Contacto al final', () => {
+    const src = readFileSync(fileURLToPath(new URL('../config.ts', import.meta.url)), 'utf8');
+    const nav = /export const NAV[^=]*=\s*\[([\s\S]*?)\];/.exec(src)?.[1] ?? '';
+    expect(nav).toMatch(/\{\s*href:\s*'\/platos-de-ducha\/',\s*label:\s*'Platos de ducha'\s*\}/);
+    expect(nav).toMatch(/\{\s*href:\s*'\/tarifas\/',\s*label:\s*'Tarifas'\s*\}/);
+    const hrefs = [...nav.matchAll(/href:\s*'([^']+)'/g)].map((m) => m[1]);
+    expect(hrefs[0]).toBe('/');
+    expect(hrefs.at(-1)).toBe('/contacto/');
+  });
+
   it('canonicalUrl une la URL base y la ruta sin duplicar la barra', () => {
     expect(canonicalUrl('https://ejemplo.test', '/contacto/')).toBe('https://ejemplo.test/contacto/');
     expect(canonicalUrl('https://ejemplo.test/', '/contacto/')).toBe('https://ejemplo.test/contacto/');

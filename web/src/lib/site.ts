@@ -14,7 +14,14 @@ export const DESCRIPTION =
   'Lo esmaltamos en tu baño, sin polvo y con garantía por escrito. Mándanos una foto y te decimos si tiene arreglo.';
 
 /** Rutas públicas que se exportan como página y van al sitemap (con barra final: trailingSlash). */
-export const PAGES: readonly string[] = ['/', '/zonas/', '/preguntas-frecuentes/', '/contacto/'];
+export const PAGES: readonly string[] = [
+  '/',
+  '/platos-de-ducha/',
+  '/tarifas/',
+  '/zonas/',
+  '/preguntas-frecuentes/',
+  '/contacto/',
+];
 
 /**
  * Base de las URL absolutas del SEO (canonical, sitemap y robots) sin barras finales. La base es `url_base` de

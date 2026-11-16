@@ -146,6 +146,28 @@ describe('web/out servido por Hono', () => {
     expect(visible).not.toContain('{{');
   });
 
+  const ldTipos = (html: string) =>
+    [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
+      (m) => (JSON.parse(m[1]) as { '@type': string })['@type'],
+    );
+
+  it.each([
+    ['/platos-de-ducha/', ['Service', 'FAQPage', 'BreadcrumbList']],
+    ['/tarifas/', ['BreadcrumbList']],
+  ])('%s se exporta con un H1, canonical, JSON-LD parseable y en el sitemap', async (ruta, tipos) => {
+    const res = await app.request(ruta);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(html).toMatch(new RegExp(`<link rel="canonical" href="https?://[^"]+${ruta}"`));
+    expect(ldTipos(html).sort()).toEqual([...tipos].sort());
+    expect(html).toMatch(/<nav[^>]*aria-label="Migas de pan"/);
+    const sinScripts = visible(html);
+    expect(sinScripts).not.toContain('PENDIENTE');
+    expect(sinScripts).not.toContain('{{');
+    expect(await (await app.request('/sitemap.xml')).text()).toContain(ruta);
+  });
+
   const urlBase = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
   /** HTML exportado de una ruta de PAGES: web/out/index.html para '/', web/out/<ruta>/index.html para el resto. */
   const htmlDe = (ruta: string) => fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
