@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ParGaleria } from '../lib/content';
-import { DeslizadorAntesDespues } from './DeslizadorAntesDespues';
+import { ASA_CY, DeslizadorAntesDespues, VELO } from './DeslizadorAntesDespues';
 
 const conHueco: ParGaleria = {
   servicio: 'platos-de-ducha',
@@ -80,5 +80,28 @@ describe('DeslizadorAntesDespues', () => {
       expect(html).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
       expect(html).not.toContain('<style');
     }
+  });
+  it('el asa va en el tercio superior y la capa de abajo, más velada', () => {
+    const html = renderToStaticMarkup(<DeslizadorAntesDespues par={conHueco} />);
+    // El asa es el <circle> de radio 4; PlatoPartido trae sus propios círculos.
+    const circulo = /<circle[^>]*\br="4"[^>]*>/.exec(html)?.[0] ?? '';
+    expect(circulo).toContain('cy="25"');
+    expect(circulo).toContain('cx="50"');
+    expect(ASA_CY).toBe(25);
+    expect(Number(/cy="([\d.]+)"/.exec(circulo)?.[1])).toBeLessThan(75 / 2);
+    expect(html).toContain('opacity="0.6"');
+    expect(VELO).toBe(0.6);
+    const slider = /<[^>]*role="slider"[^>]*>/.exec(html)?.[0] ?? '';
+    expect(slider).toContain('aria-valuenow="50"');
+    expect(slider).toContain('aria-valuemin="0"');
+    expect(slider).toContain('aria-valuemax="100"');
+  });
+
+  it('el Slider sigue siendo accesible por teclado y la línea y el recorte siguen la posición', () => {
+    // Sin @testing-library/react en el proyecto: comprobación estática del contrato del Slider.
+    const html = renderToStaticMarkup(<DeslizadorAntesDespues par={conHueco} />);
+    expect(html).toMatch(/role="slider"[^>]*aria-valuenow="50"|aria-valuenow="50"[^>]*role="slider"/);
+    expect(html).toMatch(/<line[^>]*x1="50"[^>]*x2="50"/);
+    expect(html).toMatch(/<clipPath[^>]*>\s*<rect[^>]*\bx="50"/);
   });
 });

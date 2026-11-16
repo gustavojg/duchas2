@@ -50,6 +50,14 @@ describe('HuecoFoto', () => {
     expect(html).not.toContain(conHueco.hueco);
   });
 
+  it('compacta con daño: la ilustración de ese daño en lugar del plato partido', () => {
+    const grieta = renderToStaticMarkup(<HuecoFoto par={conHueco} lado="despues" compacta dano="grieta" />);
+    expect(grieta).toMatch(/<svg[^>]*viewBox="0 0 120 120"/);
+    expect(grieta).not.toContain('viewBox="0 0 400 300"');
+    const oxido = renderToStaticMarkup(<HuecoFoto par={conHueco} lado="despues" compacta dano="oxido" />);
+    expect(oxido).not.toBe(grieta);
+  });
+
   it('sin style= propio ni hex', () => {
     for (const par of [conHueco, conFotos]) {
       const html = sinVariablesAstryx(renderToStaticMarkup(<HuecoFoto par={par} lado="antes" />));
