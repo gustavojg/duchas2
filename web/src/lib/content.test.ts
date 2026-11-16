@@ -178,11 +178,11 @@ describe('galería, FAQ y reseñas', () => {
     for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
   });
 
-  it('el contenido real valida: reseñas vacías, ≥ 15 preguntas y entre 4 y 6 en portada', () => {
+  it('el contenido real valida: reseñas vacías, ≥ 17 preguntas y entre 4 y 6 en portada', () => {
     expect(cargarResenas()).toEqual([]);
     const faq = cargarFaq();
     const preguntas = faq.temas.flatMap((t) => t.preguntas);
-    expect(preguntas.length).toBeGreaterThanOrEqual(15);
+    expect(preguntas.length).toBeGreaterThanOrEqual(17);
     const enPortada = preguntas.filter((p) => p.en_portada).length;
     expect(enPortada).toBeGreaterThanOrEqual(4);
     expect(enPortada).toBeLessThanOrEqual(6);

@@ -7,4 +7,5 @@ export const NAV: NavItem[] = [
   { href: '/', label: 'Inicio' },
   { href: '/zonas/', label: 'Zonas' },
   { href: '/preguntas-frecuentes/', label: 'Preguntas frecuentes' },
+  { href: '/contacto/', label: 'Contacto' },
 ];
