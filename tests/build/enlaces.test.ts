@@ -149,14 +149,6 @@ describe('comprobación de enlaces (HTML sintético)', () => {
   });
 });
 
-/**
- * Fichas de servicio (`ruta` de web/content/servicios.json): las tarjetas de la portada ya enlazan a ellas pero
- * sus páginas son una entrega aparte. Se excluyen solo esas rutas, sacadas del contenido, no a mano.
- */
-const RUTAS_FICHA_SERVICIO = new Set(
-  (JSON.parse(fs.readFileSync(path.resolve('web/content/servicios.json'), 'utf8')) as { ruta: string }[]).map((s) => s.ruta),
-);
-
 describe('web/out: enlaces internos', () => {
   beforeAll(() => {
     if (!fs.existsSync(path.join(webDir, 'index.html'))) throw new Error('falta web/out: ejecuta `pnpm build` antes');
@@ -165,7 +157,6 @@ describe('web/out: enlaces internos', () => {
   it('ningún enlace interno apunta a una ruta sin página generada', () => {
     const paginas = htmlDe(webDir);
     expect(paginas.length).toBeGreaterThan(0);
-    const rotos = enlacesRotos(webDir, paginas).filter((r) => !RUTAS_FICHA_SERVICIO.has(r.split(' -> ')[1]));
-    expect(rotos).toEqual([]);
+    expect(enlacesRotos(webDir, paginas)).toEqual([]);
   });
 });
