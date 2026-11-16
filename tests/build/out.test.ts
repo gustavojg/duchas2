@@ -244,6 +244,36 @@ describe('web/out: rutas, SEO y modo borrador', () => {
     for (const p of todos()) expect(p.html, p.ruta).toContain('Guardamos tu foto');
   });
 
+  describe('enlaces internos', () => {
+    const internos = (h: string) =>
+      [...h.matchAll(/href="(\/[^"]*)"/g)].map((m) => m[1]).filter((href) => !href.startsWith('//') && !href.startsWith('/_next/'));
+    const existe = (href: string) => {
+      const destino = decodeURIComponent(href.replace(/[?#].*$/, ''));
+      const f = path.join(webDir, destino);
+      return fs.existsSync(path.join(f, 'index.html')) || (fs.existsSync(f) && fs.statSync(f).isFile());
+    };
+    // Destinos que enlaza el cuerpo de la portada (galería y tarjetas de servicio, de otras entregas) y cuya
+    // página aún no existe. Se quitan de aquí al crear cada página; la navegación y el pie no tienen excepción.
+    const PAGINAS_PENDIENTES = new Set(['/antes-y-despues/', ...cargarServicios().map((s) => rutaDeServicio(s))]);
+
+    it('la navegación y el pie de cada página solo enlazan a páginas o ficheros que existen', () => {
+      for (const p of todos()) {
+        const navs = [...p.html.matchAll(/<nav\b[^>]*>[\s\S]*?<\/nav>/g)].map((m) => m[0]);
+        expect(navs.length, p.ruta).toBeGreaterThan(0);
+        for (const href of navs.flatMap(internos)) expect(existe(href), `${p.ruta} enlaza a ${href}`).toBe(true);
+      }
+    });
+
+    it('todo enlace interno apunta a una página o fichero que existe en web/out', () => {
+      for (const p of todos()) {
+        for (const href of internos(p.html)) {
+          if (PAGINAS_PENDIENTES.has(href)) continue;
+          expect(existe(href), `${p.ruta} enlaza a ${href}`).toBe(true);
+        }
+      }
+    });
+  });
+
   it('el postbuild termina bien y avisa del modo borrador', () => {
     const r = spawnSync('pnpm', ['exec', 'tsx', 'scripts/postbuild.ts'], {
       env: { ...process.env, WEB_DIR: webDir },
