@@ -25,11 +25,15 @@ import { Frame } from '../ui/Frame';
 import { metadata as metadataDeAvisoLegal } from './aviso-legal/page';
 import { metadata as metadataDeCookies } from './cookies/page';
 import NotFound from './not-found';
+import { generateMetadata as metadataDeAntesYDespues } from './antes-y-despues/page';
 import { generateMetadata as metadataDeContacto } from './contacto/page';
+import { generateMetadata as metadataDeHoteles } from './hoteles-y-comunidades/page';
 import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
+import { generateMetadata as metadataDePlatos } from './platos-de-ducha/page';
 import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
-import { metadata as metadataDePrivacidad } from './privacidad/page';
+import { generateMetadata as metadataDePrivacidad } from './privacidad/page';
 import { metadata as metadataDeQuienesSomos } from './quienes-somos/page';
+import { generateMetadata as metadataDeTarifas } from './tarifas/page';
 import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
@@ -447,17 +451,22 @@ describe('página /zonas/', () => {
       '/contacto/': metadataDeContacto(),
       '/quienes-somos/': metadataDeQuienesSomos,
       '/aviso-legal/': metadataDeAvisoLegal,
-      '/privacidad/': metadataDePrivacidad,
       '/cookies/': metadataDeCookies,
+      '/antes-y-despues/': metadataDeAntesYDespues(),
+      '/privacidad/': metadataDePrivacidad(),
+      '/platos-de-ducha/': metadataDePlatos(),
+      '/tarifas/': metadataDeTarifas(),
+      '/hoteles-y-comunidades/': metadataDeHoteles(),
     };
+    const rutas = PAGES;
     const canonicals = new Set<unknown>();
-    for (const ruta of PAGES) {
+    for (const ruta of rutas) {
       const meta = porRuta[ruta];
       expect(meta, `falta metadata para ${ruta}`).toBeDefined();
       expect(meta!.alternates?.canonical, `canonical en ${ruta}`).toBe(`${base}${ruta}`);
       canonicals.add(meta!.alternates?.canonical);
     }
-    expect(canonicals.size).toBe(PAGES.length);
+    expect(canonicals.size).toBe(rutas.length);
   });
 
   it('está en la navegación y en las páginas públicas', () => {

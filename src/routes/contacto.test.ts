@@ -107,6 +107,11 @@ describe('POST /api/contacto', () => {
     }
   });
 
+  // (3) y (3b) construyen, serializan y parsean varios MB de multipart. Aquí tardan ~100 ms, pero en una máquina
+  // lenta o con la suite cargada pueden pasar de los 5 s por defecto de vitest. El coste es de la prueba, no del
+  // servidor (app.request() no manda content-length, así que no hay atajo posible): timeout explícito solo aquí.
+  const TIMEOUT_CUERPO_GRANDE = 30_000;
+
   it('(3) foto de más de foto_max_mb ⇒ 413 sin fila ni email', async () => {
     const t = setup();
     const res = await t.post(form(VALIDO, { bytes: new Uint8Array(10 * 1024 * 1024 + 1) }));
@@ -117,7 +122,7 @@ describe('POST /api/contacto', () => {
     expect(t.filas()).toHaveLength(0);
     expect(t.sent).toHaveLength(0);
     expect(t.fotos()).toEqual([]);
-  });
+  }, TIMEOUT_CUERPO_GRANDE);
 
   it('(3b) un cuerpo mayor que el límite lo corta bodyLimit con 413', async () => {
     const t = setup({ formulario: { retencion_dias: 90, foto_max_mb: 1, limite_envios: 5, ventana_min: 60 } });
@@ -125,7 +130,7 @@ describe('POST /api/contacto', () => {
     expect(res.status).toBe(413);
     expect(await res.json()).toMatchObject({ error: 'demasiado_grande' });
     expect(t.filas()).toHaveLength(0);
-  });
+  }, TIMEOUT_CUERPO_GRANDE);
 
   it('(4) el tipo se decide por los bytes: PDF llamado foto.jpg ⇒ 415, HEIC ⇒ 201', async () => {
     const t = setup();

@@ -17,20 +17,46 @@ export const DESCRIPTION =
 export const PAGES: readonly string[] = [
   '/',
   '/quienes-somos/',
+  '/platos-de-ducha/',
+  '/tarifas/',
   '/zonas/',
   '/preguntas-frecuentes/',
-  '/contacto/',
+  '/hoteles-y-comunidades/',
+  '/antes-y-despues/',
   '/aviso-legal/',
   '/privacidad/',
   '/cookies/',
+  '/contacto/',
 ];
 
 /**
- * URL absoluta de una página: `urlBase` sin barra final + `ruta` (con barra inicial y final, por trailingSlash).
+ * Páginas del sitio para el sitemap y los tests de build: PAGES con la ruta de cada servicio de tipo
+ * 'servicio' (servicios.json) antes de '/contacto/', sin duplicados y en orden. No muta PAGES.
+ */
+export function paginasDelSitio(servicios: readonly { ruta: string; tipo: string }[]): string[] {
+  const rutas = servicios.filter((s) => s.tipo === 'servicio').map((s) => s.ruta);
+  const fin = PAGES.indexOf('/contacto/');
+  const antes = fin === -1 ? [...PAGES] : PAGES.slice(0, fin);
+  const despues = fin === -1 ? [] : PAGES.slice(fin);
+  return [...new Set([...antes, ...rutas, ...despues])];
+}
+
+/**
+ * Base de las URL absolutas del SEO (canonical, sitemap y robots) sin barras finales. La base es `url_base` de
+ * web/content/negocio.json: `http://x/` y `http://x` dan lo mismo.
+ */
+export function normalizarBase(urlBase: string): string {
+  return urlBase.replace(/\/+$/, '');
+}
+
+/**
+ * URL absoluta de una página: base normalizada + ruta con barra inicial y final (trailingSlash, como PAGES).
  * Es la misma que el `<loc>` de sitemapXml, que la usa; el canonical de cada página sale de aquí.
  */
 export function canonicalUrl(urlBase: string, ruta: string): string {
-  return `${urlBase.replace(/\/+$/, '')}${ruta}`;
+  const conInicial = ruta.startsWith('/') ? ruta : `/${ruta}`;
+  const conFinal = conInicial.endsWith('/') ? conInicial : `${conInicial}/`;
+  return `${normalizarBase(urlBase)}${conFinal}`;
 }
 
 export function sitemapXml(baseUrl: string, pages: readonly string[] = PAGES): string {
@@ -39,5 +65,5 @@ export function sitemapXml(baseUrl: string, pages: readonly string[] = PAGES): s
 }
 
 export function robotsTxt(baseUrl: string): string {
-  return `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${baseUrl}/sitemap.xml\n`;
+  return `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${normalizarBase(baseUrl)}/sitemap.xml\n`;
 }

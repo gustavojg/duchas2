@@ -7,7 +7,7 @@ import { configFormulario } from '../lib/config';
 import { cargarNegocio } from '../lib/content';
 import { modoActual } from '../lib/dato';
 import { robotsMeta } from '../lib/seo';
-import { DESCRIPTION } from '../lib/site';
+import { DESCRIPTION, normalizarBase } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
 import { BotonFlotanteWhatsApp } from '../ui/BotonFlotanteWhatsApp';
 import { Frame } from '../ui/Frame';
@@ -15,13 +15,21 @@ import { PieSitio } from '../ui/PieSitio';
 
 const negocio = cargarNegocio();
 
-/** Valores por defecto; cada página pone los suyos con metadataPagina (lib/seo). En borrador, noindex global. */
-export const metadata: Metadata = {
-  metadataBase: new URL(negocio.url_base),
-  title: `${APP_NAME} · Reparación y esmaltado de platos de ducha en Madrid`,
-  description: DESCRIPTION,
-  robots: robotsMeta(esBorrador(negocio)),
-};
+/**
+ * Valores por defecto; cada página pone los suyos con metadataPagina (lib/seo). En borrador, noindex global.
+ * Canonical absoluto por página con `url_base` de negocio.json (ADR 0005): `metadataBase` + `./` resuelve a la
+ * ruta de cada página con barra final (trailingSlash), igual que canonicalUrl de lib/site.ts y que el sitemap.
+ * Las páginas con su propio `metadata` heredan `alternates`. Lo comprueba tests/build/out.test.ts.
+ */
+export function generateMetadata(): Metadata {
+  return {
+    metadataBase: new URL(normalizarBase(negocio.url_base)),
+    title: `${APP_NAME} · Reparación y esmaltado de platos de ducha en Madrid`,
+    description: DESCRIPTION,
+    alternates: { canonical: './' },
+    robots: robotsMeta(esBorrador(negocio)),
+  };
+}
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

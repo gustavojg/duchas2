@@ -14,9 +14,13 @@ mientras falten aviso legal, teléfono o garantía, `noindex` en todo y aviso po
 - `web/src/lib/rutas.ts` es la lista canónica de rutas (estáticas + una por servicio).
 - `scripts/seo-build.ts` corre tras `next build`: escribe `sitemap.xml` y `robots.txt` en `web/out` e
   imprime el aviso de borrador con la lista de `datosFaltantes()`.
-- `web/src/lib/seo.ts` genera `metadata` (title, description, canonical, Open Graph, `robots`) y los
+- `web/src/lib/seo.ts` genera `metadata` (title, description, Open Graph, `robots`) y los
   JSON-LD **a partir de los mismos datos** que pintan los bloques; el layout raíz pone `noindex` si
   `esBorrador()`.
+- El canonical lo genera `web/src/lib/site.ts` (`canonicalUrl`) con `url_base` de `negocio.json`: el layout
+  raíz lo emite por página (`metadataBase` + `alternates.canonical: './'`, con barra final).
+- `sitemap.xml` y `robots.txt` usan la misma `url_base` en `scripts/postbuild.ts` (no `BASE_URL` del
+  servidor). `url_base` debe ser el dominio de producción antes de publicar; hoy es `http://localhost:3000`.
 
 ## Alternativas descartadas
 
@@ -29,3 +33,4 @@ mientras falten aviso legal, teléfono o garantía, `noindex` en todo y aviso po
 
 - Con el contenido de ejemplo (datos legales sin dar) el sitio sale en borrador, que es lo esperado.
 - Los tests de `web/out` comprueban sitemap, `noindex` y unicidad de title/canonical.
+- `tests/build/out.test.ts` comprueba que canonical, sitemap y robots comparten la base de `url_base`.

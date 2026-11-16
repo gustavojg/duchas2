@@ -2,7 +2,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { configFormulario } from '../../lib/config';
 import { cargarNegocio, type Negocio } from '../../lib/content';
-import { metadata, Privacidad } from './page';
+import { APP_NAME, canonicalUrl } from '../../lib/site';
+import { generateMetadata, PaginaPrivacidad, Privacidad } from './page';
 
 const negocio = cargarNegocio();
 const config = configFormulario({});
@@ -55,6 +56,48 @@ describe('privacidad', () => {
   });
 
   it('exporta metadata con canonical propio', () => {
-    expect(metadata.alternates.canonical).toMatch(/\/privacidad\/$/);
+    expect(generateMetadata().alternates.canonical).toMatch(/\/privacidad\/$/);
+  });
+});
+
+const html = renderToStaticMarkup(<PaginaPrivacidad negocio={negocio} retencion_dias={45} />);
+const texto = html
+  .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/\s+/g, ' ');
+
+describe('/privacidad/', () => {
+  it('tiene un solo H1 «Política de privacidad»', () => {
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(html).toMatch(/<h1[^>]*>(?:(?!<\/h1>).)*Política de privacidad/s);
+  });
+
+  it('explica los datos del formulario, la foto, la IP y el plazo de conservación', () => {
+    for (const d of ['teléfono', 'nombre', 'zona', 'mensaje', 'foto']) expect(texto).toContain(d);
+    expect(texto).toContain('45 días');
+    expect(texto).toMatch(/foto solo la vemos nosotros/);
+    expect(texto).toContain('HMAC');
+  });
+
+  it('no muestra datos pendientes ni NIF inventados', () => {
+    expect(html).not.toContain('PENDIENTE');
+    expect(html).not.toContain('{{');
+    expect(texto).not.toMatch(/NIF|CIF/);
+  });
+
+  it('enlaza el teléfono de negocio.json si lo hay', () => {
+    if (negocio.telefono.valor) expect(html).toMatch(/href="tel:\+?\d+"/);
+    const sinTelefono = renderToStaticMarkup(
+      <PaginaPrivacidad negocio={{ ...negocio, telefono: { valor: null, confirmado: false } }} retencion_dias={45} />,
+    );
+    expect(sinTelefono).not.toContain('href="tel:');
+  });
+
+  it('metadata con el título de la página', () => {
+    expect(generateMetadata().title).toBe(`Política de privacidad · ${APP_NAME}`);
+  });
+
+  it('metadata lleva su canonical: url_base + /privacidad/', () => {
+    expect(generateMetadata().alternates?.canonical).toBe(canonicalUrl(cargarNegocio().url_base, '/privacidad/'));
   });
 });

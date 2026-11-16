@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { loadConfig } from './config.js';
 import { testApp } from './testing.js';
 import { APP_NAME } from '../web/src/lib/site.js';
 
@@ -49,6 +50,15 @@ describe('app', () => {
     const res = await testApp({ commit: 'abc1234' }).app.request('/health');
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true, app: APP_NAME, commit: 'abc1234' });
+  });
+
+  it('/health devuelve commit «desconocido» si falta GIT_SHA', async () => {
+    const { commit } = loadConfig({});
+    const res = await testApp({ commit }).app.request('/health');
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect('commit' in body).toBe(true);
+    expect(body).toEqual({ ok: true, app: APP_NAME, commit: 'desconocido' });
   });
 
   it('sirve la portada estática en /', async () => {

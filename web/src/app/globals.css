@@ -206,6 +206,32 @@
   flex: 1 1 auto;
 }
 
+/*
+ * Filtro de GaleriaFiltrable (10 opciones, alguna larga como «Reparación y esmaltado de platos de ducha»): como el
+ * de pieza, las opciones saltan de línea; además, si una etiqueta sola no cabe en la fila se parte en varias líneas
+ * en vez de recortarse. Sin scroll horizontal de página.
+ */
+.filtro-galeria .astryx-segmented-control {
+  flex-wrap: wrap;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.filtro-galeria .astryx-segmented-control-item {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  block-size: auto;
+  min-block-size: var(--size-element-md);
+}
+
+.filtro-galeria .astryx-segmented-control-item > span {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: center;
+}
+
 /* Icono de cada pieza en el SegmentedControl del formulario. */
 .campo-pieza-icono {
   display: block;
@@ -251,4 +277,124 @@
 .lista-zonas-anillos {
   inline-size: 100%;
   max-inline-size: calc(var(--spacing-12) * 6);
+}
+
+/*
+ * Galería de /antes-y-despues/ (FiltroGaleria en src/ui/, brain/design.md «filtro segmentado + rejilla»). La página
+ * es más ancha que `--measure` (texto largo) para que quepan dos columnas de pares. La lista es una rejilla: una
+ * columna en móvil y dos desde escritorio (64rem). En cada par, «Antes» y «Después» se apilan en móvil y van lado a
+ * lado desde 40rem (640 px), repartiéndose el ancho.
+ */
+.portada-galeria {
+  max-inline-size: calc(var(--measure) * 2);
+}
+
+/*
+ * Selector «Filtrar por servicio»: ancho de móvil completo y tope en escritorio. El valor elegido (renderValue) salta
+ * de línea en vez de recortarse con puntos suspensivos, para que el nombre del servicio se lea entero a 320 px.
+ */
+.galeria-filtro {
+  inline-size: 100%;
+  max-inline-size: calc(var(--spacing-12) * 8);
+}
+
+.galeria-filtro-valor {
+  overflow-wrap: anywhere;
+}
+
+.galeria-pares {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 64rem) {
+  .galeria-pares {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 40rem) {
+  .galeria-par-lados {
+    flex-direction: row;
+  }
+}
+
+.galeria-par-lado {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
+/* Párrafos de texto largo (página del plato de ducha, legales): medida de lectura de --measure. */
+.texto-largo {
+  max-inline-size: var(--measure);
+}
+
+/*
+ * Tabla de /tarifas/ (src/app/tarifas/page.tsx): ocupa el contenedor y «Incluye» toma el espacio que sobra.
+ * Astryx pone en th/td max-width:0, overflow:hidden y, en la cabecera, nowrap + ellipsis: aquí se anulan para
+ * que nada se recorte ni se parta a mitad de palabra. «Trabajo» y «Desde» llevan solo ancho mínimo (en «Desde»
+ * cabe «Pide presupuesto gratuito» en un máximo de 2 líneas). En móvil (≤ 40em) cada fila se apila: nombre,
+ * debajo el precio y debajo el resumen.
+ */
+.tabla-tarifas {
+  inline-size: 100%;
+}
+
+.tabla-tarifas,
+.tabla-tarifas th,
+.tabla-tarifas td,
+.tabla-tarifas p,
+.tabla-tarifas a {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}
+
+.tabla-tarifas th,
+.tabla-tarifas td {
+  max-inline-size: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.tabla-tarifas .tabla-tarifas-trabajo {
+  min-inline-size: calc(var(--spacing-12) * 3);
+}
+
+.tabla-tarifas .tabla-tarifas-desde {
+  min-inline-size: calc(var(--spacing-12) * 4);
+}
+
+@media (max-width: 40em) {
+  .tabla-tarifas thead {
+    display: none;
+  }
+
+  .tabla-tarifas,
+  .tabla-tarifas tbody {
+    display: block;
+  }
+
+  .tabla-tarifas tr,
+  .tabla-tarifas td {
+    display: block;
+  }
+
+  .tabla-tarifas tr {
+    padding-block: var(--spacing-2);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .tabla-tarifas td {
+    min-inline-size: 0;
+    padding-block: var(--spacing-1);
+    border-block-end-width: 0;
+  }
+}
+
+/* Ilustración de cada daño en la rejilla de /platos-de-ducha/: al lado del enlace, sin encogerse. */
+.plato-dano-icono {
+  flex: none;
+  inline-size: var(--spacing-12);
 }

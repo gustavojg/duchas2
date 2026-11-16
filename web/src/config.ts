@@ -6,6 +6,9 @@ export { APP_NAME } from './lib/site';
 export const NAV: NavItem[] = [
   { href: '/', label: 'Inicio' },
   { href: '/quienes-somos/', label: 'Quiénes somos' },
+  { href: '/antes-y-despues/', label: 'Antes y después' },
+  { href: '/platos-de-ducha/', label: 'Platos de ducha' },
+  { href: '/tarifas/', label: 'Tarifas' },
   { href: '/zonas/', label: 'Zonas' },
   { href: '/preguntas-frecuentes/', label: 'Preguntas frecuentes' },
   { href: '/contacto/', label: 'Contacto' },

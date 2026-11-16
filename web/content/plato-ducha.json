@@ -1,0 +1,84 @@
+{
+  "h1": "Reparamos tu plato de ducha en Madrid, sin cambiarlo y sin obras",
+  "danos": [
+    {
+      "id": "grieta",
+      "titulo": "¿Se puede arreglar un plato de ducha agrietado?",
+      "texto": "Sí, casi siempre. Una grieta fina no obliga a cambiar el plato. Primero miramos si el plato se mueve al pisarlo. Si se mueve, lo calzamos antes de tocar la grieta. Después abrimos un poco la grieta para que agarre el relleno. La rellenamos con masilla y la dejamos curar. Lijamos hasta que la zona queda lisa al tacto. Por último esmaltamos y la grieta deja de verse. El agua ya no entra por debajo. Mándanos una foto con buena luz. Si puedes, pon una moneda al lado para ver el tamaño. Así te decimos si tiene arreglo antes de ir."
+    },
+    {
+      "id": "golpe",
+      "titulo": "¿Qué hago si se me cayó algo y el plato tiene un golpe?",
+      "texto": "Un bote o un secador que cae deja un golpe con forma de estrella. No hace falta cambiar el plato por eso. Limpiamos bien la zona y quitamos los trozos sueltos. Rellenamos el hueco con masilla del color del plato. Lijamos con cuidado para que no quede bulto. Después esmaltamos la zona y la igualamos con el resto. Al final no notas el golpe con el pie. Tampoco se ve a simple vista. Cuanto antes lo arregles, mejor. Un golpe abierto deja pasar agua y crece con el tiempo. Haz una foto de cerca y otra de lejos. Con eso te decimos qué podemos hacer."
+    },
+    {
+      "id": "desconchon",
+      "titulo": "¿Cómo se arregla un plato de ducha desconchado?",
+      "texto": "El desconchón es el daño que más vemos. Salta el esmalte y se ve el fondo oscuro del plato. Suele salir junto al desagüe o donde más se pisa. Lo arreglamos en tu baño, sin quitar el plato. Lijamos el borde del desconchón para que no quede escalón. Rellenamos con masilla y la dejamos lisa. Después aplicamos imprimación y esmalte con pistola. El color queda igual que el resto del plato. Si hay muchos desconchones, esmaltamos el plato entero. Así queda como nuevo y con el mismo brillo. Mándanos una foto del desconchón por WhatsApp. Te decimos si basta con un retoque o conviene esmaltarlo todo."
+    },
+    {
+      "id": "perforacion",
+      "titulo": "¿Tiene arreglo un plato de ducha con un agujero?",
+      "texto": "A veces un golpe fuerte atraviesa el plato y deja un agujero. Otras veces el agujero lo hizo alguien al montar la mampara. Muchas veces tiene arreglo sin cambiar el plato. Primero comprobamos que debajo no hay humedad. Si la hay, secamos la zona antes de seguir. Cerramos el agujero con una carga resistente al agua. Después lijamos y esmaltamos para que no se note. El plato vuelve a ser estanco y seguro al pisar. Si el agujero es muy grande, te lo decimos claro. No arreglamos lo que no va a durar. Mándanos una foto del agujero y de alrededor. Así vemos el tamaño y el estado del plato."
+    },
+    {
+      "id": "oxido",
+      "titulo": "¿Se puede quitar el óxido de un plato de ducha?",
+      "texto": "Los platos de chapa esmaltada se oxidan cuando salta el esmalte. El óxido empieza como una mancha marrón pequeña. Si no se para, crece por debajo del esmalte sano. Por eso conviene actuar pronto. Quitamos todo el óxido hasta ver el metal limpio. Tratamos la zona para frenar que vuelva a salir. Después rellenamos, lijamos y esmaltamos encima. La mancha desaparece y el plato queda protegido otra vez. Si el óxido ha comido mucho metal, te lo decimos antes. En ese caso vemos juntos si compensa reparar. Mándanos una foto de la mancha de cerca. Con eso te decimos cuánto ha avanzado y qué hacemos."
+    },
+    {
+      "id": "brillo",
+      "titulo": "¿Cómo recupero el brillo de un plato de ducha mate o amarillento?",
+      "texto": "Con los años el plato pierde brillo y se vuelve áspero. Los productos fuertes de limpieza lo desgastan aún más. También puede quedar amarillento aunque lo frotes mucho. No es suciedad, es el esmalte gastado. La solución es esmaltar el plato entero en tu baño. Limpiamos a fondo y quitamos la silicona vieja. Lijamos toda la superficie para que el esmalte agarre. Protegemos el baño con cinta y plástico. Después aplicamos el esmalte nuevo con pistola. El plato queda liso, blanco y brillante. También es más fácil de limpiar. Mándanos una foto con la luz del baño encendida. Así vemos el estado real del esmalte."
+    }
+  ],
+  "antideslizante": {
+    "titulo": "¿Se puede poner antideslizante a un plato de ducha?",
+    "texto": "Sí. Al esmaltar podemos añadir un acabado antideslizante. Se nota al pisar, pero no raspa la piel. Es buena idea si en casa hay niños o personas mayores. También si tu plato resbala cuando está mojado. Se limpia igual que un plato normal. Pregúntanos por WhatsApp y te contamos cómo queda."
+  },
+  "cambio_color": {
+    "titulo": "¿Puedo cambiar el color de mi plato de ducha?",
+    "texto": "Sí. Al esmaltar el plato podemos cambiarle el color. Muchos clientes pasan de un color antiguo a blanco. También hay quien elige gris o negro para combinar con el baño. No hace falta cambiar el plato ni romper azulejos. Dinos qué color quieres y te decimos si es posible."
+  },
+  "materiales": [
+    { "nombre": "Resina", "reparable": { "valor": null, "confirmado": false } },
+    { "nombre": "Carga mineral", "reparable": { "valor": null, "confirmado": false } },
+    { "nombre": "Acrílico", "reparable": { "valor": null, "confirmado": false } },
+    { "nombre": "Porcelana", "reparable": { "valor": null, "confirmado": false } }
+  ],
+  "proceso": {
+    "titulo": "¿Cómo reparamos tu plato de ducha?",
+    "intro": "Trabajamos en tu baño, con el plato en su sitio. Protegemos todo con cinta y plástico.",
+    "curado": "Al terminar, el esmalte necesita curar. {uso_ducha}."
+  },
+  "faqs": [
+    {
+      "p": "¿Cuánto dura la reparación de un plato de ducha?",
+      "r": "Depende del daño y del tamaño del plato. {reparacion}. Con una foto te decimos cuánto tardamos."
+    },
+    {
+      "p": "¿Cuándo puedo volver a usar la ducha?",
+      "r": "El esmalte necesita curar antes de mojarse. {uso_ducha}."
+    },
+    {
+      "p": "¿Qué materiales de plato de ducha se pueden reparar?",
+      "r": "Trabajamos con los platos más comunes. Mándanos una foto de tu plato y te decimos si se puede reparar."
+    },
+    {
+      "p": "¿El plato queda antideslizante?",
+      "r": "Si quieres, sí. Al esmaltar añadimos un acabado antideslizante que no raspa la piel."
+    },
+    {
+      "p": "¿Se arregla un golpe o un desconchón del plato?",
+      "r": "Sí. Rellenamos el golpe o el desconchón, lijamos y esmaltamos la zona. Al final no se nota."
+    },
+    {
+      "p": "¿Se puede reparar un plato de ducha con óxido?",
+      "r": "Casi siempre. Quitamos el óxido, tratamos el metal y esmaltamos encima. Si está muy comido, te lo decimos antes."
+    },
+    {
+      "p": "¿Cuánto cuesta el presupuesto?",
+      "r": "Nada. {presupuesto}. {garantia}."
+    }
+  ]
+}
