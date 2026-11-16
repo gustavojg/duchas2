@@ -8,11 +8,14 @@ import {
   cargarGaleria,
   cargarNegocio,
   cargarPasos,
+  cargarPlatoDucha,
   cargarResenas,
   cargarServicios,
   cargarZonas,
   contentDir,
+  platoDuchaSchema,
 } from './content.ts';
+import { respuestaFaq } from './faq.ts';
 
 const leer = (f: string) => JSON.parse(readFileSync(join(contentDir(), f), 'utf8'));
 const original = () => leer('negocio.json');
@@ -119,6 +122,45 @@ describe('content.ts', () => {
       conServicios(data);
       expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
     });
+
+    const rutasMalas = ['//evil.com/', 'javascript:x', 'javascript:alert(1)//', 'http://evil.com/', '/\\evil.com/'];
+
+    it.each(rutasMalas)('la ruta %s falla con fichero y campo', (ruta) => {
+      const data = leer('servicios.json');
+      data[4].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
+    });
+
+    // El tipo 'empresas' no tiene ruta fija: aquí solo rutaSchema protege contra «//» y esquemas.
+    it.each(rutasMalas)('la ruta %s falla también en el servicio de empresas', (ruta) => {
+      const data = leer('servicios.json');
+      data[9].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*9\.ruta/s);
+    });
+
+    it('el servicio principal fuera de /platos-de-ducha/ falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/otra-ruta/';
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*0\.ruta/s);
+    });
+
+    it('el servicio principal en /platos-de-ducha/ valida', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/platos-de-ducha/';
+      conServicios(data);
+      expect(cargarServicios()[0].ruta).toBe('/platos-de-ducha/');
+    });
+
+    it('una ruta válida sigue validando', () => {
+      const data = leer('servicios.json');
+      data[4].ruta = '/servicios/azulejos/';
+      data[9].ruta = '/hoteles-y-comunidades/';
+      conServicios(data);
+      expect(() => cargarServicios()).not.toThrow();
+    });
   });
 });
 
@@ -139,11 +181,11 @@ describe('galería, FAQ y reseñas', () => {
     for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
   });
 
-  it('el contenido real valida: reseñas vacías, ≥ 15 preguntas y entre 4 y 6 en portada', () => {
+  it('el contenido real valida: reseñas vacías, ≥ 17 preguntas y entre 4 y 6 en portada', () => {
     expect(cargarResenas()).toEqual([]);
     const faq = cargarFaq();
     const preguntas = faq.temas.flatMap((t) => t.preguntas);
-    expect(preguntas.length).toBeGreaterThanOrEqual(15);
+    expect(preguntas.length).toBeGreaterThanOrEqual(17);
     const enPortada = preguntas.filter((p) => p.en_portada).length;
     expect(enPortada).toBeGreaterThanOrEqual(4);
     expect(enPortada).toBeLessThanOrEqual(6);
@@ -181,8 +223,94 @@ describe('galería, FAQ y reseñas', () => {
     expect(() => cargarGaleria()).toThrow(/galeria\.json.*antes/s);
   });
 
+  it('negocio.json lleva url_base de localhost y una nota que pide el dominio de producción', () => {
+    const n = cargarNegocio();
+    expect(n.url_base).toBe('http://localhost:3000');
+    expect(n.url_base_nota).toMatch(/producción/);
+  });
+
+  it('url_base_nota es opcional', () => {
+    const { url_base_nota: _, ...sinNota } = original();
+    conFichero('negocio.json', sinNota);
+    expect(cargarNegocio().url_base_nota).toBeUndefined();
+  });
+
   it('resenas.json con nota 6 lanza', () => {
     conFichero('resenas.json', [{ autor: 'Ana', nota: 6, texto: 'Muy bien', fecha: '2026-01-10', fuente: 'Google' }]);
     expect(() => cargarResenas()).toThrow(/resenas\.json.*nota/s);
+  });
+});
+
+describe('plato-ducha.json', () => {
+  const palabras = (t: string) => t.trim().split(/\s+/).length;
+  const real = () => JSON.parse(readFileSync(join(contentDir(), 'plato-ducha.json'), 'utf8'));
+  const falla = (data: unknown) => expect(platoDuchaSchema.safeParse(data).success).toBe(false);
+
+  it('el JSON real tiene 6 daños únicos de 80-150 palabras, h1 con plato de ducha y Madrid y ≥ 5 FAQ', () => {
+    const plato = cargarPlatoDucha();
+    expect(plato.danos).toHaveLength(6);
+    expect(new Set(plato.danos.map((d) => d.id)).size).toBe(6);
+    for (const d of plato.danos) {
+      expect(palabras(d.texto)).toBeGreaterThanOrEqual(80);
+      expect(palabras(d.texto)).toBeLessThanOrEqual(150);
+    }
+    expect(plato.h1).toContain('plato de ducha');
+    expect(plato.h1).toContain('Madrid');
+    expect(plato.faqs.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('rechaza un daño de 79 palabras', () => {
+    const data = real();
+    data.danos[0].texto = Array.from({ length: 79 }, () => 'palabra').join(' ');
+    falla(data);
+    data.danos[0].texto = Array.from({ length: 80 }, () => 'palabra').join(' ');
+    expect(platoDuchaSchema.safeParse(data).success).toBe(true);
+  });
+
+  it('rechaza un h1 sin «Madrid»', () => {
+    const data = real();
+    data.h1 = 'Reparamos tu plato de ducha sin obras';
+    falla(data);
+  });
+
+  it('rechaza 5 daños', () => {
+    const data = real();
+    data.danos = data.danos.slice(0, 5);
+    falla(data);
+  });
+
+  it('rechaza un id de daño repetido', () => {
+    const data = real();
+    data.danos[1].id = data.danos[0].id;
+    falla(data);
+  });
+
+  it('rechaza una FAQ con cifra literal y un curado con cifra literal', () => {
+    const data = real();
+    data.faqs[0].r = 'Lo tienes listo en 24 horas.';
+    falla(data);
+    const otro = real();
+    otro.proceso.curado = 'Espera 48 horas. {uso_ducha}';
+    falla(otro);
+  });
+
+  it('acepta los marcadores entre llaves', () => {
+    const data = real();
+    data.faqs[0].r = 'Depende del daño. {reparacion}.';
+    expect(platoDuchaSchema.safeParse(data).success).toBe(true);
+  });
+
+  it('todas las respuestas y el curado usan marcadores conocidos de faq.ts', () => {
+    const plato = cargarPlatoDucha();
+    const ctx = { negocio: cargarNegocio(), retencion_dias: 90, modo: 'publico' as const };
+    for (const q of plato.faqs) expect(() => respuestaFaq(q.r, ctx)).not.toThrow();
+    expect(() => respuestaFaq(plato.proceso.curado, ctx)).not.toThrow();
+    expect(plato.proceso.curado).toContain('{uso_ducha}');
+  });
+
+  it('los materiales empiezan sin confirmar', () => {
+    const plato = cargarPlatoDucha();
+    expect(plato.materiales.map((m) => m.nombre)).toEqual(['Resina', 'Carga mineral', 'Acrílico', 'Porcelana']);
+    for (const m of plato.materiales) expect(m.reparable).toEqual({ valor: null, confirmado: false });
   });
 });
