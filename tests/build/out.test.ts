@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME } from '../../web/src/lib/site.js';
+import { APP_NAME, canonicalUrl, PAGES } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -113,6 +113,27 @@ describe('web/out servido por Hono', () => {
     expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
   });
 
+  it('todas las páginas de PAGES llevan un único canonical = url_base + ruta', () => {
+    const base = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
+    const vistos = new Set<string>();
+    for (const ruta of PAGES) {
+      const html = fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /href="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, `canonical en ${ruta}`).toEqual([`${base}${ruta}`]);
+      vistos.add(canonicals[0]!);
+    }
+    expect(vistos.size).toBe(PAGES.length);
+  });
+
+  it('todas las páginas de PAGES llevan un único canonical', async () => {
+    const { url_base } = contenido('negocio.json') as { url_base: string };
+    for (const p of PAGES) {
+      const html = await (await app.request(p)).text();
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /\bhref="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, p).toEqual([canonicalUrl(url_base, p)]);
+    }
+  });
+
   it('la portada lleva LocalBusiness sin AggregateRating, el antes/después y la FAQ resumida', () => {
     const html = fs.readFileSync(path.join(webDir, 'index.html'), 'utf8');
     expect(html).toContain('"@type":"LocalBusiness"');
@@ -123,6 +144,72 @@ describe('web/out servido por Hono', () => {
     expect(visible).toContain('href="/preguntas-frecuentes/"');
     expect(visible).not.toContain('PENDIENTE');
     expect(visible).not.toContain('{{');
+  });
+
+  const ldTipos = (html: string) =>
+    [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
+      (m) => (JSON.parse(m[1]) as { '@type': string })['@type'],
+    );
+
+  it.each([
+    ['/platos-de-ducha/', ['Service', 'FAQPage', 'BreadcrumbList']],
+    ['/tarifas/', ['BreadcrumbList']],
+  ])('%s se exporta con un H1, canonical, JSON-LD parseable y en el sitemap', async (ruta, tipos) => {
+    const res = await app.request(ruta);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(html).toMatch(new RegExp(`<link rel="canonical" href="https?://[^"]+${ruta}"`));
+    expect(ldTipos(html).sort()).toEqual([...tipos].sort());
+    expect(html).toMatch(/<nav[^>]*aria-label="Migas de pan"/);
+    const sinScripts = visible(html);
+    expect(sinScripts).not.toContain('PENDIENTE');
+    expect(sinScripts).not.toContain('{{');
+    expect(await (await app.request('/sitemap.xml')).text()).toContain(ruta);
+  });
+
+  const urlBase = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
+  /** HTML exportado de una ruta de PAGES: web/out/index.html para '/', web/out/<ruta>/index.html para el resto. */
+  const htmlDe = (ruta: string) => fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
+  const canonicalDe = (ruta: string) => /<link rel="canonical" href="([^"]*)"\/?>/.exec(htmlDe(ruta))?.[1];
+
+  it('cada página de PAGES lleva su canonical absoluto con url_base y barra final', () => {
+    expect(htmlDe('/zonas/')).toContain(`<link rel="canonical" href="${urlBase}/zonas/"/>`);
+    for (const ruta of PAGES) expect(canonicalDe(ruta), ruta).toBe(`${urlBase}${ruta}`);
+  });
+
+  it('la página 404 no lleva canonical (no inventa una ruta fuera de PAGES)', () => {
+    expect(fs.readFileSync(path.join(webDir, '404.html'), 'utf8')).not.toContain('rel="canonical"');
+  });
+
+  it('sitemap.xml y robots.txt usan url_base de negocio.json, no BASE_URL del servidor', async () => {
+    const xml = await (await app.request('/sitemap.xml')).text();
+    const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+    expect(locs.length).toBeGreaterThan(0);
+    for (const loc of locs) expect(loc.startsWith(`${urlBase}/`), loc).toBe(true);
+    const robots = await (await app.request('/robots.txt')).text();
+    expect(robots).toContain(`Sitemap: ${urlBase}/sitemap.xml`);
+  });
+
+  it('canonical y sitemap comparten base', async () => {
+    const xml = await (await app.request('/sitemap.xml')).text();
+    const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+    const robots = await (await app.request('/robots.txt')).text();
+    const sitemapDeRobots = /^Sitemap: (\S+)$/m.exec(robots)?.[1];
+    expect(locs.length, 'sitemap.xml sin <loc>').toBeGreaterThan(0);
+    expect(sitemapDeRobots, 'robots.txt sin línea Sitemap:').toBeDefined();
+
+    const canonicals = PAGES.map((ruta) => {
+      const c = canonicalDe(ruta);
+      expect(c, `${ruta} sin canonical`).toBeDefined();
+      return c!;
+    });
+    const origen = new URL(urlBase).origin;
+    const origenes = [...canonicals, locs[0], sitemapDeRobots!].map((u) => new URL(u).origin);
+    for (const o of origenes) expect(o).toBe(origen);
+
+    // Cada <loc> es exactamente el canonical de su página, y el sitemap lista todas las de PAGES.
+    expect(locs).toEqual(canonicals);
   });
 
   it('/health sigue respondiendo JSON', async () => {

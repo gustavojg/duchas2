@@ -76,8 +76,8 @@ describe('TarjetaServicio', () => {
       const html = renderToStaticMarkup(<TarjetaServicio servicio={s} />);
       expect(html.includes(`href="${s.ruta}"`)).toBe(rutaGenerada(s.ruta));
     }
-    // Hoy no existen /platos-de-ducha/ ni /servicios/*: ninguna de las dos enlaza.
-    expect(renderToStaticMarkup(<TarjetaServicio servicio={plato} />)).not.toContain('href=');
+    // Hoy existe /platos-de-ducha/ pero no /servicios/*: la de platos enlaza y la de azulejos no.
+    expect(renderToStaticMarkup(<TarjetaServicio servicio={plato} />)).toContain('href="/platos-de-ducha/"');
     expect(renderToStaticMarkup(<TarjetaServicio servicio={azulejos} />)).not.toContain('href=');
   });
 

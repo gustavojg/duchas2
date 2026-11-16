@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { Metadata } from 'next';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { APP_NAME, NAV } from '../config';
@@ -23,8 +24,14 @@ import { telLink } from '../lib/whatsapp';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
-import { Portada, type PortadaProps } from './page';
-import { metadata as metadataZonas, Zonas } from './zonas/page';
+import { generateMetadata as metadataDeAntesYDespues } from './antes-y-despues/page';
+import { generateMetadata as metadataDeContacto } from './contacto/page';
+import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
+import { generateMetadata as metadataDePlatos } from './platos-de-ducha/page';
+import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
+import { generateMetadata as metadataDePrivacidad } from './privacidad/page';
+import { generateMetadata as metadataDeTarifas } from './tarifas/page';
+import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
 const config = configFormulario({});
@@ -445,9 +452,32 @@ describe('página /zonas/', () => {
   it('va dentro del contenedor `portada` y tiene metadatos propios sin plazos', () => {
     const vista = renderToStaticMarkup(<Zonas negocio={negocio} zonas={zonas} />);
     expect(vista).toMatch(/^<[a-z]+ [^>]*class="[^"]*\bportada\b[^"]*"/);
+    const metadataZonas = metadataDeZonas();
     expect(String(metadataZonas.title)).toMatch(/[Zz]onas/);
     expect(String(metadataZonas.description)).toMatch(/Madrid/);
     expect(`${metadataZonas.title} ${metadataZonas.description}`).not.toMatch(/\d+\s*(h|horas|días|años)\b|en el día|en unas horas|PENDIENTE/);
+  });
+
+  it('cada página lleva su propio canonical: url_base + ruta', () => {
+    const base = negocio.url_base.replace(/\/+$/, '');
+    const porRuta: Record<string, Metadata> = {
+      '/': metadataDePortada(),
+      '/zonas/': metadataDeZonas(),
+      '/preguntas-frecuentes/': metadataDeFaq(),
+      '/contacto/': metadataDeContacto(),
+      '/antes-y-despues/': metadataDeAntesYDespues(),
+      '/privacidad/': metadataDePrivacidad(),
+      '/platos-de-ducha/': metadataDePlatos(),
+      '/tarifas/': metadataDeTarifas(),
+    };
+    const canonicals = new Set<unknown>();
+    for (const ruta of PAGES) {
+      const meta = porRuta[ruta];
+      expect(meta, `falta metadata para ${ruta}`).toBeDefined();
+      expect(meta!.alternates?.canonical, `canonical en ${ruta}`).toBe(`${base}${ruta}`);
+      canonicals.add(meta!.alternates?.canonical);
+    }
+    expect(canonicals.size).toBe(PAGES.length);
   });
 
   it('está en la navegación y en las páginas públicas', () => {

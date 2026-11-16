@@ -5,6 +5,7 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { Link } from '@astryxdesign/core/Link';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { filasComparativa, resolverPasos, serviciosConPrecio, serviciosOrdenados } from '../lib/catalogo';
 import { type ConfigFormulario, configFormulario } from '../lib/config';
@@ -29,11 +30,11 @@ import {
 import { type Modo, modoActual } from '../lib/dato';
 import { preguntasResueltas } from '../lib/faq';
 import { jsonLdLocalBusiness } from '../lib/seo';
-import { DESCRIPTION } from '../lib/site';
+import { canonicalUrl, DESCRIPTION } from '../lib/site';
 import { compromisosFranja, respuesta, titularPortada } from '../lib/textos';
 import { MENSAJE_PORTADA, telLink, waLink } from '../lib/whatsapp';
 import { AcordeonFaq } from '../ui/AcordeonFaq';
-import { PlatoPartido } from '../ui/art';
+import { type Dano, PlatoPartido } from '../ui/art';
 import { BloqueResenas } from '../ui/BloqueResenas';
 import { BotonLlamar } from '../ui/BotonLlamar';
 import { BotonWhatsApp } from '../ui/BotonWhatsApp';
@@ -48,6 +49,11 @@ import { PasosTrabajo } from '../ui/PasosTrabajo';
 import { PrecioDesde } from '../ui/PrecioDesde';
 import { TablaRepararCambiar } from '../ui/TablaRepararCambiar';
 import { TarjetaServicio } from '../ui/TarjetaServicio';
+
+/** Canonical de la portada; title y description los hereda del layout (el layout no declara canonical). */
+export function generateMetadata(): Metadata {
+  return { alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/') } };
+}
 
 const MENSAJE_PRECIO = 'Hola, quiero saber cuánto costaría arreglar mi baño. Os mando una foto.';
 const MENSAJE_ZONA = 'Hola, vivo en… ¿venís a mi zona?';
@@ -72,6 +78,8 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
   if (platos.length === 0) return null;
   const [principal, ...resto] = platos;
   const miniaturas = resto.slice(0, 3);
+  // ParGaleria no trae el daño: se asigna por posición para que las miniaturas no repitan la misma ilustración.
+  const DANOS_MINIATURA: Dano[] = ['grieta', 'golpe', 'oxido'];
   // Las miniaturas compactas no llevan cinta propia: una sola encima avisa de que no son fotos reales.
   const hayIlustraciones = miniaturas.some((par) => !par.despues);
   return (
@@ -84,9 +92,9 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
         <VStack gap={2}>
           {hayIlustraciones ? <CintaEtiqueta>Ilustraciones</CintaEtiqueta> : null}
           <HStack gap={2} as="ul" aria-label="Más trabajos">
-            {miniaturas.map((par) => (
+            {miniaturas.map((par, i) => (
               <VStack as="li" key={par.alt_despues} className="portada-miniatura">
-                <HuecoFoto par={par} lado="despues" compacta />
+                <HuecoFoto par={par} lado="despues" compacta dano={DANOS_MINIATURA[i]} />
               </VStack>
             ))}
           </HStack>
