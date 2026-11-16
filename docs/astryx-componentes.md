@@ -65,6 +65,7 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | DeslizadorAntesDespues | `web/src/ui/DeslizadorAntesDespues.tsx` | Slider (`isLabelHidden`, «Comparar antes y después», 0-100, inicial 50) + AspectRatio 4:3 + Overlay (`scrim={false}`, cintas) + CintaEtiqueta «ANTES»/«DESPUÉS»; recorte de la «después» con `<clipPath><rect width={posición}>` y asa (`<line>`/`<circle>` con var(--…)). Sin fotos, la ilustración de art.tsx (PlatoPartido) en el mismo lienzo SVG (capa de abajo velada, la de arriba recortada) y el asa siguiendo al Slider; cinta «ILUSTRACIÓN» encima y el aviso + `hueco` una vez debajo. `'use client'` (estado de la posición) | creada |
 | MigasDePan | `web/src/ui/MigasDePan.tsx` | `<nav aria-label="Migas de pan">` + HStack (`as="ol"`/`"li"`, `wrap`) + Link en cada miga salvo la última, que es Text (`supporting`) con `aria-current="page"` en su `li`; separador «›» en Text con `aria-hidden`. Servidor. La página pasa la misma lista a `jsonLdBreadcrumbList()` de seo.ts | creada |
 | PlantillaServicio | `web/src/ui/PlantillaServicio.tsx` | Componente puro de servidor (props `servicio`, `servicios`, `negocio`, `modo`, `galeria`): VStack `portada` + MigasDePan + CintaEtiqueta + Heading 1 «<servicio> en Madrid» + HStack `#cta-hero` (BotonWhatsApp primario con `whatsapp_mensaje`, BotonLlamar) + secciones VStack `as="section"` con Heading 2: problema, pasos (`ol` con «PASO N» en Text `type="code"` + `paso-numero`), PrecioDesde, DeslizadorAntesDespues (pares del servicio o `parHueco()`), AcordeonFaq, cierre y 2-3 TarjetaServicio. JSON-LD Service y BreadcrumbList. La usa `/servicios/[slug]/` | creada |
+| GaleriaFiltrable | `web/src/ui/GaleriaFiltrable.tsx` | `'use client'` (estado del filtro, inicial «todos»): SegmentedControl + SegmentedControlItem con `opcionesFiltro()` (layout `hug`: se limita al ancho del contenedor y recorta etiquetas; el nombre accesible sigue entero) + VStack `as="ul"` de pares (`li` con Card, Text con el nombre del servicio y dos HuecoFoto: `<img alt>` o el hueco) + BotonWhatsApp secondary tras cada bloque de 6 (`grupos()`) salvo el último; sin pares, `GALERIA_VACIA` + BotonWhatsApp. La usa `/antes-y-despues/` | creada |
 
 Notas de implementación:
 
@@ -80,4 +81,4 @@ Notas de implementación:
 - `Grid` con `columns` pinta `style="--x-gridTemplateColumns…"`: para listas se usa VStack/HStack.
 
 Previstas por `brain/design.md` (las construye la funcionalidad que las usa): CabeceraContacto,
-GaleriaFiltrable, IlustracionSvg.
+IlustracionSvg.
