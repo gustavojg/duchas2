@@ -6,8 +6,12 @@
 import { serviciosOrdenados } from './catalogo.ts';
 import type { ParGaleria, Servicio } from './content.ts';
 
-/** Vacío de galería (brain/design.md § Textos). */
-export const GALERIA_VACIA = 'Aún no hemos subido fotos de este trabajo. Mándanos la tuya y te decimos qué podemos hacer.';
+/** Título del vacío de galería (brain/design.md § Textos): el title de EmptyState. */
+export const GALERIA_VACIA_TITULO = 'Aún no hemos subido fotos de este trabajo.';
+/** Descripción del vacío de galería (brain/design.md § Textos): la description de EmptyState. */
+export const GALERIA_VACIA_DESCRIPCION = 'Mándanos la tuya y te decimos qué podemos hacer.';
+/** Vacío de galería completo (brain/design.md § Textos), para quien lo pinta en un solo párrafo. */
+export const GALERIA_VACIA = `${GALERIA_VACIA_TITULO} ${GALERIA_VACIA_DESCRIPCION}`;
 
 /** Valor del filtro que muestra todos los pares. */
 export const TODOS = 'todos';

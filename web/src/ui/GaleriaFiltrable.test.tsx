@@ -3,7 +3,7 @@ import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { cargarNegocio, cargarServicios, type ParGaleria } from '../lib/content';
-import { GALERIA_VACIA } from '../lib/galeria';
+import { GALERIA_VACIA_DESCRIPCION, GALERIA_VACIA_TITULO } from '../lib/galeria';
 import { GaleriaFiltrable, type GaleriaFiltrableProps } from './GaleriaFiltrable';
 
 const servicios = cargarServicios();
@@ -70,11 +70,23 @@ describe('GaleriaFiltrable', () => {
     expect(t).toContain('Reparación de mamparas');
   });
 
-  it('sin pares sale el texto de galería vacía y el WhatsApp', () => {
+  it('sin pares sale el EmptyState con título (h2) y descripción literales, como status, y el WhatsApp', () => {
     const html = pinta({ pares: [] });
-    expect(textoPlano(html)).toContain(GALERIA_VACIA);
+    expect(html).toContain('astryx-empty-state');
+    expect(html).toMatch(/class="[^"]*astryx-empty-state[^"]*"[^>]*role="status"|role="status"[^>]*class="[^"]*astryx-empty-state/);
+    expect(/<h2[^>]*>((?:(?!<\/h2>).)*)<\/h2>/s.exec(html)?.[1]).toBe(GALERIA_VACIA_TITULO);
+    expect(textoPlano(html)).toContain(GALERIA_VACIA_DESCRIPCION);
+    expect(html).not.toContain('<h1');
     expect(ctas(html)).toBe(1);
+    expect(textoPlano(html)).toContain('Manda la foto del tuyo');
     expect(items(html)).toBe(0);
+  });
+
+  it('sin pares y sin número: el EmptyState sin botón', () => {
+    const html = pinta({ pares: [], whatsapp: null });
+    expect(html).toContain('astryx-empty-state');
+    expect(textoPlano(html)).toContain(GALERIA_VACIA_TITULO);
+    expect(textoPlano(html)).not.toContain('Manda la foto del tuyo');
   });
 
   it('sin número de WhatsApp no pinta botones', () => {
