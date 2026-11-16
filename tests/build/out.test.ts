@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME } from '../../web/src/lib/site.js';
+import { APP_NAME, canonicalUrl, PAGES } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
@@ -111,6 +111,15 @@ describe('web/out servido por Hono', () => {
     expect(sinScripts).not.toContain('PENDIENTE');
     expect(sinScripts).not.toContain('{{');
     expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
+  });
+
+  it('todas las páginas de PAGES llevan un único canonical', async () => {
+    const { url_base } = contenido('negocio.json') as { url_base: string };
+    for (const p of PAGES) {
+      const html = await (await app.request(p)).text();
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /\bhref="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, p).toEqual([canonicalUrl(url_base, p)]);
+    }
   });
 
   it('la portada lleva LocalBusiness sin AggregateRating, el antes/después y la FAQ resumida', () => {

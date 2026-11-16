@@ -23,7 +23,7 @@ import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
 import { Portada, type PortadaProps } from './page';
-import { metadata as metadataZonas, Zonas } from './zonas/page';
+import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
 const config = configFormulario({});
@@ -425,6 +425,7 @@ describe('página /zonas/', () => {
   it('va dentro del contenedor `portada` y tiene metadatos propios sin plazos', () => {
     const vista = renderToStaticMarkup(<Zonas negocio={negocio} zonas={zonas} />);
     expect(vista).toMatch(/^<[a-z]+ [^>]*class="[^"]*\bportada\b[^"]*"/);
+    const metadataZonas = metadataDeZonas();
     expect(String(metadataZonas.title)).toMatch(/[Zz]onas/);
     expect(String(metadataZonas.description)).toMatch(/Madrid/);
     expect(`${metadataZonas.title} ${metadataZonas.description}`).not.toMatch(/\d+\s*(h|horas|días|años)\b|en el día|en unas horas|PENDIENTE/);

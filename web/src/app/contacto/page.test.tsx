@@ -3,7 +3,8 @@ import { Text } from '@astryxdesign/core/Text';
 import { describe, expect, it } from 'vitest';
 import { configFormulario } from '../../lib/config';
 import { cargarNegocio, type Negocio } from '../../lib/content';
-import { Contacto, metadata } from './page';
+import { canonicalUrl } from '../../lib/site';
+import { Contacto, generateMetadata } from './page';
 
 const negocio = cargarNegocio();
 const config = configFormulario({});
@@ -118,7 +119,9 @@ describe('/contacto/', () => {
   });
 
   it('metadatos propios', () => {
+    const metadata = generateMetadata();
     expect(String(metadata.title)).toMatch(/Contacto/);
     expect(String(metadata.description)).toMatch(/foto/);
+    expect(metadata.alternates?.canonical).toBe(canonicalUrl(cargarNegocio().url_base, '/contacto/'));
   });
 });
