@@ -318,6 +318,21 @@ describe('portada: módulos tras la franja de confianza', () => {
     expect(html.indexOf('>¿Reparar o cambiar?<')).toBeGreaterThan(franja);
   });
 
+  it('los H2 de sección llevan type display-2, mayor que el display-3 del H3 del plato', () => {
+    const etiquetas = [...html.matchAll(/<h2[^>]*>((?:(?!<\/h2>).)*)<\/h2>/gs)];
+    expect(etiquetas.map((m) => m[1].replace(/<[^>]+>/g, ''))).toEqual([
+      'Antes y después',
+      '¿Reparar o cambiar?',
+      'Cómo trabajamos',
+      'Servicios',
+      'Precios orientativos',
+      'Preguntas frecuentes',
+      'Zonas',
+      'Mándanos una foto',
+    ]);
+    for (const [h2] of etiquetas) expect(h2).toMatch(/^<h2[^>]*\bdata-type="display-2"/);
+  });
+
   it('una tarjeta por servicio, el plato primero y Hoteles al final, cada una a su ruta', () => {
     const t = tarjetas(html);
     expect(t).toHaveLength(servicios.length);

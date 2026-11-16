@@ -52,6 +52,12 @@ describe('TarjetaServicio', () => {
     sinEstilos(compacta);
   });
 
+  it('la grande conserva data-tamano y la caja del icono, y el texto puede ir al lado sin dejar hueco', () => {
+    expect(grande).toMatch(/<[^>]*class="[^"]*\btarjeta-servicio-icono\b[^"]*"[^>]*data-tamano="grande"/);
+    expect(grande).toMatch(/<[^>]*class="[^"]*\btarjeta-servicio-textos\b[^"]*"[^>]*data-tamano="grande"/);
+    expect(compacta).not.toContain('tarjeta-servicio-textos');
+  });
+
   it('no muestra precio', () => {
     expect(grande).not.toMatch(/€|Desde|presupuesto/i);
   });

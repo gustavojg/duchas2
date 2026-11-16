@@ -16,7 +16,7 @@ export function BloqueResenas({ resenas }: { resenas: Resena[] }) {
   const opiniones = resumen.total === 1 ? '1 opinión' : `${resumen.total} opiniones`;
   return (
     <VStack gap={4} as="section" aria-labelledby="resenas-titulo">
-      <Heading level={2} id="resenas-titulo">
+      <Heading level={2} type="display-2" weight="bold" id="resenas-titulo">
         Lo que dicen de nosotros
       </Heading>
       <HStack gap={2} vAlign="center" wrap="wrap">

@@ -76,7 +76,7 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
   const hayIlustraciones = miniaturas.some((par) => !par.despues);
   return (
     <VStack gap={4} as="section" aria-labelledby="portada-antes-despues-titulo">
-      <Heading level={2} id="portada-antes-despues-titulo">
+      <Heading level={2} type="display-2" weight="bold" id="portada-antes-despues-titulo">
         Antes y después
       </Heading>
       <DeslizadorAntesDespues par={principal} />
@@ -114,7 +114,7 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
 function FaqResumida({ preguntas }: { preguntas: { p: string; r: string }[] }) {
   return (
     <VStack gap={4} as="section" aria-labelledby="portada-faq-titulo">
-      <Heading level={2} id="portada-faq-titulo">
+      <Heading level={2} type="display-2" weight="bold" id="portada-faq-titulo">
         Preguntas frecuentes
       </Heading>
       <AcordeonFaq preguntas={preguntas} idBase="portada-faq" />
@@ -127,7 +127,7 @@ function FaqResumida({ preguntas }: { preguntas: { p: string; r: string }[] }) {
 function Seccion({ id, titulo, children }: { id: string; titulo: string; children: ReactNode }) {
   return (
     <VStack gap={4} as="section" aria-labelledby={id}>
-      <Heading level={2} id={id}>
+      <Heading level={2} type="display-2" weight="bold" id={id}>
         {titulo}
       </Heading>
       {children}
@@ -226,7 +226,7 @@ export function Portada({ negocio, config, modo, servicios, pasos, comparativa, 
        * es el segundo primario de la portada; el flotante se oculta mientras se ve este o el del hero.
        */}
       <VStack gap={4} as="section" aria-labelledby="portada-formulario">
-        <Heading level={2} id="portada-formulario">
+        <Heading level={2} type="display-2" weight="bold" id="portada-formulario">
           Mándanos una foto
         </Heading>
         <EnviarContacto
