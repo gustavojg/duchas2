@@ -269,6 +269,63 @@ export function cargarFaq(): Faq {
   return leerContenido('faq.json', faqSchema);
 }
 
+/** Claves de Dano de web/src/ui/art.tsx (lib no importa de ui): si art.tsx gana un daño, se añade aquí. */
+export const DANOS = ['grieta', 'golpe', 'desconchon', 'perforacion', 'oxido', 'brillo'] as const;
+
+const palabras = (t: string) => t.trim().split(/\s+/).length;
+/** Sin cifras fuera de los marcadores `{...}`: los plazos los pone faq.ts con datos confirmados. */
+const sinCifras = (t: string) => !/\d/.test(t.replace(/\{[^}]*\}/g, ''));
+const MENSAJE_CIFRAS = 'sin cifras literales: usa un marcador como {uso_ducha}';
+
+const bloqueTexto = z.object({ titulo: cadena, texto: cadena }).strict();
+
+/**
+ * Página larga del plato de ducha (plato-ducha.json, PRD F2): H1 con «plato de ducha» y «Madrid», 6 daños
+ * (uno por ilustración de art.tsx) de 80-150 palabras, materiales con su dato confirmado, proceso con el
+ * curado como plantilla ({uso_ducha}) y al menos 5 FAQ cuyas respuestas no llevan cifras.
+ */
+export const platoDuchaSchema = z
+  .object({
+    h1: cadena.refine((t) => t.includes('plato de ducha') && t.includes('Madrid'), 'el h1 lleva «plato de ducha» y «Madrid»'),
+    danos: z
+      .array(
+        z
+          .object({
+            id: z.enum(DANOS),
+            titulo: cadena,
+            texto: cadena.refine((t) => palabras(t) >= 80 && palabras(t) <= 150, 'el texto de un daño tiene de 80 a 150 palabras'),
+          })
+          .strict(),
+      )
+      .length(6)
+      .superRefine((danos, ctx) => {
+        const vistos = new Set<string>();
+        danos.forEach((d, i) => {
+          if (vistos.has(d.id)) ctx.addIssue({ code: 'custom', path: [i, 'id'], message: `daño repetido: ${d.id}` });
+          vistos.add(d.id);
+        });
+      }),
+    antideslizante: bloqueTexto,
+    cambio_color: bloqueTexto,
+    materiales: z.array(z.object({ nombre: cadena, reparable: datoSchema(z.boolean()) }).strict()).min(1),
+    proceso: z
+      .object({
+        titulo: cadena,
+        intro: cadena,
+        /** Plantilla del curado con {uso_ducha}, resuelta con respuestaFaq() de faq.ts. */
+        curado: cadena.refine(sinCifras, MENSAJE_CIFRAS).refine((t) => t.includes('{uso_ducha}'), 'el curado lleva {uso_ducha}'),
+      })
+      .strict(),
+    faqs: z.array(z.object({ p: cadena, r: cadena.refine(sinCifras, MENSAJE_CIFRAS) }).strict()).min(5),
+  })
+  .strict();
+
+export type PlatoDucha = z.infer<typeof platoDuchaSchema>;
+
+export function cargarPlatoDucha(): PlatoDucha {
+  return leerContenido('plato-ducha.json', platoDuchaSchema);
+}
+
 /** Reseñas reales (resenas.json, ARCHITECTURE §4.1). Vacío ⇒ ni bloque ni AggregateRating. */
 export const resenasSchema = z.array(
   z
