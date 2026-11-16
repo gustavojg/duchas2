@@ -85,4 +85,8 @@ describe('/preguntas-frecuentes/', () => {
     expect(PAGES).toContain('/preguntas-frecuentes/');
     expect(NAV.map((n) => n.href)).toContain('/preguntas-frecuentes/');
   });
+
+  it('metadata lleva su canonical: url_base + /preguntas-frecuentes/', () => {
+    expect(generateMetadata().alternates?.canonical).toBe(`${negocio.url_base.replace(/\/+$/, '')}/preguntas-frecuentes/`);
+  });
 });

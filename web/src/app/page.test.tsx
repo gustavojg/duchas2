@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { Metadata } from 'next';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { APP_NAME, NAV } from '../config';
@@ -22,7 +23,9 @@ import { telLink } from '../lib/whatsapp';
 import { FranjaConfianza } from '../ui/FranjaConfianza';
 import { Frame } from '../ui/Frame';
 import NotFound from './not-found';
-import { Portada, type PortadaProps } from './page';
+import { generateMetadata as metadataDeContacto } from './contacto/page';
+import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
+import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
 import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
@@ -429,6 +432,24 @@ describe('página /zonas/', () => {
     expect(String(metadataZonas.title)).toMatch(/[Zz]onas/);
     expect(String(metadataZonas.description)).toMatch(/Madrid/);
     expect(`${metadataZonas.title} ${metadataZonas.description}`).not.toMatch(/\d+\s*(h|horas|días|años)\b|en el día|en unas horas|PENDIENTE/);
+  });
+
+  it('cada página lleva su propio canonical: url_base + ruta', () => {
+    const base = negocio.url_base.replace(/\/+$/, '');
+    const porRuta: Record<string, Metadata> = {
+      '/': metadataDePortada(),
+      '/zonas/': metadataDeZonas(),
+      '/preguntas-frecuentes/': metadataDeFaq(),
+      '/contacto/': metadataDeContacto(),
+    };
+    const canonicals = new Set<unknown>();
+    for (const ruta of PAGES) {
+      const meta = porRuta[ruta];
+      expect(meta, `falta metadata para ${ruta}`).toBeDefined();
+      expect(meta!.alternates?.canonical, `canonical en ${ruta}`).toBe(`${base}${ruta}`);
+      canonicals.add(meta!.alternates?.canonical);
+    }
+    expect(canonicals.size).toBe(PAGES.length);
   });
 
   it('está en la navegación y en las páginas públicas', () => {

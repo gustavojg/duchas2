@@ -113,6 +113,18 @@ describe('web/out servido por Hono', () => {
     expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
   });
 
+  it('todas las páginas de PAGES llevan un único canonical = url_base + ruta', () => {
+    const base = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
+    const vistos = new Set<string>();
+    for (const ruta of PAGES) {
+      const html = fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
+      const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /href="([^"]*)"/.exec(m[0])?.[1]);
+      expect(canonicals, `canonical en ${ruta}`).toEqual([`${base}${ruta}`]);
+      vistos.add(canonicals[0]!);
+    }
+    expect(vistos.size).toBe(PAGES.length);
+  });
+
   it('todas las páginas de PAGES llevan un único canonical', async () => {
     const { url_base } = contenido('negocio.json') as { url_base: string };
     for (const p of PAGES) {

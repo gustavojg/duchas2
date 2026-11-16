@@ -30,6 +30,10 @@ describe('/contacto/', () => {
   const html = pinta();
   const texto = textoPlano(html);
 
+  it('metadata lleva su canonical: url_base + /contacto/', () => {
+    expect(generateMetadata().alternates?.canonical).toBe(`${negocio.url_base.replace(/\/+$/, '')}/contacto/`);
+  });
+
   it('un solo H1 con el texto exacto', () => {
     expect(h1s(html)).toEqual(['Mándanos una foto y te decimos si tiene arreglo']);
   });
