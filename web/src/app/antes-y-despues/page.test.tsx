@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { cargarGaleria, cargarNegocio, type ParGaleria } from '../../lib/content';
-import { APP_NAME } from '../../lib/site';
-import { AntesYDespues, metadata } from './page';
+import { APP_NAME, canonicalUrl } from '../../lib/site';
+import { AntesYDespues, generateMetadata } from './page';
 
 const negocio = cargarNegocio();
 const galeria = cargarGaleria();
@@ -56,6 +56,10 @@ describe('/antes-y-despues/', () => {
   });
 
   it('metadata con el título de la página', () => {
-    expect(metadata.title).toBe(`Antes y después · ${APP_NAME}`);
+    expect(generateMetadata().title).toBe(`Antes y después · ${APP_NAME}`);
+  });
+
+  it('metadata lleva su canonical: url_base + /antes-y-despues/', () => {
+    expect(generateMetadata().alternates?.canonical).toBe(canonicalUrl(cargarNegocio().url_base, '/antes-y-despues/'));
   });
 });

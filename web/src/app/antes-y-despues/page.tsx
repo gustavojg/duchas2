@@ -4,15 +4,18 @@ import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import type { Metadata } from 'next';
 import { cargarGaleria, cargarNegocio, type Negocio, type ParGaleria } from '../../lib/content';
-import { APP_NAME } from '../../lib/site';
+import { APP_NAME, canonicalUrl } from '../../lib/site';
 import { MENSAJE_PORTADA } from '../../lib/whatsapp';
 import { BotonWhatsApp } from '../../ui/BotonWhatsApp';
 import { HuecoFoto } from '../../ui/HuecoFoto';
 
-export const metadata: Metadata = {
-  title: `Antes y después · ${APP_NAME}`,
-  description: 'Trabajos reales de reparación de platos de ducha, bañeras y azulejos, antes y después.',
-};
+export function generateMetadata(): Metadata {
+  return {
+    title: `Antes y después · ${APP_NAME}`,
+    description: 'Trabajos reales de reparación de platos de ducha, bañeras y azulejos, antes y después.',
+    alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/antes-y-despues/') },
+  };
+}
 
 export interface AntesYDespuesProps {
   galeria: ParGaleria[];
