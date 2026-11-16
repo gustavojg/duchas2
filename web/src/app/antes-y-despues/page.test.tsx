@@ -1,19 +1,33 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { NAV } from '../../config';
-import { cargarGaleria, cargarNegocio, cargarServicios } from '../../lib/content';
-import { PAGES } from '../../lib/site';
-import { AntesYDespues, metadata } from './page';
+import { cargarGaleria, cargarNegocio, cargarServicios, type Negocio, type ParGaleria } from '../../lib/content';
+import { APP_NAME, canonicalUrl, PAGES } from '../../lib/site';
+import { AntesYDespues, generateMetadata } from './page';
 
 const pares = cargarGaleria();
 const servicios = cargarServicios();
 const negocio = cargarNegocio();
 
-const html = renderToStaticMarkup(<AntesYDespues pares={pares} servicios={servicios} negocio={negocio} />);
-const sinScripts = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
-const textoPlano = sinScripts.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+const render = (p: ParGaleria[], n: Negocio = negocio) =>
+  renderToStaticMarkup(<AntesYDespues pares={p} servicios={servicios} negocio={n} />);
+const plano = (h: string) =>
+  h
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ');
+
+const html = render(pares);
+const textoPlano = plano(html);
 /** Astryx (AspectRatio) pinta variables CSS internas en `style`; eso no es estilo propio. */
 const sinVariablesAstryx = (s: string) => s.replace(/ style="(?:--[\w-]+:[\w.\s-]+;?)+"/g, '');
+
+const conFoto: ParGaleria = {
+  ...pares[0],
+  antes: '/galeria/antes-1.jpg',
+  despues: '/galeria/despues-1.jpg',
+  hueco: undefined,
+} as ParGaleria;
 
 describe('/antes-y-despues/', () => {
   it('tiene un solo H1 «Antes y después»', () => {
@@ -25,6 +39,13 @@ describe('/antes-y-despues/', () => {
     expect(pares.length).toBeGreaterThan(0);
     for (const p of pares) if (p.hueco) expect(html).toContain(p.hueco);
     if (pares.some((p) => !p.antes || !p.despues)) expect(textoPlano.toUpperCase()).toContain('ILUSTRACIÓN');
+  });
+
+  it('con el contenido actual (sin fotos) avisa «Pronto, fotos reales…», ofrece mandar la foto y no pinta <img>', () => {
+    expect(pares.some((p) => p.antes && p.despues)).toBe(false);
+    expect(textoPlano).toContain('Pronto, fotos reales de este trabajo');
+    if (negocio.whatsapp.valor) expect(textoPlano).toContain('Manda la foto del tuyo');
+    expect(html).not.toContain('<img');
   });
 
   it('lleva el filtro con «Todos» y el nombre de platos-de-ducha de servicios.json', () => {
@@ -46,17 +67,38 @@ describe('/antes-y-despues/', () => {
     }
   });
 
+  it('sin WhatsApp no pinta el botón', () => {
+    const sin = render(pares, { ...negocio, whatsapp: { valor: null, confirmado: false } });
+    expect(plano(sin)).not.toContain('Manda la foto del tuyo');
+  });
+
+  it('con un par con foto pinta las dos fotos y no el aviso', () => {
+    const solo = render([conFoto]);
+    expect(solo).toContain('src="/galeria/antes-1.jpg"');
+    expect(solo).toContain('src="/galeria/despues-1.jpg"');
+    expect(solo.match(/<img\b/g)).toHaveLength(2);
+    expect(plano(solo)).not.toContain('Pronto, fotos reales de este trabajo');
+    // Mezclado con los pares sin foto, siguen siendo solo las dos <img> del par con foto.
+    expect(render([conFoto, ...pares]).match(/<img\b/g)).toHaveLength(2);
+  });
+
   it('sin pendientes, marcadores ni estilos sueltos', () => {
-    expect(textoPlano).not.toContain('PENDIENTE');
+    expect(html).not.toContain('PENDIENTE');
+    expect(html).not.toContain('{{');
     expect(textoPlano).not.toContain('{');
     expect(sinVariablesAstryx(html)).not.toContain('style=');
     expect(html).not.toContain('<style');
   });
 
-  it('metadata con title «Antes y después…» y description', () => {
+  it('metadata con title «Antes y después · APP_NAME» y description', () => {
+    const metadata = generateMetadata();
     expect(String(metadata.title)).toMatch(/^Antes y después/);
+    expect(metadata.title).toBe(`Antes y después · ${APP_NAME}`);
     expect(metadata.description).toBeTruthy();
-    expect(metadata.alternates).toBeUndefined();
+  });
+
+  it('metadata lleva su canonical: url_base + /antes-y-despues/', () => {
+    expect(generateMetadata().alternates?.canonical).toBe(canonicalUrl(cargarNegocio().url_base, '/antes-y-despues/'));
   });
 
   it('PAGES (sitemap) y NAV incluyen la página', () => {

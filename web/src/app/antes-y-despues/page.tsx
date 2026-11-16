@@ -2,18 +2,22 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import type { Metadata } from 'next';
-import { APP_NAME } from '../../config';
 import { cargarGaleria, cargarNegocio, cargarServicios, type Negocio, type ParGaleria, type Servicio } from '../../lib/content';
 import { serviciosConPares } from '../../lib/galeria';
+import { APP_NAME, canonicalUrl } from '../../lib/site';
 import { MENSAJE_PORTADA } from '../../lib/whatsapp';
 import { BotonWhatsApp } from '../../ui/BotonWhatsApp';
 import { FiltroGaleria } from '../../ui/FiltroGaleria';
 
-export const metadata: Metadata = {
-  title: `Antes y después de nuestros trabajos · ${APP_NAME}`,
-  description:
-    'Mira cómo quedan los platos de ducha y las bañeras antes y después de repararlos en casa, sin obras. Filtra por servicio.',
-};
+/** Título de main (exacto) y canonical de url_base, como el resto de páginas de PAGES. */
+export function generateMetadata(): Metadata {
+  return {
+    title: `Antes y después · ${APP_NAME}`,
+    description:
+      'Mira cómo quedan los platos de ducha y las bañeras antes y después de repararlos en casa, sin obras. Filtra por servicio.',
+    alternates: { canonical: canonicalUrl(cargarNegocio().url_base, '/antes-y-despues/') },
+  };
+}
 
 export interface AntesYDespuesProps {
   pares: ParGaleria[];

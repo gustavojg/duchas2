@@ -22,5 +22,6 @@
     "uso_ducha": { "valor": null, "confirmado": false }
   },
   "url_base": "http://localhost:3000",
+  "url_base_nota": "Debe ser el dominio de producción (https://…) antes de publicar. Hoy es localhost. Lo usan el canonical, sitemap.xml y robots.txt.",
   "analitica": { "ga4_id": null }
 }
