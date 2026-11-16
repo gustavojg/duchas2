@@ -29,6 +29,10 @@ describe('BannerCookiesVista', () => {
     expect(html).toContain('banner-cookies');
   });
 
+  it('el Banner no lleva elevación: brain/design.md reserva --shadow-1 al botón flotante y al CTA del hero', () => {
+    expect(html).not.toMatch(/data-elevation="(?!none")[^"]*"/);
+  });
+
   it('los dos botones tienen la misma clase y ninguno es primario', () => {
     const botones = [...html.matchAll(/<button\b[^>]*>/g)].map((m) => m[0]);
     expect(botones).toHaveLength(2);

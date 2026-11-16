@@ -22,7 +22,7 @@ export interface BannerCookiesVistaProps {
 export function BannerCookiesVista({ onAceptar, onRechazar }: BannerCookiesVistaProps) {
   return (
     <VStack className="banner-cookies">
-      <Banner status="info" title="Cookies de analítica" container="card" elevation="med" collapsible={false}>
+      <Banner status="info" title="Cookies de analítica" container="card" collapsible={false}>
         <VStack gap={3}>
           <Text as="p">
             Usamos cookies de Google Analytics para saber cómo se usa la web, solo si las aceptas.{' '}
