@@ -36,6 +36,12 @@ con el build actual (`pnpm build && PORT=8804 HOST=127.0.0.1 DATA_DIR=data/stagi
 Chromium: `pnpm exec playwright install chromium` (con `--with-deps` si faltan librerías del sistema), uno
 de la imagen con `E2E_CHROMIUM_PATH=/ruta/al/chromium`, o el contenedor `mcr.microsoft.com/playwright` con
 `--network host`.
+El spec `tests/e2e/staging-smoke.spec.ts` recorre todas las rutas de `web/src/lib/rutas.ts` (con los servicios de
+`servicios.json`), `/sitemap.xml` y `/robots.txt`, y comprueba que una ruta inexistente da 404. La variable
+`E2E_EMAIL_DESTINO=con|sin` (por defecto `con`) declara si el staging arrancó con email de destino: con `con` el
+POST `/api/contacto` debe dar 2xx y con `sin` debe dar 503. El staging debe usar `MAIL_TRANSPORT=file` para que no
+se envíe ningún email real (como en `pnpm smoke:contacto`). El spec hace 1 POST que cuenta contra el límite por IP
+(5 por 60 min).
 
 Smoke del formulario contra un servidor en marcha (el staging): `pnpm smoke:contacto`. Comprueba que
 POST `/api/contacto` responde 201 y deja un `.eml` con la foto adjunta, que el honeypot responde 201 sin correo,
