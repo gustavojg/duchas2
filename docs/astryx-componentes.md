@@ -32,7 +32,7 @@ Cada fila dice «componente Astryx: X» (se usa tal cual) o «composición con p
 | error de campo | componente Astryx: Field `status` + FieldStatus (`@astryxdesign/core/Field`, `/FieldStatus`) | `status={{type: 'error', message}}` junto al campo; FieldStatus para controles propios. |
 | banner | componente Astryx: Banner (`@astryxdesign/core/Banner`) | Cookies y confirmación del formulario. |
 | imagen | composición con primitivas: HuecoFoto (AspectRatio + `<img>` nativo, Thumbnail para miniaturas) | No existe «Image»: `astryx component Image` responde «No component named "Image"» y sugiere Lightbox, Thumbnail, Overlay. Se envuelve el `<img>` nativo en AspectRatio (4:3); mientras no haya fotos, ilustración de `web/src/ui/art.tsx`. |
-| migas de pan | componente Astryx: Breadcrumbs + BreadcrumbItem (`@astryxdesign/core/Breadcrumbs`) | `MigasDePan` lo alimentará con las rutas y el JSON-LD. |
+| migas de pan | componente Astryx: Breadcrumbs + BreadcrumbItem (`@astryxdesign/core/Breadcrumbs`) | `MigasDePan` no lo usa: la spec pidió una lista ordenada con HStack + Link + Text (ver «Composiciones registradas»); las mismas migas alimentan el JSON-LD BreadcrumbList. |
 | segmented control | componente Astryx: SegmentedControl (`@astryxdesign/core/SegmentedControl`) | Pieza del formulario y filtro de la galería. |
 
 Todas las piezas quedan resueltas: no hace falta la pregunta abierta 13 del PRD.
@@ -63,6 +63,7 @@ de la regla (sin hex, px, rem ni `style=`) les aplica igual.
 | BloqueResenas | `web/src/ui/BloqueResenas.tsx` | VStack (`section`/`ul`/`li`) + Heading (level 2) + Text (`type="code"` para la nota); nota y número de `resumenResenas()`/`notaVisible()` de seo.ts. Sin reseñas devuelve null | creada |
 | HuecoFoto | `web/src/ui/HuecoFoto.tsx` | AspectRatio + `<img>` nativo + art.tsx + CintaEtiqueta; `compacta` (miniaturas): solo la ilustración, sin cintas, aviso ni `hueco`; quien la usa pone una única cinta «ILUSTRACIONES» encima | creada |
 | DeslizadorAntesDespues | `web/src/ui/DeslizadorAntesDespues.tsx` | Slider (`isLabelHidden`, «Comparar antes y después», 0-100, inicial 50) + AspectRatio 4:3 + Overlay (`scrim={false}`, cintas) + CintaEtiqueta «ANTES»/«DESPUÉS»; recorte de la «después» con `<clipPath><rect width={posición}>` y asa (`<line>`/`<circle>` con var(--…)). Sin fotos, la ilustración de art.tsx (PlatoPartido) en el mismo lienzo SVG (capa de abajo velada, la de arriba recortada) y el asa siguiendo al Slider; cinta «ILUSTRACIÓN» encima y el aviso + `hueco` una vez debajo. `'use client'` (estado de la posición) | creada |
+| MigasDePan | `web/src/ui/MigasDePan.tsx` | `<nav aria-label="Migas de pan">` + HStack (`as="ol"`/`"li"`, `wrap`) + Link en cada miga salvo la última, que es Text (`supporting`) con `aria-current="page"` en su `li`; separador «›» en Text con `aria-hidden`. Servidor. La página pasa la misma lista a `jsonLdBreadcrumbList()` de seo.ts | creada |
 
 Notas de implementación:
 
@@ -78,4 +79,4 @@ Notas de implementación:
 - `Grid` con `columns` pinta `style="--x-gridTemplateColumns…"`: para listas se usa VStack/HStack.
 
 Previstas por `brain/design.md` (las construye la funcionalidad que las usa): CabeceraContacto,
-GaleriaFiltrable, MigasDePan, IlustracionSvg.
+GaleriaFiltrable, IlustracionSvg.
