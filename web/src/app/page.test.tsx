@@ -26,8 +26,10 @@ import NotFound from './not-found';
 import { generateMetadata as metadataDeAntesYDespues } from './antes-y-despues/page';
 import { generateMetadata as metadataDeContacto } from './contacto/page';
 import { generateMetadata as metadataDePortada, Portada, type PortadaProps } from './page';
+import { generateMetadata as metadataDePlatos } from './platos-de-ducha/page';
 import { generateMetadata as metadataDeFaq } from './preguntas-frecuentes/page';
 import { generateMetadata as metadataDePrivacidad } from './privacidad/page';
+import { generateMetadata as metadataDeTarifas } from './tarifas/page';
 import { generateMetadata as metadataDeZonas, Zonas } from './zonas/page';
 
 const negocio = cargarNegocio();
@@ -445,6 +447,8 @@ describe('página /zonas/', () => {
       '/contacto/': metadataDeContacto(),
       '/antes-y-despues/': metadataDeAntesYDespues(),
       '/privacidad/': metadataDePrivacidad(),
+      '/platos-de-ducha/': metadataDePlatos(),
+      '/tarifas/': metadataDeTarifas(),
     };
     const canonicals = new Set<unknown>();
     for (const ruta of PAGES) {

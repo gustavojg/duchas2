@@ -12,7 +12,7 @@ API de formulario por **un solo proceso Node con Hono** (un puerto), que guarda 
 
 ```
 Navegador ──► Hono (PORT=3000)
-               ├── GET  /health                 → JSON
+               ├── GET  /health                 → { ok, app, commit }
                ├── POST /api/contacto           → valida, limita, guarda (SQLite + fotos), envía SMTP
                └── GET  /*                      → ficheros de web/out (HTML estático de Next)
 ```
@@ -26,7 +26,7 @@ En desarrollo hay dos procesos (`next dev` en :3000 con rewrites de `/api/*` y `
 /                         raíz pnpm (workspace: ".", "web")
 ├── src/                  SERVIDOR (Hono). Solo TypeScript, sin React.
 │   ├── server.ts         arranque: openDb, mailer, limpieza al arrancar + cada 24 h, serve()
-│   ├── app.ts            createApp(deps) → Hono: /health, /api/contacto, estáticos y 404
+│   ├── app.ts            createApp(deps) → Hono: /health ({ ok, app, commit }), /api/contacto, estáticos y 404
 │   ├── db.ts             openDb + MIGRATIONS (aditivas, como la plantilla)
 │   ├── contacto.ts       handler de POST /api/contacto (orquesta los módulos de abajo)
 │   ├── foto.ts           detección de tipo por bytes mágicos, guardado en DATA_DIR/fotos
@@ -99,7 +99,7 @@ type Dato<T> = { valor: T | null; confirmado: boolean };
 
 | Fichero | Contenido |
 |---|---|
-| `negocio.json` | `marca: Dato<string>`, `telefono: Dato<string>` (E.164, uno solo), `whatsapp: Dato<string>`, `email: Dato<string>`, `email_destino` (a quién llegan las peticiones), `horario: Dato<string>`, `legal: { razon_social, nif, domicilio: Dato<string> }`, `anios: Dato<number>`, `garantia: { anios: Dato<number>, condiciones: Dato<string> }`, `plazos: { presupuesto, respuesta, reparacion, uso_ducha: Dato<string> }`, `url_base`, `analitica: { ga4_id: string \| null }` |
+| `negocio.json` | `marca: Dato<string>`, `telefono: Dato<string>` (E.164, uno solo), `whatsapp: Dato<string>`, `email: Dato<string>`, `email_destino` (a quién llegan las peticiones), `horario: Dato<string>`, `legal: { razon_social, nif, domicilio: Dato<string> }`, `anios: Dato<number>`, `garantia: { anios: Dato<number>, condiciones: Dato<string> }`, `plazos: { presupuesto, respuesta, reparacion, uso_ducha: Dato<string> }`, `url_base` (única base de canonical, sitemap y robots; hoy `http://localhost:3000`, poner el dominio de producción antes de publicar), `url_base_nota` (opcional, recordatorio para quien edita), `analitica: { ga4_id: string \| null }` |
 | `config.json` | `formulario: { retencion_dias: 90, foto_max_mb: 10, limite_envios: 5, ventana_min: 60 }` |
 | `servicios.json` | lista ordenada: `slug, nombre, ruta, tipo: 'principal'\|'servicio'\|'empresas', orden, resumen, problema, como (pasos), precio_desde: Dato<number>, faqs: [{p, r}], relacionados: [slug], whatsapp_mensaje, seo: {title, description}, imagen_tarjeta` |
 | `plato-ducha.json` | contenido extra de F2: `h1, danos: [{id, titulo, texto}]` (grieta, golpe, desconchón, perforación, manchas, pérdida de brillo), `antideslizante, cambio_color, materiales: [{nombre, reparable: Dato<boolean>}], proceso, faqs` (≥5) |
@@ -134,7 +134,7 @@ build; trailing slash activado (`/tarifas/` → `web/out/tarifas/index.html`).
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| GET | `/health` | `{ ok: true, app }` (staging) |
+| GET | `/health` | `{ ok: true, app, commit }` (staging). `commit` sale de la variable de entorno `GIT_SHA` (la inyecta el staging de la fábrica; `src/config.ts` la lee recortada como `Config.commit` y llega a `createApp` por `Deps.commit`); vale «desconocido» si falta o está vacía |
 | POST | `/api/contacto` | `multipart/form-data`; ver §6.3. Respuestas 201 / 400 / 413 / 415 / 429 / 503 |
 | GET | `/_next/static/*` | estáticos con `Cache-Control: public, max-age=31536000, immutable` |
 | GET | `/*` | fichero de `web/out`; si no existe, `web/out/404.html` con **404** |
@@ -178,6 +178,8 @@ en modo borrador, banner de cookies solo si `ga4_id`.
 ### 6.2 Contacto único
 - Un teléfono y un WhatsApp en `negocio.json`; `telLink`/`waLink` son la única forma de construir
   enlaces. `waLink` usa `https://wa.me/<digitos>?text=<encodeURIComponent(mensaje)>`.
+- `waLink` y `telLink` **lanzan** un `Error` ante un número inválido: antes de pintar un botón de
+  contacto se comprueba `esNumeroValido(numero)` y, si da `false`, no se pinta (ver §10 «Contratos»).
 - Mensajes precargados: por página de servicio (`whatsapp_mensaje`), plato de ducha (menciona la página y
   pide la foto), empresas, confirmación del formulario, y uno por defecto.
 
@@ -223,9 +225,15 @@ confirmación con plazo de respuesta (tabla) y botón de WhatsApp.
   garantía (plazo). Si la lista no está vacía, el layout raíz emite `robots: noindex, nofollow` en todas
   las páginas y `scripts/seo-build.ts` imprime `⚠ MODO BORRADOR: faltan …`. Con todo completo, ni
   `noindex` ni aviso.
-- `sitemap.xml` (todas las rutas de `rutas.ts`, con `url_base`) y `robots.txt` (`Allow: /` + `Sitemap:`)
-  se generan en postbuild; no se usa la ruta dinámica `sitemap.ts` de Next.
-- Un H1 por página; canonical absoluto con `url_base`; Open Graph por página.
+- `url_base` de `negocio.json` es la **única** base de las URL absolutas del SEO: canonical, `sitemap.xml` y
+  `robots.txt`. `BASE_URL` del servidor ya no interviene. Hoy vale `http://localhost:3000`; antes de publicar
+  hay que poner el dominio de producción (`https://…`).
+- `sitemap.xml` (todas las rutas de `PAGES`, con `url_base`) y `robots.txt` (`Allow: /` + `Sitemap:`)
+  se generan en postbuild (`scripts/postbuild.ts`); no se usa la ruta dinámica `sitemap.ts` de Next.
+- Un H1 por página; canonical absoluto con `url_base` (`canonicalUrl` de `web/src/lib/site.ts`; el layout raíz
+  lo emite con `metadataBase` + `alternates.canonical: './'`, con barra final); Open Graph por página.
+- `tests/build/out.test.ts` comprueba que el canonical de cada página, los `<loc>` del sitemap y la línea
+  `Sitemap:` de robots comparten la base de `url_base`, y que cada `<loc>` es el canonical de su página.
 
 ### 6.6 Cookies
 - Sin `ga4_id` ⇒ no hay banner ni script. Con `ga4_id` ⇒ `BannerCookies` con «Aceptar» y «Rechazar» del
@@ -246,13 +254,14 @@ confirmación con plazo de respuesta (tabla) y botón de WhatsApp.
 | `TRUST_PROXY` | `0` | leer `X-Forwarded-For` |
 | `MOSTRAR_PENDIENTES` | `0` | build con `{{PENDIENTE}}` visibles |
 | `CONTENT_DIR` | `./web/content` | carpeta de JSON que lee `content.ts` (tests de build con fixtures) |
+| `GIT_SHA` | «desconocido» si falta | commit servido en `/health` |
 
 ## 8. Estrategia de tests
 
 `pnpm test` (vitest) — servidor y lógica, sin red ni navegador:
 - **Servidor sobre `app.request()`** con `createApp({ db: openDb(':memory:'), mailer: fakeMailer,
   dataDir: tmp, config, ahora: () => t, ipDe: () => '1.2.3.4' })`:
-  - `/health` 200; ruta inexistente → 404 con HTML; `/tarifas/` sirve el `index.html` de un `WEB_DIR` de
+  - `/health` 200, también con `commit` (es «desconocido» sin `GIT_SHA`); ruta inexistente → 404 con HTML; `/tarifas/` sirve el `index.html` de un `WEB_DIR` de
     fixture.
   - `/api/contacto`: 201 válido (fila en BD, foto en disco, 1 email con adjunto y todos los campos);
     400 por nombre vacío, teléfono inválido (`12345`, `5xxxxxxxx`), sin privacidad — con el campo en
@@ -308,3 +317,22 @@ el servidor local, portada, platos de ducha y FAQ); validador de schema.org; rec
 - Las fotos HEIC solo viajan como adjunto; la web muestra únicamente WebP de `web/public/fotos`.
 - Las peticiones no se consultan desde la web: se reciben por email; la BD solo es respaldo local.
 - No se copian textos, nombres ni fotos de competidores.
+
+## 10. Contratos
+
+### 10.1 `GET /health`
+- `{ ok: true, app, commit }`; `commit` es `GIT_SHA` recortado, o «desconocido» si falta o está vacía
+  (detalle en §5.1).
+
+### 10.2 Enlaces de contacto (`web/src/lib/whatsapp.ts`)
+- Número válido: teléfono español de 9 cifras que empieza por 6-9; se admiten espacios y los prefijos
+  `+34` y `0034`.
+- `waLink(numero, mensaje)` devuelve `https://wa.me/<solo dígitos>?text=<encodeURIComponent(mensaje)>` y
+  **lanza un `Error`** si el número no es válido.
+- `telLink(numero)` devuelve `tel:+34XXXXXXXXX` y lanza igual, con el mismo error que `waLink`.
+- `esNumeroValido(numero)` devuelve `boolean` con la misma validación que `waLink` y `telLink`. Quien pinte
+  un botón de contacto la llama **antes** y no pinta el botón si da `false`:
+
+```ts
+const href = esNumeroValido(n) ? waLink(n, mensaje) : null; // null → no se pinta el botón
+```

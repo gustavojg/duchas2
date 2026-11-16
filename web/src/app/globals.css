@@ -225,3 +225,78 @@
   inline-size: 100%;
   max-inline-size: calc(var(--spacing-12) * 6);
 }
+
+/* Párrafos de texto largo (página del plato de ducha, legales): medida de lectura de --measure. */
+.texto-largo {
+  max-inline-size: var(--measure);
+}
+
+/*
+ * Tabla de /tarifas/ (src/app/tarifas/page.tsx): ocupa el contenedor y «Incluye» toma el espacio que sobra.
+ * Astryx pone en th/td max-width:0, overflow:hidden y, en la cabecera, nowrap + ellipsis: aquí se anulan para
+ * que nada se recorte ni se parta a mitad de palabra. «Trabajo» y «Desde» llevan solo ancho mínimo (en «Desde»
+ * cabe «Pide presupuesto gratuito» en un máximo de 2 líneas). En móvil (≤ 40em) cada fila se apila: nombre,
+ * debajo el precio y debajo el resumen.
+ */
+.tabla-tarifas {
+  inline-size: 100%;
+}
+
+.tabla-tarifas,
+.tabla-tarifas th,
+.tabla-tarifas td,
+.tabla-tarifas p,
+.tabla-tarifas a {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}
+
+.tabla-tarifas th,
+.tabla-tarifas td {
+  max-inline-size: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.tabla-tarifas .tabla-tarifas-trabajo {
+  min-inline-size: calc(var(--spacing-12) * 3);
+}
+
+.tabla-tarifas .tabla-tarifas-desde {
+  min-inline-size: calc(var(--spacing-12) * 4);
+}
+
+@media (max-width: 40em) {
+  .tabla-tarifas thead {
+    display: none;
+  }
+
+  .tabla-tarifas,
+  .tabla-tarifas tbody {
+    display: block;
+  }
+
+  .tabla-tarifas tr,
+  .tabla-tarifas td {
+    display: block;
+  }
+
+  .tabla-tarifas tr {
+    padding-block: var(--spacing-2);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .tabla-tarifas td {
+    min-inline-size: 0;
+    padding-block: var(--spacing-1);
+    border-block-end-width: 0;
+  }
+}
+
+/* Ilustración de cada daño en la rejilla de /platos-de-ducha/: al lado del enlace, sin encogerse. */
+.plato-dano-icono {
+  flex: none;
+  inline-size: var(--spacing-12);
+}
