@@ -148,6 +148,27 @@ describe('web/out servido por Hono', () => {
     expect(robots).toContain(`Sitemap: ${urlBase}/sitemap.xml`);
   });
 
+  it('canonical y sitemap comparten base', async () => {
+    const xml = await (await app.request('/sitemap.xml')).text();
+    const locs = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]);
+    const robots = await (await app.request('/robots.txt')).text();
+    const sitemapDeRobots = /^Sitemap: (\S+)$/m.exec(robots)?.[1];
+    expect(locs.length, 'sitemap.xml sin <loc>').toBeGreaterThan(0);
+    expect(sitemapDeRobots, 'robots.txt sin línea Sitemap:').toBeDefined();
+
+    const canonicals = PAGES.map((ruta) => {
+      const c = canonicalDe(ruta);
+      expect(c, `${ruta} sin canonical`).toBeDefined();
+      return c!;
+    });
+    const origen = new URL(urlBase).origin;
+    const origenes = [...canonicals, locs[0], sitemapDeRobots!].map((u) => new URL(u).origin);
+    for (const o of origenes) expect(o).toBe(origen);
+
+    // Cada <loc> es exactamente el canonical de su página, y el sitemap lista todas las de PAGES.
+    expect(locs).toEqual(canonicals);
+  });
+
   it('/health sigue respondiendo JSON', async () => {
     expect(await (await app.request('/health')).json()).toMatchObject({ ok: true });
   });
