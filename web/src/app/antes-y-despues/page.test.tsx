@@ -3,7 +3,15 @@ import { describe, expect, it } from 'vitest';
 import { NAV } from '../../config';
 import { cargarGaleria, cargarNegocio, cargarServicios, type Negocio, type ParGaleria } from '../../lib/content';
 import { APP_NAME, canonicalUrl, PAGES } from '../../lib/site';
-import { AntesYDespues, generateMetadata } from './page';
+import { metadataServicio } from '../servicios/[slug]/page';
+import {
+  AntesYDespues,
+  DESCRIPCION,
+  generateMetadata,
+  PaginaAntesYDespues,
+  type PaginaAntesYDespuesProps,
+  TITULO,
+} from './page';
 
 const pares = cargarGaleria();
 const servicios = cargarServicios();
@@ -104,5 +112,46 @@ describe('/antes-y-despues/', () => {
   it('PAGES (sitemap) y NAV incluyen la página', () => {
     expect(PAGES).toContain('/antes-y-despues/');
     expect(NAV.map((n) => n.href)).toContain('/antes-y-despues/');
+  });
+});
+
+const base: PaginaAntesYDespuesProps = { negocio, servicios, galeria: cargarGaleria() };
+const pinta = (otro: Partial<PaginaAntesYDespuesProps> = {}) => renderToStaticMarkup(<PaginaAntesYDespues {...base} {...otro} />);
+const htmlPagina = pinta();
+
+describe('/antes-y-despues/ (PaginaAntesYDespues)', () => {
+  it('tiene un solo H1 «Antes y después de nuestros trabajos»', () => {
+    expect(htmlPagina.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(/<h1[^>]*>((?:(?!<\/h1>).)*)<\/h1>/s.exec(htmlPagina)![1]).toBe('Antes y después de nuestros trabajos');
+  });
+
+  it('metadata propia con canonical = url_base + /antes-y-despues/', () => {
+    const meta = generateMetadata();
+    expect(meta.title).toBe(TITULO);
+    expect(meta.description).toBe(DESCRIPCION);
+    expect(meta.alternates?.canonical).toBe(`${negocio.url_base.replace(/\/+$/, '')}/antes-y-despues/`);
+  });
+
+  it('el título y la descripción no repiten los de otra página', () => {
+    for (const s of servicios) {
+      const m = metadataServicio(servicios, s.slug, negocio.url_base);
+      expect(m.title).not.toBe(TITULO);
+      expect(m.description).not.toBe(DESCRIPCION);
+    }
+  });
+
+  it('migas Inicio › Antes y después, galería y cierre con WhatsApp en #cta-hero', () => {
+    expect(htmlPagina).toContain('aria-label="Migas de pan"');
+    expect(htmlPagina).toContain('aria-label="Filtrar por servicio"');
+    expect((htmlPagina.match(/data-par=/g) ?? []).length).toBe(base.galeria.length);
+    expect(htmlPagina.slice(htmlPagina.indexOf('id="cta-hero"'))).toContain('wa.me');
+    expect(htmlPagina).toContain('"@type":"BreadcrumbList"');
+    expect(htmlPagina).not.toContain('PENDIENTE');
+    expect(htmlPagina).not.toContain('{{');
+  });
+
+  it('sin número de WhatsApp no pinta el botón', () => {
+    const sin: Negocio = { ...negocio, whatsapp: { valor: null, confirmado: false } };
+    expect(pinta({ negocio: sin })).not.toContain('wa.me');
   });
 });

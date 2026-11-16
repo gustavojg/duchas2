@@ -2,10 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { testApp } from '../../src/testing.js';
-import { APP_NAME, canonicalUrl, PAGES } from '../../web/src/lib/site.js';
+import { cargarServicios } from '../../web/src/lib/content.js';
+import { APP_NAME, canonicalUrl, paginasDelSitio } from '../../web/src/lib/site.js';
 
 /** `pnpm test:build`: el web/out real (tras `pnpm build`) servido por la app Hono, con app.request(). */
 const webDir = path.resolve('web/out');
+/** Páginas del sitio: PAGINAS más una por servicio de tipo 'servicio' de servicios.json. */
+const servicios = cargarServicios();
+const PAGINAS = paginasDelSitio(servicios);
 
 describe('web/out servido por Hono', () => {
   beforeAll(() => {
@@ -113,21 +117,21 @@ describe('web/out servido por Hono', () => {
     expect(await (await app.request('/sitemap.xml')).text()).toContain('/preguntas-frecuentes/');
   });
 
-  it('todas las páginas de PAGES llevan un único canonical = url_base + ruta', () => {
+  it('todas las páginas del sitio llevan un único canonical = url_base + ruta', () => {
     const base = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
     const vistos = new Set<string>();
-    for (const ruta of PAGES) {
+    for (const ruta of PAGINAS) {
       const html = fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
       const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /href="([^"]*)"/.exec(m[0])?.[1]);
       expect(canonicals, `canonical en ${ruta}`).toEqual([`${base}${ruta}`]);
       vistos.add(canonicals[0]!);
     }
-    expect(vistos.size).toBe(PAGES.length);
+    expect(vistos.size).toBe(PAGINAS.length);
   });
 
-  it('todas las páginas de PAGES llevan un único canonical', async () => {
+  it('todas las páginas del sitio llevan un único canonical', async () => {
     const { url_base } = contenido('negocio.json') as { url_base: string };
-    for (const p of PAGES) {
+    for (const p of PAGINAS) {
       const html = await (await app.request(p)).text();
       const canonicals = [...html.matchAll(/<link\b[^>]*\brel="canonical"[^>]*>/g)].map((m) => /\bhref="([^"]*)"/.exec(m[0])?.[1]);
       expect(canonicals, p).toEqual([canonicalUrl(url_base, p)]);
@@ -184,16 +188,16 @@ describe('web/out servido por Hono', () => {
   });
 
   const urlBase = (contenido('negocio.json') as { url_base: string }).url_base.replace(/\/+$/, '');
-  /** HTML exportado de una ruta de PAGES: web/out/index.html para '/', web/out/<ruta>/index.html para el resto. */
+  /** HTML exportado de una ruta del sitio: web/out/index.html para '/', web/out/<ruta>/index.html para el resto. */
   const htmlDe = (ruta: string) => fs.readFileSync(path.join(webDir, ruta, 'index.html'), 'utf8');
   const canonicalDe = (ruta: string) => /<link rel="canonical" href="([^"]*)"\/?>/.exec(htmlDe(ruta))?.[1];
 
-  it('cada página de PAGES lleva su canonical absoluto con url_base y barra final', () => {
+  it('cada página del sitio lleva su canonical absoluto con url_base y barra final', () => {
     expect(htmlDe('/zonas/')).toContain(`<link rel="canonical" href="${urlBase}/zonas/"/>`);
-    for (const ruta of PAGES) expect(canonicalDe(ruta), ruta).toBe(`${urlBase}${ruta}`);
+    for (const ruta of PAGINAS) expect(canonicalDe(ruta), ruta).toBe(`${urlBase}${ruta}`);
   });
 
-  it('la página 404 no lleva canonical (no inventa una ruta fuera de PAGES)', () => {
+  it('la página 404 no lleva canonical (no inventa una ruta fuera del sitio)', () => {
     expect(fs.readFileSync(path.join(webDir, '404.html'), 'utf8')).not.toContain('rel="canonical"');
   });
 
@@ -214,7 +218,7 @@ describe('web/out servido por Hono', () => {
     expect(locs.length, 'sitemap.xml sin <loc>').toBeGreaterThan(0);
     expect(sitemapDeRobots, 'robots.txt sin línea Sitemap:').toBeDefined();
 
-    const canonicals = PAGES.map((ruta) => {
+    const canonicals = PAGINAS.map((ruta) => {
       const c = canonicalDe(ruta);
       expect(c, `${ruta} sin canonical`).toBeDefined();
       return c!;
@@ -223,8 +227,45 @@ describe('web/out servido por Hono', () => {
     const origenes = [...canonicals, locs[0], sitemapDeRobots!].map((u) => new URL(u).origin);
     for (const o of origenes) expect(o).toBe(origen);
 
-    // Cada <loc> es exactamente el canonical de su página, y el sitemap lista todas las de PAGES.
+    // Cada <loc> es exactamente el canonical de su página, y el sitemap lista todas las del sitio.
     expect(locs).toEqual(canonicals);
+  });
+
+  const deTipoServicio = servicios.filter((s) => s.tipo === 'servicio');
+
+  it('existe un HTML por cada servicio de tipo servicio, con un H1 y JSON-LD Service y BreadcrumbList', async () => {
+    expect(deTipoServicio.length).toBeGreaterThan(0);
+    for (const s of deTipoServicio) {
+      expect(fs.existsSync(path.join(webDir, 'servicios', s.slug, 'index.html')), s.ruta).toBe(true);
+      const res = await app.request(s.ruta);
+      expect(res.status, s.ruta).toBe(200);
+      const html = await res.text();
+      expect(html.match(/<h1[\s>]/g), s.ruta).toHaveLength(1);
+      expect(ldTipos(html).sort(), s.ruta).toEqual(['BreadcrumbList', 'Service']);
+      const sinScripts = visible(html);
+      expect(sinScripts).not.toContain('PENDIENTE');
+      expect(sinScripts).not.toContain('{{');
+    }
+    expect((await app.request('/servicios/no-existe/')).status).toBe(404);
+  });
+
+  it('los <title> de las páginas de servicio son únicos', () => {
+    const titulos = deTipoServicio.map((s) => /<title>([^<]*)<\/title>/.exec(htmlDe(s.ruta))?.[1]);
+    for (const [i, t] of titulos.entries()) expect(t, deTipoServicio[i].ruta).toBeTruthy();
+    expect(new Set(titulos).size).toBe(deTipoServicio.length);
+  });
+
+  it('/hoteles-y-comunidades/ existe y no tiene sección «Referencias» mientras referencias.json esté vacío', () => {
+    const html = visible(htmlDe('/hoteles-y-comunidades/'));
+    expect(html).toMatch(/<h1[^>]*>Renovamos bañeras de hotel sin cerrar habitaciones<\/h1>/);
+    if ((contenido('referencias.json') as unknown[]).length === 0) expect(html).not.toContain('Referencias');
+  });
+
+  it('/antes-y-despues/ se exporta con un H1, el filtro y el sitemap la lista', async () => {
+    const html = visible(htmlDe('/antes-y-despues/'));
+    expect(html.match(/<h1[\s>]/g)).toHaveLength(1);
+    expect(html).toContain('Filtrar por servicio');
+    expect(await (await app.request('/sitemap.xml')).text()).toContain('/antes-y-despues/');
   });
 
   it('/health sigue respondiendo JSON', async () => {
