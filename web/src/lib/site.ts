@@ -24,7 +24,10 @@ export function normalizarBase(urlBase: string): string {
   return urlBase.replace(/\/+$/, '');
 }
 
-/** URL absoluta de una página: base normalizada + ruta con barra inicial y final (trailingSlash, como PAGES). */
+/**
+ * URL absoluta de una página: base normalizada + ruta con barra inicial y final (trailingSlash, como PAGES).
+ * Es la misma que el `<loc>` de sitemapXml, que la usa; el canonical de cada página sale de aquí.
+ */
 export function canonicalUrl(urlBase: string, ruta: string): string {
   const conInicial = ruta.startsWith('/') ? ruta : `/${ruta}`;
   const conFinal = conInicial.endsWith('/') ? conInicial : `${conInicial}/`;

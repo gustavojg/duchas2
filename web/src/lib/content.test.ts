@@ -119,6 +119,45 @@ describe('content.ts', () => {
       conServicios(data);
       expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
     });
+
+    const rutasMalas = ['//evil.com/', 'javascript:x', 'javascript:alert(1)//', 'http://evil.com/', '/\\evil.com/'];
+
+    it.each(rutasMalas)('la ruta %s falla con fichero y campo', (ruta) => {
+      const data = leer('servicios.json');
+      data[4].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*4\.ruta/s);
+    });
+
+    // El tipo 'empresas' no tiene ruta fija: aquí solo rutaSchema protege contra «//» y esquemas.
+    it.each(rutasMalas)('la ruta %s falla también en el servicio de empresas', (ruta) => {
+      const data = leer('servicios.json');
+      data[9].ruta = ruta;
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*9\.ruta/s);
+    });
+
+    it('el servicio principal fuera de /platos-de-ducha/ falla con fichero y campo', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/otra-ruta/';
+      conServicios(data);
+      expect(() => cargarServicios()).toThrow(/servicios\.json.*0\.ruta/s);
+    });
+
+    it('el servicio principal en /platos-de-ducha/ valida', () => {
+      const data = leer('servicios.json');
+      data[0].ruta = '/platos-de-ducha/';
+      conServicios(data);
+      expect(cargarServicios()[0].ruta).toBe('/platos-de-ducha/');
+    });
+
+    it('una ruta válida sigue validando', () => {
+      const data = leer('servicios.json');
+      data[4].ruta = '/servicios/azulejos/';
+      data[9].ruta = '/hoteles-y-comunidades/';
+      conServicios(data);
+      expect(() => cargarServicios()).not.toThrow();
+    });
   });
 });
 

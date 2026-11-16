@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { configFormulario } from './config.ts';
 import { cargarFaq, cargarNegocio, type Resena } from './content.ts';
 import { preguntasResueltas } from './faq.ts';
-import { jsonLdFaqPage, jsonLdLocalBusiness, jsonLdScript, notaVisible, resumenResenas } from './seo.ts';
+import { canonicalUrl, jsonLdFaqPage, jsonLdLocalBusiness, jsonLdScript, notaVisible, resumenResenas } from './seo.ts';
 
 const negocio = cargarNegocio();
 
@@ -80,5 +80,22 @@ describe('jsonLdScript', () => {
     const s = jsonLdScript({ a: '</script>' });
     expect(s).not.toContain('</script>');
     expect(JSON.parse(s)).toEqual({ a: '</script>' });
+  });
+});
+
+describe('canonicalUrl', () => {
+  it('une url_base y la ruta sin duplicar la barra', () => {
+    expect(canonicalUrl('https://x.es/', '/preguntas-frecuentes/')).toBe('https://x.es/preguntas-frecuentes/');
+    expect(canonicalUrl('https://x.es', '/preguntas-frecuentes/')).toBe('https://x.es/preguntas-frecuentes/');
+  });
+
+  it('la portada es url_base con una sola barra final', () => {
+    expect(canonicalUrl('https://x.es/', '/')).toBe('https://x.es/');
+    expect(canonicalUrl('https://x.es', '/')).toBe('https://x.es/');
+  });
+
+  it('la ruta siempre empieza y termina en «/» (trailingSlash)', () => {
+    expect(canonicalUrl('https://x.es//', 'zonas')).toBe('https://x.es/zonas/');
+    expect(canonicalUrl('https://x.es', '/zonas')).toBe('https://x.es/zonas/');
   });
 });
