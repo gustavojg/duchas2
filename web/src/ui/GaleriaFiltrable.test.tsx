@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { cargarNegocio, cargarServicios, type ParGaleria } from '../lib/content';
@@ -89,5 +91,15 @@ describe('GaleriaFiltrable', () => {
     for (const e of esperadas) expect(t).toContain(e);
     expect(t).not.toContain('Hoteles y comunidades');
     expect(radios[0]).toContain('aria-checked="true"');
+  });
+
+  it('el filtro va dentro de .filtro-galeria (globals.css: salta de línea y no recorta etiquetas)', () => {
+    const html = pinta({ pares: siete });
+    const i = html.indexOf('filtro-galeria');
+    expect(i).toBeGreaterThan(-1);
+    expect(html.indexOf('role="radiogroup"')).toBeGreaterThan(i);
+    const css = fs.readFileSync(path.resolve(__dirname, '../app/globals.css'), 'utf8');
+    expect(css).toMatch(/\.filtro-galeria \.astryx-segmented-control[^{]*\{[^}]*flex-wrap: wrap/);
+    expect(css).toMatch(/\.filtro-galeria \.astryx-segmented-control-item > span \{[^}]*white-space: normal/);
   });
 });

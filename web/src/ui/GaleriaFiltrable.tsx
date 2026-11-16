@@ -39,12 +39,14 @@ export function GaleriaFiltrable({ servicios, pares, whatsapp, mensaje }: Galeri
 
   return (
     <VStack gap={6}>
-      {/* layout «hug»: se limita al ancho del contenedor y recorta las etiquetas, sin scroll horizontal de página. */}
-      <SegmentedControl label="Filtrar por trabajo" value={filtro} onChange={setFiltro}>
-        {opciones.map((o) => (
-          <SegmentedControlItem key={o.valor} value={o.valor} label={o.etiqueta} />
-        ))}
-      </SegmentedControl>
+      {/* .filtro-galeria (globals.css): las opciones saltan de línea y una etiqueta larga se parte, sin recortes ni scroll horizontal. */}
+      <VStack className="filtro-galeria">
+        <SegmentedControl label="Filtrar por trabajo" value={filtro} onChange={setFiltro}>
+          {opciones.map((o) => (
+            <SegmentedControlItem key={o.valor} value={o.valor} label={o.etiqueta} />
+          ))}
+        </SegmentedControl>
+      </VStack>
 
       {visibles.length === 0 ? (
         <VStack gap={3} hAlign="start" role="status">

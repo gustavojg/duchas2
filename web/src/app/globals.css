@@ -179,6 +179,32 @@
   flex: 1 1 auto;
 }
 
+/*
+ * Filtro de GaleriaFiltrable (10 opciones, alguna larga como «Reparación y esmaltado de platos de ducha»): como el
+ * de pieza, las opciones saltan de línea; además, si una etiqueta sola no cabe en la fila se parte en varias líneas
+ * en vez de recortarse. Sin scroll horizontal de página.
+ */
+.filtro-galeria .astryx-segmented-control {
+  flex-wrap: wrap;
+  max-inline-size: 100%;
+  box-sizing: border-box;
+}
+
+.filtro-galeria .astryx-segmented-control-item {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  block-size: auto;
+  min-block-size: var(--size-element-md);
+}
+
+.filtro-galeria .astryx-segmented-control-item > span {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: center;
+}
+
 /* Icono de cada pieza en el SegmentedControl del formulario. */
 .campo-pieza-icono {
   display: block;

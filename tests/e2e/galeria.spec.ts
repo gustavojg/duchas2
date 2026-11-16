@@ -4,7 +4,7 @@ import { expect, type Page, test } from '@playwright/test';
 
 /** `pnpm e2e`: el filtro segmentado de /antes-y-despues/ con los pares de web/content/galeria.json. */
 const galeria = JSON.parse(fs.readFileSync(path.resolve('web/content/galeria.json'), 'utf8')) as { servicio: string }[];
-const servicios = JSON.parse(fs.readFileSync(path.resolve('web/content/servicios.json'), 'utf8')) as { slug: string; nombre: string }[];
+const servicios = JSON.parse(fs.readFileSync(path.resolve('web/content/servicios.json'), 'utf8')) as { slug: string; nombre: string; tipo: string }[];
 const nombre = (slug: string) => servicios.find((s) => s.slug === slug)!.nombre;
 const deServicio = (slug: string) => galeria.filter((p) => p.servicio === slug).length;
 const VACIA = 'Aún no hemos subido fotos de este trabajo';
@@ -52,6 +52,35 @@ test.describe('galería antes y después', () => {
       expect(desborda).toBe(false);
       await elegir(page, nombre('mamparas'));
       await expect(page.getByText(VACIA)).toBeVisible();
+      const despues = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+      expect(despues).toBe(false);
+    });
+
+    test('cada opción del filtro muestra su etiqueta entera, sin recortar', async ({ page }) => {
+      await abrir(page);
+      const radios = page.getByRole('radio');
+      const etiquetas = ['Todos', ...servicios.filter((s) => s.tipo !== 'empresas').map((s) => s.nombre)];
+      await expect(radios).toHaveCount(etiquetas.length);
+      const textos = await radios.evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
+      expect([...textos].sort()).toEqual([...etiquetas].sort());
+      for (let i = 0; i < etiquetas.length; i++) {
+        const opcion = radios.nth(i);
+        const texto = textos[i]!;
+        await opcion.scrollIntoViewIfNeeded();
+        await expect(opcion.getByText(texto, { exact: true })).toBeVisible();
+        // Ninguna etiqueta recortada: ni la opción ni nada dentro de ella desborda su caja.
+        const recortes = await opcion.evaluate((el) =>
+          [el, ...Array.from(el.querySelectorAll('*'))]
+            .filter((n) => n.scrollWidth > n.clientWidth && n.clientWidth > 0)
+            .map((n) => `${n.tagName}.${n.className} ${n.scrollWidth}>${n.clientWidth}`),
+        );
+        expect(recortes, texto).toEqual([]);
+        const caja = (await opcion.boundingBox())!;
+        expect(caja.x, texto).toBeGreaterThanOrEqual(0);
+        expect(caja.x + caja.width, texto).toBeLessThanOrEqual(360);
+      }
+      const desborda = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+      expect(desborda).toBe(false);
     });
   });
 });
