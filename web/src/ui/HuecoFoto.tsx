@@ -2,7 +2,7 @@ import { AspectRatio } from '@astryxdesign/core/AspectRatio';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import type { ParGaleria } from '../lib/content';
-import { PlatoPartido } from './art';
+import { type Dano, IlustracionDano, PlatoPartido } from './art';
 import { CintaEtiqueta } from './CintaEtiqueta';
 
 export interface HuecoFotoProps {
@@ -13,6 +13,8 @@ export interface HuecoFotoProps {
    * del hueco: miniaturas, donde quien la usa pone una única cinta «ILUSTRACIONES» para todas.
    */
   compacta?: boolean;
+  /** Solo con `compacta` y sin foto: la ilustración de ese daño en lugar del plato partido, para variar las miniaturas. */
+  dano?: Dano;
 }
 
 /**
@@ -20,7 +22,7 @@ export interface HuecoFotoProps {
  * AspectRatio 4:3. Mientras el cliente no mande la foto (`par[lado]` null), la ilustración de art.tsx en su
  * lugar, con la cinta «ILUSTRACIÓN», el aviso y el texto del hueco, para no hacerla pasar por una foto real.
  */
-export function HuecoFoto({ par, lado, compacta = false }: HuecoFotoProps) {
+export function HuecoFoto({ par, lado, compacta = false, dano }: HuecoFotoProps) {
   const foto = par[lado];
   const alt = lado === 'antes' ? par.alt_antes : par.alt_despues;
   if (foto) {
@@ -40,7 +42,7 @@ export function HuecoFoto({ par, lado, compacta = false }: HuecoFotoProps) {
         </Text>
       ) : null}
       <AspectRatio ratio={4 / 3} fit="contain">
-        <PlatoPartido title={alt} sinCinta={compacta} />
+        {compacta && dano ? <IlustracionDano dano={dano} title={alt} /> : <PlatoPartido title={alt} sinCinta={compacta} />}
       </AspectRatio>
     </VStack>
   );

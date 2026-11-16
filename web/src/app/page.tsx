@@ -33,7 +33,7 @@ import { DESCRIPTION } from '../lib/site';
 import { compromisosFranja, respuesta, titularPortada } from '../lib/textos';
 import { MENSAJE_PORTADA, telLink, waLink } from '../lib/whatsapp';
 import { AcordeonFaq } from '../ui/AcordeonFaq';
-import { PlatoPartido } from '../ui/art';
+import { type Dano, PlatoPartido } from '../ui/art';
 import { BloqueResenas } from '../ui/BloqueResenas';
 import { BotonLlamar } from '../ui/BotonLlamar';
 import { BotonWhatsApp } from '../ui/BotonWhatsApp';
@@ -72,6 +72,8 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
   if (platos.length === 0) return null;
   const [principal, ...resto] = platos;
   const miniaturas = resto.slice(0, 3);
+  // ParGaleria no trae el daño: se asigna por posición para que las miniaturas no repitan la misma ilustración.
+  const DANOS_MINIATURA: Dano[] = ['grieta', 'golpe', 'oxido'];
   // Las miniaturas compactas no llevan cinta propia: una sola encima avisa de que no son fotos reales.
   const hayIlustraciones = miniaturas.some((par) => !par.despues);
   return (
@@ -84,9 +86,9 @@ function BloqueAntesDespues({ galeria, whatsapp }: { galeria: ParGaleria[]; what
         <VStack gap={2}>
           {hayIlustraciones ? <CintaEtiqueta>Ilustraciones</CintaEtiqueta> : null}
           <HStack gap={2} as="ul" aria-label="Más trabajos">
-            {miniaturas.map((par) => (
+            {miniaturas.map((par, i) => (
               <VStack as="li" key={par.alt_despues} className="portada-miniatura">
-                <HuecoFoto par={par} lado="despues" compacta />
+                <HuecoFoto par={par} lado="despues" compacta dano={DANOS_MINIATURA[i]} />
               </VStack>
             ))}
           </HStack>
