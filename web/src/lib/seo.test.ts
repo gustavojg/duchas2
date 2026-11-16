@@ -2,7 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { configFormulario } from './config.ts';
 import { cargarFaq, cargarNegocio, type Resena } from './content.ts';
 import { preguntasResueltas } from './faq.ts';
-import { jsonLdFaqPage, jsonLdLocalBusiness, jsonLdScript, notaVisible, resumenResenas } from './seo.ts';
+import {
+  jsonLdBreadcrumbList,
+  jsonLdFaqPage,
+  jsonLdLocalBusiness,
+  jsonLdScript,
+  jsonLdService,
+  metadataPagina,
+  notaVisible,
+  resumenResenas,
+  urlAbsoluta,
+} from './seo.ts';
+import { APP_NAME } from './site.ts';
 
 const negocio = cargarNegocio();
 
@@ -80,5 +91,77 @@ describe('jsonLdScript', () => {
     const s = jsonLdScript({ a: '</script>' });
     expect(s).not.toContain('</script>');
     expect(JSON.parse(s)).toEqual({ a: '</script>' });
+  });
+});
+
+describe('urlAbsoluta', () => {
+  it('quita la barra final de la base y concatena la ruta', () => {
+    expect(urlAbsoluta('https://x.test/', '/tarifas/')).toBe('https://x.test/tarifas/');
+    expect(urlAbsoluta('https://x.test', '/tarifas/')).toBe('https://x.test/tarifas/');
+  });
+});
+
+describe('BreadcrumbList', () => {
+  const migas = [
+    { nombre: 'Inicio', ruta: '/' },
+    { nombre: 'Servicios', ruta: '/servicios/' },
+    { nombre: 'Platos de ducha', ruta: '/platos-de-ducha/' },
+  ];
+  type Bc = { '@type': string; itemListElement: { '@type': string; position: number; name: string; item: string }[] };
+
+  for (const base of ['https://x.test', 'https://x.test/']) {
+    it(`posiciones desde 1 e item absoluto (base «${base}»)`, () => {
+      const ld = jsonLdBreadcrumbList(migas, base) as Bc;
+      expect(ld['@type']).toBe('BreadcrumbList');
+      expect(ld.itemListElement.map((i) => i.position)).toEqual([1, 2, 3]);
+      expect(ld.itemListElement.map((i) => i.name)).toEqual(['Inicio', 'Servicios', 'Platos de ducha']);
+      expect(ld.itemListElement.map((i) => i.item)).toEqual([
+        'https://x.test/',
+        'https://x.test/servicios/',
+        'https://x.test/platos-de-ducha/',
+      ]);
+      for (const i of ld.itemListElement) expect(i['@type']).toBe('ListItem');
+      expect(JSON.parse(jsonLdScript(ld))).toEqual(ld);
+    });
+  }
+});
+
+describe('Service', () => {
+  it('lleva tipo, url absoluta, proveedor y zona, sin precios', () => {
+    const ld = jsonLdService({
+      nombre: 'Reparación de platos de ducha',
+      descripcion: 'Reparamos tu plato.',
+      urlBase: 'https://x.test/',
+      ruta: '/platos-de-ducha/',
+      negocio,
+    }) as Record<string, unknown> & { provider: Record<string, unknown> };
+    expect(ld['@context']).toBe('https://schema.org');
+    expect(ld['@type']).toBe('Service');
+    expect(ld.name).toBe('Reparación de platos de ducha');
+    expect(ld.description).toBe('Reparamos tu plato.');
+    expect(ld.url).toBe('https://x.test/platos-de-ducha/');
+    expect(ld.areaServed).toBe('Madrid');
+    expect(ld.provider).toEqual({ '@type': 'LocalBusiness', name: negocio.marca.valor });
+    expect(ld).not.toHaveProperty('offers');
+    expect(JSON.parse(jsonLdScript(ld))).toEqual(ld);
+  });
+
+  it('sin marca, el proveedor se llama APP_NAME', () => {
+    const sin = structuredClone(negocio);
+    sin.marca = { valor: null, confirmado: false };
+    const ld = jsonLdService({ nombre: 'a', descripcion: 'b', urlBase: 'https://x.test', ruta: '/', negocio: sin }) as {
+      provider: { name: string };
+    };
+    expect(ld.provider.name).toBe(APP_NAME);
+  });
+});
+
+describe('metadataPagina', () => {
+  it('title y description tal cual y canonical absoluto', () => {
+    expect(metadataPagina({ title: 'T', description: 'D', ruta: '/tarifas/', urlBase: 'https://x.test/' })).toEqual({
+      title: 'T',
+      description: 'D',
+      alternates: { canonical: 'https://x.test/tarifas/' },
+    });
   });
 });
