@@ -177,6 +177,24 @@
 }
 
 /*
+ * Banner de cookies (BannerCookies en src/ui/BannerCookies.tsx): fijo abajo a la izquierda, por encima de la
+ * píldora de WhatsApp (su alto es --size-element-lg) para no taparla, con la columna de lectura como máximo.
+ * `banner-cookies-acciones`: «Aceptar» y «Rechazar» en dos columnas iguales, con el mismo ancho y alto.
+ */
+.banner-cookies {
+  position: fixed;
+  inset-inline: var(--spacing-4);
+  inset-block-end: calc(var(--spacing-4) * 2 + var(--size-element-lg));
+  z-index: var(--z-flotante);
+  max-inline-size: var(--measure);
+}
+
+.banner-cookies-acciones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/*
  * FormularioContacto y CampoFoto (src/ui/): inputs nativos que no se ven. `campo-foto-input` es el <input
  * type="file"> que abre el botón «Añadir foto del daño»; `campo-trampa` es el honeypot `web` (aria-hidden y
  * tabindex -1). Ocultos sin display:none, fuera del flujo y recortados.

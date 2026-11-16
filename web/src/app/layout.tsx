@@ -9,6 +9,7 @@ import { modoActual } from '../lib/dato';
 import { robotsMeta } from '../lib/seo';
 import { DESCRIPTION, normalizarBase } from '../lib/site';
 import { telLink } from '../lib/whatsapp';
+import { BannerCookies } from '../ui/BannerCookies';
 import { BotonFlotanteWhatsApp } from '../ui/BotonFlotanteWhatsApp';
 import { Frame } from '../ui/Frame';
 import { PieSitio } from '../ui/PieSitio';
@@ -55,8 +56,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }
         >
           {children}
-          {/* Una sola vez para todo el sitio. */}
+          {/* Una sola vez para todo el sitio. Sin ga4_id válido el banner no pinta nada (GA4 solo tras «Aceptar»). */}
           {whatsapp ? <BotonFlotanteWhatsApp numero={whatsapp} /> : null}
+          <BannerCookies ga4Id={negocio.analitica.ga4_id} />
         </Frame>
       </body>
     </html>
