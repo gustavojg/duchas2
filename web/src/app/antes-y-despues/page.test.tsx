@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { NAV } from '../../config';
 import { cargarGaleria, cargarNegocio, cargarServicios } from '../../lib/content';
+import { PAGES } from '../../lib/site';
 import { AntesYDespues, metadata } from './page';
 
 const pares = cargarGaleria();
@@ -51,5 +53,10 @@ describe('/antes-y-despues/', () => {
     expect(String(metadata.title)).toMatch(/^Antes y después/);
     expect(metadata.description).toBeTruthy();
     expect(metadata.alternates).toBeUndefined();
+  });
+
+  it('PAGES (sitemap) y NAV incluyen la página', () => {
+    expect(PAGES).toContain('/antes-y-despues/');
+    expect(NAV.map((n) => n.href)).toContain('/antes-y-despues/');
   });
 });
